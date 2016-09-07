@@ -1,0 +1,63 @@
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fbutton="http://schemas.android.com/tools"
+    android:id="@+id/card_view"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+    android:layout_marginRight="@dimen/activity_horizontal_margin"
+    android:layout_marginTop="@dimen/activity_horizontal_margin"
+    android:background="#C5CAE9"
+    app:cardCornerRadius="5dp"
+    android:foreground="?attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:weightSum="8">
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:background="@drawable/no_preview"
+                android:id="@+id/file_preview" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Image_abc.jpg "
+                android:layout_weight="3"
+                android:textSize="@dimen/subheading_main"
+                android:textColor="@color/fbColor"
+                android:typeface="normal"
+                android:id="@+id/file_name"
+                android:gravity="center" />
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:layout_weight="3">
+
+                <info.hoang8f.widget.FButton
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    fbutton:shadowColor="@color/main_color_grey_400"
+                    android:id="@+id/file_remove_btn"
+                    fbutton:shadowEnabled="true"
+                    android:text="REMOVE"
+                    android:textColor="@color/white"
+                    fbutton:shadowHeight="5dp"
+                    fbutton:cornerRadius="5dp"/>
+
+            </RelativeLayout>
+        </LinearLayout>
+    </LinearLayout>
+</android.support.v7.widget.CardView>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:id="@+id/popup_layout"
+    android:gravity="center">
+
+  <RelativeLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:gravity="center"
+      android:padding="@dimen/activity_vertical_margin"
+      android:id="@+id/whole_layout">
+
+      <RelativeLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:background="#ffffff"
+          android:gravity="center"
+          android:id="@+id/dialog_layout">
+
+          <RelativeLayout
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:id="@+id/logo_main"
+              android:background="@color/success_green">
+
+              <ImageView
+                  android:layout_width="@dimen/_120sdp"
+                  android:layout_height="@dimen/_30sdp"
+                  android:background="@drawable/logo_main"
+                  android:layout_margin="@dimen/very_small_margin"
+                  android:layout_alignParentTop="true" />
+
+              <ImageButton
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_margin="@dimen/very_small_margin"
+                  android:background="@drawable/cancel_white"
+                  android:layout_centerVertical="true"
+                  android:layout_alignParentEnd="true"
+                  android:id="@+id/btn_close" />
+
+          </RelativeLayout>
+
+      <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+          android:id="@+id/text_popup"
+          android:layout_width="fill_parent"
+          android:layout_height="wrap_content"
+          android:text="New Project Added. ID - P1005"
+          android:textSize="@dimen/_14sdp"
+          android:textColor="#000000"
+          android:layout_below="@+id/logo_main"
+          android:layout_margin="@dimen/activity_vertical_margin"
+          android:gravity="center" />
+
+      <Button
+          android:id="@+id/dialog_btn_approve"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text=" APPROVE "
+          android:backgroundTint="@color/success_green"
+          android:textColor="#ffffff"
+          android:padding="@dimen/_10sdp"
+          android:layout_below="@+id/text_popup"
+          android:layout_alignStart="@+id/text_popup"
+          android:layout_marginTop="@dimen/activity_vertical_margin" />
+
+      <Button
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:id="@+id/dialog_btn_reject"
+          android:text=" REJECT "
+          android:backgroundTint="@color/fancy_red"
+          android:textColor="#ffffff"
+          android:padding="@dimen/_10sdp"
+          android:layout_alignTop="@+id/dialog_btn_approve"
+          android:layout_alignEnd="@+id/text_popup" />
+    </RelativeLayout>
+  </RelativeLayout>
+
+</RelativeLayout>

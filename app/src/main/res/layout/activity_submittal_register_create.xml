@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/back_five"
+    tools:context=".Activities.FormActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:background="?attr/colorPrimary"
+        android:elevation="6dp"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+
+    <android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/DrawerLayout"
+        android:layout_below="@id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="7dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/activity_vertical_margin"
+            android:gravity="center">
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#99ffffff"
+                android:layout_above="@+id/createBtn">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center">
+
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <RelativeLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:paddingBottom="@dimen/activity_vertical_margin"
+                                android:paddingLeft="@dimen/activity_horizontal_margin"
+                                android:paddingRight="@dimen/activity_horizontal_margin"
+                                android:paddingTop="@dimen/activity_vertical_margin">
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical"
+                                    android:id="@+id/main_layout">
+
+                                    <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:textSize="25sp"
+                                        android:text="Create Submittal Register"
+                                        android:textColor="@color/colorPrimary"
+                                        android:layout_marginBottom="50dp"
+                                        android:gravity="center"
+                                        android:id="@+id/title" />
+
+                                    <com.weiwangcn.betterspinner.library.BetterSpinner
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:padding="10dp"
+                                        android:hint="Priority"
+                                        android:textColorHint="#000000"
+                                        android:textColor="#000000"
+                                        android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                        android:background="@drawable/edittext_states_red"
+                                        android:textSize="15sp"
+                                        android:id="@+id/spinnerPriority" />
+
+                                    <EditText
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:padding="10dp"
+                                        android:hint="Description"
+                                        android:maxLines="1"
+                                        android:inputType="textCapSentences"
+                                        android:imeOptions="actionDone"
+                                        android:textColorHint="#000000"
+                                        android:textColor="#000000"
+                                        android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                        android:background="@drawable/edittext_states_red"
+                                        android:textSize="15sp"
+                                        android:id="@+id/text_desc" />
+
+                                    <EditText
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:padding="10dp"
+                                        android:hint="Status"
+                                        android:maxLines="1"
+                                        android:inputType="textCapSentences"
+                                        android:imeOptions="actionDone"
+                                        android:textColorHint="#000000"
+                                        android:textColor="#000000"
+                                        android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                        android:background="@drawable/edittext_states_red"
+                                        android:textSize="15sp"
+                                        android:id="@+id/text_status" />
+
+                                    <Button
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:padding="10dp"
+                                        android:hint="Anticipated Submittal start date"
+                                        android:textColorHint="#000000"
+                                        android:textColor="#000000"
+                                        android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                        android:background="@drawable/edittext_states_red"
+                                        android:textSize="15sp"
+                                        android:id="@+id/select_start_date" />
+
+
+                                    <Button
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:padding="10dp"
+                                        android:hint="Anticipated Submittal end date"
+                                        android:textColorHint="#000000"
+                                        android:textColor="#000000"
+                                        android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                        android:background="@drawable/edittext_states_red"
+                                        android:textSize="15sp"
+                                        android:id="@+id/select_end_date" />
+
+
+                                </LinearLayout>
+                            </RelativeLayout>
+                        </RelativeLayout>
+                    </RelativeLayout>
+
+                </LinearLayout>
+            </ScrollView>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#ffffff"
+                android:text="CREATE"
+                android:padding="@dimen/activity_vertical_margin"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:gravity="center"
+                android:background="@color/colorPrimary"
+                android:layout_alignParentBottom="true"
+                android:id="@+id/createBtn" />
+        </RelativeLayout>
+    </android.support.v4.widget.DrawerLayout>
+</RelativeLayout>

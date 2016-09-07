@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="5dp"
+    tools:context=".Activities.SeperatePurchase">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_weight="10">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/scrollView">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/mainLayout"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        android:orientation="horizontal">
+                        <android.support.design.widget.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:id="@+id/itemIdLayout">
+
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="3"
+                                android:textSize="20sp"
+                                android:textColor="#000000"
+                                android:imeOptions="actionNext"
+                                android:maxLines="1"
+                                android:id="@+id/itemId"
+                                android:hint="Item ID"
+                                android:inputType="textCapSentences"
+                                android:maxLength="50"
+                                android:text="A41541"
+                                android:paddingLeft="5dp"/>
+                        </android.support.design.widget.TextInputLayout>
+                    </LinearLayout>
+
+
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        android:orientation="horizontal">
+                        <android.support.design.widget.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:id="@+id/itemDescLayout">
+
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="3"
+                                android:textSize="20sp"
+                                android:textColor="#000000"
+                                android:imeOptions="actionNext"
+                                android:maxLines="1"
+                                android:inputType="textCapSentences"
+                                android:id="@+id/itemDesc"
+                                android:hint="Item Description"
+                                android:maxLength="50"
+                                android:text="124"
+                                android:paddingLeft="5dp"/>
+                        </android.support.design.widget.TextInputLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        android:orientation="horizontal">
+                        <android.support.design.widget.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:id="@+id/quantityReceivedLayout">
+
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="3"
+                                android:textSize="20sp"
+                                android:textColor="#000000"
+                                android:imeOptions="actionNext"
+                                android:maxLines="1"
+                                android:inputType="number"
+                                android:maxLength="15"
+                                android:id="@+id/quantityReceived"
+                                android:hint="Quantity Received"
+                                android:text="47"
+                                android:paddingLeft="5dp"/>
+                        </android.support.design.widget.TextInputLayout>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        android:orientation="horizontal">
+                        <android.support.design.widget.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:id="@+id/uomLayout">
+
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="3"
+                                android:textSize="20sp"
+                                android:textColor="#000000"
+                                android:id="@+id/uom"
+                                android:imeOptions="actionNext"
+                                android:maxLines="1"
+                                android:inputType="textCapSentences"
+                                android:maxLength="10"
+                                android:hint="UOM"
+                                android:text="15"
+                                android:paddingLeft="5dp"/>
+                        </android.support.design.widget.TextInputLayout>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        android:orientation="horizontal">
+                        <android.support.design.widget.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:id="@+id/quantityAcceptedLayout">
+
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="3"
+                                android:textSize="20sp"
+                                android:textColor="#000000"
+                                android:imeOptions="actionNext"
+                                android:maxLines="1"
+                                android:inputType="textCapSentences"
+                                android:maxLength="10"
+                                android:id="@+id/quantityAccepted"
+                                android:hint="Quantity Accepted"
+                                android:text="001"
+                                android:paddingLeft="5dp"/>
+                        </android.support.design.widget.TextInputLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        android:orientation="horizontal">
+                        <android.support.design.widget.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:id="@+id/uomLayout1">
+
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="3"
+                                android:textSize="20sp"
+                                android:textColor="#000000"
+                                android:imeOptions="actionNext"
+                                android:maxLines="1"
+                                android:inputType="textCapSentences"
+                                android:maxLength="10"
+                                android:id="@+id/uom1"
+                                android:hint="UOM"
+                                android:text="CR14514"
+                                android:paddingLeft="5dp"/>
+                        </android.support.design.widget.TextInputLayout>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        android:orientation="horizontal">
+                        <android.support.design.widget.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:id="@+id/quantityRejectedLayout">
+
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="3"
+                                android:textSize="20sp"
+                                android:textColor="#000000"
+                                android:imeOptions="actionNext"
+                                android:maxLines="1"
+                                android:inputType="number"
+                                android:maxLength="15"
+                                android:hint="Quantity Rejected"
+                                android:id="@+id/quantityRejected"
+                                android:text="41541"
+                                android:paddingLeft="5dp"/>
+                        </android.support.design.widget.TextInputLayout>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        android:orientation="horizontal">
+                        <android.support.design.widget.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:id="@+id/uomLayout2">
+
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="3"
+                                android:textSize="20sp"
+                                android:textColor="#000000"
+                                android:imeOptions="actionNext"
+                                android:maxLines="1"
+                                android:inputType="textCapSentences"
+                                android:maxLength="10"
+                                android:id="@+id/uom2"
+                                android:hint="UOM"
+                                android:text="41541"
+                                android:paddingLeft="5dp"/>
+                        </android.support.design.widget.TextInputLayout>
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1">
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:textSize="20sp"
+                                android:textColor="#000000"
+                                android:text="Attachments : "
+                                android:paddingLeft="5dp"
+                                android:gravity="center" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1">
+                            <Button
+                                android:id="@+id/attachmentBtn"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="ADD"
+                                android:textSize="20sp"
+                                android:layout_margin="@dimen/fab_margin"/>
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </ScrollView>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="9">
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="SAVE"
+                android:id="@+id/saveButton"
+                android:background="@drawable/button"
+                android:textColor="#ffffff"
+                android:textSize="20sp" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

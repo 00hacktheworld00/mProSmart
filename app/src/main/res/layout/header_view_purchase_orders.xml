@@ -1,0 +1,262 @@
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="@dimen/card_corner_radius"
+    android:transitionName="card"
+    android:id="@+id/cardview"
+    android:layout_marginTop="@dimen/very_small_margin"
+    android:layout_marginLeft="@dimen/very_small_margin"
+    android:layout_marginRight="@dimen/very_small_margin"
+    android:background="@color/white"
+    tools:ignore="UnusedAttribute">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="@dimen/logo_medium"
+            android:layout_height="@dimen/logo_medium"
+            android:layout_margin="@dimen/activity_horizontal_margin">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/company_logo"
+                android:layout_width="@dimen/logo_medium"
+                android:layout_height="@dimen/logo_medium"
+                android:src="@drawable/logo_two"/></LinearLayout>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:id="@id/project_no"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="@dimen/activity_horizontal_margin"
+                    android:layout_marginRight="@dimen/activity_horizontal_margin"
+                    android:layout_marginTop="@dimen/very_small_margin"
+                    android:orientation="horizontal"
+                    android:id="@+id/clockLayout"
+                    android:gravity="end">
+
+
+                    <ImageButton
+                        android:layout_width="@dimen/small_logo_btn"
+                        android:layout_height="@dimen/small_logo_btn"
+                        android:background="@drawable/clock"
+                        android:layout_marginRight="@dimen/small_margin"/>
+
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="4:00 PM"
+                        android:textColor="@color/new_grey"
+                        android:id="@+id/last_updated_time"
+                        android:gravity="center" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginRight="@dimen/small_margin"
+                    android:gravity="top">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="Fourth Floor Slab and Collar Beam"
+                        android:textSize="@dimen/heading_main"
+                        android:textColor="@color/fbColor"
+                        android:layout_below="@+id/product_category"
+                        android:layout_alignParentStart="true"
+                        android:gravity="center_vertical"
+                        android:typeface="normal"
+                        android:layout_marginTop="@dimen/small_margin"
+                        android:id="@+id/title" />
+                </LinearLayout>
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="@dimen/activity_vertical_margin">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Project No. - "
+                    android:layout_marginRight="@dimen/very_small_margin"
+                    android:textSize="@dimen/subheading_main" />
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/project_number"
+                    android:text="114"
+                    android:textSize="@dimen/subheading_main"
+                    android:layout_marginRight="@dimen/small_margin" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="@dimen/very_small_margin">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="4G Tablet Project"
+                    android:layout_marginRight="@dimen/very_small_margin"
+                    android:id="@+id/descriptionOne"
+                    android:textSize="@dimen/subheading_main" />
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/descriptionTwo"
+                    android:text="Development Stage"
+                    android:textSize="@dimen/subheading_main"
+                    android:layout_marginRight="@dimen/small_margin" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="end"
+                android:weightSum="2"
+                android:layout_marginTop="@dimen/very_small_margin">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <ImageButton
+                        android:layout_width="@dimen/small_logo_btn"
+                        android:layout_height="@dimen/small_logo_btn"
+                        android:background="@drawable/play_button"
+                        android:layout_marginRight="@dimen/very_small_margin"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:id="@+id/startedDate"
+                        android:text="16 Dec 2015"
+                        android:textColor="@color/new_grey"
+                        android:layout_marginRight="@dimen/small_margin"
+                        android:gravity="bottom" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_weight="1"
+                    android:layout_marginRight="@dimen/small_margin"
+                    android:gravity="right">
+
+
+
+                    <ImageButton
+                        android:layout_width="@dimen/small_logo_btn"
+                        android:layout_height="@dimen/small_logo_btn"
+                        android:background="@drawable/finish_flag"
+                        android:layout_marginRight="@dimen/very_small_margin"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:id="@+id/finishByDate"
+                        android:text="18 Mar 2016"
+                        android:textColor="@color/new_grey"
+                        android:gravity="bottom" />
+
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="@dimen/very_small_margin"
+                android:layout_marginBottom="@dimen/very_small_margin"
+                android:weightSum="2">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:id="@+id/purchaseReceipts"
+                        android:text="7"
+                        android:textColor="@color/fbColor"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text=" Purchase Orders"
+                        android:textColor="@color/new_grey"
+                        android:layout_marginRight="@dimen/small_margin" />
+
+
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_weight="1"
+                    android:gravity="right"
+                    android:layout_marginRight="@dimen/small_margin">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/itemsReceived"
+                        android:text="60%"
+                        android:textColor="@color/fbColor"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=" Items Received"
+                        android:textColor="@color/new_grey"/>
+
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</android.support.v7.widget.CardView>

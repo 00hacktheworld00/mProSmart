@@ -1,0 +1,257 @@
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_250sdp"
+            android:background="@color/colorPrimary"
+            android:gravity="center">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/circleView"
+                android:layout_width="@dimen/_85sdp"
+                android:layout_height="@dimen/_85sdp"
+                android:src="@drawable/abc"
+                android:layout_centerVertical="true"
+                android:layout_centerHorizontal="true" />
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Welcome"
+                android:textSize="@dimen/heading_big"
+                android:textColor="@color/white"
+                android:typeface="normal"
+                android:id="@+id/title"
+                android:layout_marginTop="@dimen/small_margin"
+                android:layout_below="@+id/circleView"
+                android:layout_centerHorizontal="true" />
+        </RelativeLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_120sdp"
+                    android:id="@+id/firstLayout"
+                    android:orientation="horizontal"
+                    android:weightSum="2">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="?attr/selectableItemBackground"
+                        android:id="@+id/new_contact_layout">
+
+                        <ImageView
+                            android:id="@+id/new_contact"
+                            android:layout_width="@dimen/_30sdp"
+                            android:layout_height="@dimen/_30sdp"
+                            android:layout_centerVertical="true"
+                            android:layout_centerHorizontal="true"
+                            android:src="@drawable/new_contact"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="NEW CONTACT"
+                            android:textColor="@color/colorPrimary"
+                            android:typeface="normal"
+                            android:layout_marginTop="@dimen/small_margin"
+                            android:layout_below="@+id/new_contact"
+                            android:layout_centerHorizontal="true" />
+                    </RelativeLayout>
+
+                    <View
+                        android:layout_width="@dimen/_1sdp"
+                        android:layout_height="match_parent"
+                        android:background="@color/material_grey_300"/>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="?attr/selectableItemBackground"
+                        android:id="@+id/new_invoice_layout">
+
+                        <ImageView
+                            android:id="@+id/new_invoice"
+                            android:layout_width="@dimen/_30sdp"
+                            android:layout_height="@dimen/_30sdp"
+                            android:layout_centerVertical="true"
+                            android:layout_centerHorizontal="true"
+                            android:src="@drawable/invoice_new"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="NEW INVOICE"
+                            android:textColor="@color/colorPrimary"
+                            android:typeface="normal"
+                            android:layout_marginTop="@dimen/small_margin"
+                            android:layout_below="@+id/new_invoice"
+                            android:layout_centerHorizontal="true" />
+                    </RelativeLayout>
+
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_1sdp"
+                    android:id="@+id/line1"
+                    android:layout_below="@id/firstLayout"
+                    android:background="@color/material_grey_300"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_120sdp"
+                    android:orientation="horizontal"
+                    android:id="@+id/secondLayout"
+                    android:layout_below="@+id/line1"
+                    android:weightSum="2">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="?attr/selectableItemBackground"
+                        android:id="@+id/record_expense_layout">
+
+                        <ImageView
+                            android:id="@+id/record_expense"
+                            android:layout_width="@dimen/_30sdp"
+                            android:layout_height="@dimen/_30sdp"
+                            android:layout_centerVertical="true"
+                            android:layout_centerHorizontal="true"
+                            android:src="@drawable/record_expense"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="RECORD EXPENSE"
+                            android:textColor="@color/colorPrimary"
+                            android:typeface="normal"
+                            android:layout_marginTop="@dimen/small_margin"
+                            android:layout_below="@+id/record_expense"
+                            android:layout_centerHorizontal="true" />
+                    </RelativeLayout>
+
+                    <View
+                        android:layout_width="@dimen/_1sdp"
+                        android:layout_height="match_parent"
+                        android:background="@color/material_grey_300"/>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="?attr/selectableItemBackground"
+                        android:id="@+id/log_time_layout">
+
+                        <ImageView
+                            android:id="@+id/log_time"
+                            android:layout_width="@dimen/_30sdp"
+                            android:layout_height="@dimen/_30sdp"
+                            android:layout_centerVertical="true"
+                            android:layout_centerHorizontal="true"
+                            android:src="@drawable/log_time"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="LOG TIME"
+                            android:textColor="@color/colorPrimary"
+                            android:typeface="normal"
+                            android:layout_marginTop="@dimen/small_margin"
+                            android:layout_below="@+id/log_time"
+                            android:layout_centerHorizontal="true" />
+                    </RelativeLayout>
+                </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_1sdp"
+                    android:id="@+id/line2"
+                    android:layout_below="@+id/secondLayout"
+                    android:background="@color/material_grey_300"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_120sdp"
+                    android:orientation="horizontal"
+                    android:layout_below="@+id/line2"
+                    android:id="@+id/thirdLayout"
+                    android:weightSum="2">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="?attr/selectableItemBackground"
+                        android:id="@+id/fifth_layout">
+
+                        <ImageView
+                            android:id="@+id/fifth_item"
+                            android:layout_width="@dimen/_30sdp"
+                            android:layout_height="@dimen/_30sdp"
+                            android:layout_centerVertical="true"
+                            android:layout_centerHorizontal="true"
+                            android:src="@drawable/my_profile"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="MY PROFILE"
+                            android:textColor="@color/colorPrimary"
+                            android:typeface="normal"
+                            android:layout_marginTop="@dimen/small_margin"
+                            android:layout_below="@+id/fifth_item"
+                            android:layout_centerHorizontal="true" />
+                    </RelativeLayout>
+
+                    <View
+                        android:layout_width="@dimen/_1sdp"
+                        android:layout_height="match_parent"
+                        android:background="@color/material_grey_300"/>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="?attr/selectableItemBackground"
+                        android:id="@+id/sixth_layout">
+
+                        <ImageView
+                            android:id="@+id/sixth_item"
+                            android:layout_width="@dimen/_30sdp"
+                            android:layout_height="@dimen/_30sdp"
+                            android:layout_centerVertical="true"
+                            android:layout_centerHorizontal="true"
+                            android:src="@drawable/settings"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="SETTINGS"
+                            android:textColor="@color/colorPrimary"
+                            android:typeface="normal"
+                            android:layout_marginTop="@dimen/small_margin"
+                            android:layout_below="@+id/sixth_item"
+                            android:layout_centerHorizontal="true" />
+                    </RelativeLayout>
+                </LinearLayout>
+            </RelativeLayout>
+        </ScrollView>
+    </LinearLayout>

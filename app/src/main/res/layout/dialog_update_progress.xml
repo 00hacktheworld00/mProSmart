@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="@dimen/_15sdp"
+        android:layout_margin="@dimen/_20sdp"
+        android:padding="@dimen/_20sdp"
+        android:visibility="invisible"
+        app:cardBackgroundColor="@color/colorAccent">
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="@dimen/_15sdp"
+        android:layout_margin="@dimen/_20sdp"
+        android:padding="@dimen/_20sdp"
+        android:visibility="invisible"
+        app:cardBackgroundColor="@color/colorAccent">
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="@dimen/_15sdp"
+        android:layout_margin="@dimen/_20sdp"
+        android:padding="@dimen/_20sdp"
+        android:visibility="invisible"
+        app:cardBackgroundColor="@color/colorAccent">
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="@dimen/_15sdp"
+        android:layout_margin="@dimen/_20sdp"
+        app:cardElevation="@dimen/_25sdp"
+        app:cardBackgroundColor="@color/back_light">
+
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="@dimen/_15sdp"
+            android:layout_margin="@dimen/_3sdp"
+            app:cardBackgroundColor="#fdfdfd"
+            android:id="@+id/view4">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:layout_marginTop="@dimen/_20sdp"
+                    android:layout_marginBottom="@dimen/_20sdp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Update Progress"
+                        android:textSize="@dimen/_20sdp"
+                        android:textColor="#000000"/>
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/activity_horizontal_margin"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Enter New Progress : "
+                        android:layout_marginTop="@dimen/activity_vertical_margin"
+                        android:textColor="@color/new_grey" />
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/very_small_margin"
+                        android:background="@drawable/custom_rect"
+                        android:padding="@dimen/activity_vertical_margin"
+                        android:id="@+id/text_new_progress"
+                        android:imeOptions="actionDone"
+                        android:inputType="numberDecimal"
+                        android:minLines="1" />
+
+                </LinearLayout>
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="SAVE"
+                    android:layout_margin="@dimen/activity_vertical_margin"
+                    android:id="@+id/saveBtn"
+                    android:background="@drawable/pay_button_green"
+                    style="@style/Widget.AppCompat.Button.Colored"/>
+
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
+    </android.support.v7.widget.CardView>
+</LinearLayout>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/activity_vertical_margin">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_vertical_margin"
+        android:padding="@dimen/activity_vertical_margin"
+        android:text="Choose purchase order against which purchase receipt has to be issued :-"/>
+
+
+    <com.weiwangcn.betterspinner.library.BetterSpinner
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/spinner_size"
+        android:gravity="center"
+        android:layout_weight="1"
+        android:layout_margin="@dimen/activity_vertical_margin"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:text="Choose Purchase Order"
+        android:background="@drawable/custom_rect"
+        android:textSize="@dimen/normal_text"
+        android:textColor="@color/abc_primary_text_disable_only_material_light"
+        android:id="@+id/spinnerOrders" />
+</LinearLayout>

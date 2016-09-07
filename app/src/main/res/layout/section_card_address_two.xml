@@ -1,0 +1,301 @@
+<android.support.v7.widget.CardView android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardElevation="@dimen/_2sdp"
+    android:layout_marginBottom="@dimen/_3sdp"
+    android:layout_marginLeft="@dimen/_3sdp"
+    android:layout_marginRight="@dimen/_3sdp"
+    android:id="@+id/card_address_two"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:visibility="gone">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/small_margin">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ADDITIONAL ADDRESS"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true" />
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:id="@+id/checkbox_address_two"
+                android:enabled="false"/>
+
+        </RelativeLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:id="@+id/hiddenLayoutAddressTwo"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:padding="@dimen/small_margin"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="2">
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_weight="1">
+
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="House No."
+                        android:textColor="@color/colorPrimary"
+                        android:layout_marginLeft="@dimen/very_very_small_margin"
+                        android:layout_marginBottom="@dimen/very_small_margin"/>
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:hint="House No."
+                        android:background="@drawable/edittext_states_red"
+                        android:inputType="number"
+                        android:maxLines="1"
+                        android:imeOptions="actionNext"
+                        android:textColorHint="#000000"
+                        android:textColor="#000000"
+                        android:textSize="@dimen/_10sdp"
+                        android:id="@+id/text_house_no_two"
+                        android:layout_marginRight="@dimen/_2sdp"
+                        android:layout_marginBottom="@dimen/_3sdp" />
+
+
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_weight="1">
+
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Street Name"
+                        android:textColor="@color/colorPrimary"
+                        android:layout_marginLeft="@dimen/very_very_small_margin"
+                        android:layout_marginBottom="@dimen/very_small_margin"/>
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:hint="Street Name"
+                        android:background="@drawable/edittext_states_red"
+                        android:inputType="textCapSentences"
+                        android:maxLines="1"
+                        android:imeOptions="actionNext"
+                        android:textColorHint="#000000"
+                        android:textColor="#000000"
+                        android:layout_marginLeft="@dimen/_2sdp"
+                        android:textSize="@dimen/_10sdp"
+                        android:id="@+id/text_street_name_two"
+                        android:layout_marginBottom="@dimen/_3sdp" />
+                    </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="2"
+                android:layout_marginTop="@dimen/very_very_small_margin">
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_weight="1">
+
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="City"
+                        android:textColor="@color/colorPrimary"
+                        android:layout_marginLeft="@dimen/very_very_small_margin"
+                        android:layout_marginBottom="@dimen/very_small_margin"/>
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:hint="City"
+                        android:background="@drawable/edittext_states_red"
+                        android:inputType="textCapSentences"
+                        android:maxLines="1"
+                        android:imeOptions="actionNext"
+                        android:textColorHint="#000000"
+                        android:textColor="#000000"
+                        android:textSize="@dimen/_10sdp"
+                        android:id="@+id/text_city_two"
+                        android:layout_marginRight="@dimen/_2sdp"
+                        android:layout_marginBottom="@dimen/_3sdp" />
+
+
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_weight="1">
+
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="State"
+                        android:textColor="@color/colorPrimary"
+                        android:layout_marginLeft="@dimen/very_very_small_margin"
+                        android:layout_marginBottom="@dimen/very_small_margin"/>
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:hint="State"
+                        android:background="@drawable/edittext_states_red"
+                        android:inputType="textCapSentences"
+                        android:maxLines="1"
+                        android:imeOptions="actionNext"
+                        android:textColorHint="#000000"
+                        android:layout_marginLeft="@dimen/_2sdp"
+                        android:textColor="#000000"
+                        android:textSize="@dimen/_10sdp"
+                        android:id="@+id/text_state_two"
+                        android:layout_marginBottom="@dimen/_3sdp" />
+                    </LinearLayout>
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="2"
+                android:layout_marginTop="@dimen/very_very_small_margin">
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_weight="1">
+
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Country"
+                        android:textColor="@color/colorPrimary"
+                        android:layout_marginLeft="@dimen/very_very_small_margin"
+                        android:layout_marginBottom="@dimen/very_small_margin"/>
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:hint="Country"
+                        android:background="@drawable/edittext_states_red"
+                        android:inputType="textCapSentences"
+                        android:maxLines="1"
+                        android:imeOptions="actionNext"
+                        android:textColorHint="#000000"
+                        android:textColor="#000000"
+                        android:layout_marginRight="@dimen/_2sdp"
+                        android:textSize="@dimen/_10sdp"
+                        android:id="@+id/text_country_two"
+                        android:layout_marginBottom="@dimen/_3sdp" />
+
+
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_weight="1">
+
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Zip Code"
+                        android:textColor="@color/colorPrimary"
+                        android:layout_marginLeft="@dimen/very_very_small_margin"
+                        android:layout_marginBottom="@dimen/very_small_margin"/>
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:hint="Zip Code"
+                        android:background="@drawable/edittext_states_red"
+                        android:inputType="number"
+                        android:maxLines="1"
+                        android:imeOptions="actionDone"
+                        android:layout_marginLeft="@dimen/_2sdp"
+                        android:textColorHint="#000000"
+                        android:textColor="#000000"
+                        android:textSize="@dimen/_10sdp"
+                        android:id="@+id/text_zipcode_two"
+                        android:layout_marginBottom="@dimen/_3sdp" />
+                    </LinearLayout>
+            </LinearLayout>
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/activity_vertical_margin">
+
+
+                <ImageButton
+                    android:layout_width="@dimen/_30sdp"
+                    android:layout_height="@dimen/_30sdp"
+                    android:background="@drawable/ic_next"
+                    android:layout_gravity="center_horizontal"
+                    android:id="@+id/btn_next_address_two"
+                    android:layout_alignTop="@+id/btn_remove_address_two"
+                    android:layout_centerHorizontal="true" />
+
+
+                <ImageButton
+                    android:layout_width="@dimen/_30sdp"
+                    android:layout_height="@dimen/_30sdp"
+                    android:background="@drawable/ic_minus_red"
+                    android:layout_gravity="center_horizontal"
+                    android:id="@+id/btn_remove_address_two"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true" />
+            </RelativeLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</android.support.v7.widget.CardView>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="@dimen/_100sdp">
+
+    <RelativeLayout
+        android:layout_width="@dimen/_30sdp"
+        android:layout_height="match_parent">
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="@drawable/ic_plus_square"
+            android:id="@+id/icon" />
+    </RelativeLayout>
+
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:weightSum="4"
+        android:padding="@dimen/activity_vertical_margin">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+
+            <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Purchase receipt No. - "
+                android:textColor="@color/success_green"
+                android:id="@+id/title" />
+
+            <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="PR001"
+                android:textColor="@color/success_green"
+                android:id="@+id/pr_no" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+
+            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Inventory Total - "
+                android:textSize="@dimen/_10sdp"/>
+
+            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="1200"
+                android:textSize="@dimen/_10sdp"
+                android:id="@+id/inventory_total" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Item Added - "
+                android:textSize="@dimen/_10sdp"
+                android:id="@+id/item_added_issued_title" />
+
+            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="500"
+                android:textSize="@dimen/_10sdp"
+                android:id="@+id/item_added_issued" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Date - "
+                android:textColor="@color/new_grey"
+                android:textSize="@dimen/_10sdp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="23/July/2016"
+                android:textColor="@color/new_grey"
+                android:textSize="@dimen/_10sdp"
+                android:id="@+id/text_date" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

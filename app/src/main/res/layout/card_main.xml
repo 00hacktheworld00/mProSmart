@@ -1,0 +1,89 @@
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/small_margin"
+    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+    android:layout_marginRight="@dimen/activity_horizontal_margin"
+    android:layout_marginBottom="@dimen/very_small_margin"
+    android:background="#C5CAE9"
+    app:cardCornerRadius="20dp"
+    android:foreground="?attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:gravity="center_vertical"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Purchase Receipt No : "
+                android:textSize="@dimen/heading_main"
+                android:textColor="@color/fbColor"
+                android:gravity="center_vertical"
+                android:typeface="normal"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="12345"
+                android:textSize="@dimen/heading_main"
+                android:textColor="@color/fbColor"
+                android:gravity="center_vertical"
+                android:typeface="normal"
+                android:id="@+id/receipt_no" />
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/small_margin">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true">
+
+                <ImageButton
+                    android:layout_width="@dimen/small_logo_btn"
+                    android:layout_height="@dimen/small_logo_btn"
+                    android:background="@drawable/delivery"
+                    android:layout_marginEnd="@dimen/very_small_margin"/>
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="Last Received : "
+                    android:textSize="@dimen/subheading_main" />
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="5 days ago "
+                    android:id="@+id/item_last_received"
+                    android:textSize="@dimen/subheading_main" />
+            </LinearLayout>
+        </RelativeLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/mainLayout2"
+        android:orientation="vertical"></LinearLayout>
+
+
+</android.support.v7.widget.CardView>

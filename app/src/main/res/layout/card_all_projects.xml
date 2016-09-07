@@ -1,0 +1,305 @@
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:transitionName="card"
+    android:id="@+id/cardview"
+    android:layout_marginTop="@dimen/very_small_margin"
+    android:layout_marginLeft="@dimen/very_small_margin"
+    android:layout_marginRight="@dimen/very_small_margin"
+    android:background="@color/white"
+    tools:ignore="UnusedAttribute"
+    android:focusable="true"
+    android:clickable="true"
+    android:foreground="?android:attr/selectableItemBackground">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="@dimen/logo_medium"
+            android:layout_height="@dimen/logo_medium"
+            android:layout_margin="@dimen/activity_horizontal_margin">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/company_logo"
+                android:layout_width="@dimen/logo_medium"
+                android:layout_height="@dimen/logo_medium" /></LinearLayout>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:id="@+id/project_no"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="@dimen/activity_horizontal_margin"
+                    android:layout_marginRight="@dimen/activity_horizontal_margin"
+                    android:layout_marginTop="@dimen/very_small_margin"
+                    android:orientation="horizontal"
+                    android:id="@+id/clockLayout"
+                    android:gravity="end|center">
+
+
+                    <ImageButton
+                        android:layout_width="@dimen/small_logo_btn"
+                        android:layout_height="@dimen/small_logo_btn"
+                        android:background="@drawable/clock"
+                        android:layout_marginRight="@dimen/small_margin"/>
+
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/new_grey"
+                        android:id="@+id/last_updated_time"
+                        android:gravity="center" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginRight="@dimen/small_margin"
+                    android:gravity="top">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:textColor="@color/fbColor"
+                        android:typeface="normal"
+                        android:id="@+id/title" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/descriptionOne"
+                    android:layout_marginTop="@dimen/small_margin" />
+
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:id="@+id/descriptionTwo"
+                    android:text="Development Stage"
+                    android:layout_marginRight="@dimen/small_margin" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="end"
+                android:weightSum="2"
+                android:layout_marginTop="@dimen/very_small_margin">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center|start"
+                    android:orientation="horizontal">
+
+                    <ImageButton
+                        android:layout_width="@dimen/small_logo_btn"
+                        android:layout_height="@dimen/small_logo_btn"
+                        android:background="@drawable/play_button"
+                        android:layout_marginRight="@dimen/very_small_margin"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/startedDate"
+                        android:textColor="@color/new_grey"
+                        android:layout_marginRight="@dimen/small_margin"
+                        android:gravity="bottom" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_weight="1"
+                    android:layout_marginRight="@dimen/small_margin"
+                    android:gravity="right|center">
+
+
+
+                    <ImageButton
+                        android:layout_width="@dimen/small_logo_btn"
+                        android:layout_height="@dimen/small_logo_btn"
+                        android:background="@drawable/finish_flag"
+                        android:layout_marginRight="@dimen/very_small_margin"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/finishByDate"
+                        android:textColor="@color/new_grey"
+                        android:gravity="bottom" />
+
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="@dimen/very_small_margin"
+                android:weightSum="2">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/purchaseReceipts"
+                        android:textColor="@color/fbColor"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=" Purchase Orders"
+                        android:textColor="@color/new_grey"
+                        android:layout_marginRight="@dimen/small_margin" />
+
+
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_weight="1"
+                    android:gravity="right"
+                    android:layout_marginRight="@dimen/small_margin">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/itemsReceived"
+                        android:textColor="@color/fbColor"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=" % Progress"
+                        android:textColor="@color/new_grey"/>
+
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/line_view_size"
+                android:layout_marginTop="@dimen/very_small_margin"
+                android:background="@color/line_color"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/commentLayout"
+                xmlns:fancy="http://schemas.android.com/apk/res-auto"
+                android:paddingTop="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingBottom="@dimen/activity_horizontal_margin"
+                android:layout_marginRight="@dimen/activity_horizontal_margin"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/image_main"
+                        android:src="@drawable/custom_rect"
+                        android:id="@+id/imageView" />
+
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        xmlns:app="http://schemas.android.com/apk/res-auto"
+                        android:layout_width="@dimen/image_main"
+                        android:layout_height="@dimen/image_main"
+                        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                        android:layout_marginRight="@dimen/activity_horizontal_margin"
+                        android:layout_alignParentTop="false"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentBottom="false"
+                        android:layout_alignParentLeft="false"
+                        android:id="@+id/profile_pic" />
+
+                    <EditText
+                        android:layout_width="@dimen/textbox_width"
+                        android:layout_height="wrap_content"
+                        android:hint="Write Your Notes Here"
+                        android:layout_toEndOf="@+id/profile_pic"
+                        android:background="@android:color/transparent"
+                        android:layout_centerVertical="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentStart="false"
+                        android:maxLines="1"
+                        android:inputType="text"
+                        android:imeOptions="actionDone"
+                        android:textSize="@dimen/_12sdp"
+                        android:id="@+id/text_notes" />
+                </RelativeLayout>
+
+                <mehdi.sakout.fancybuttons.FancyButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="@dimen/very_very_small_margin"
+                    android:paddingLeft="@dimen/activity_vertical_margin"
+                    android:paddingRight="@dimen/activity_vertical_margin"
+                    android:paddingTop="@dimen/very_very_small_margin"
+                    android:layout_margin="@dimen/_10sdp"
+                    fancy:fb_borderColor="@color/colorPrimary"
+                    fancy:fb_borderWidth="1dp"
+                    fancy:fb_radius="@dimen/_10sdp"
+                    fancy:fb_defaultColor="@color/white"
+                    fancy:fb_focusColor="@color/colorPrimary"
+                    fancy:fb_text="Update Progress"
+                    android:layout_marginLeft="@dimen/_10sdp"
+                    fancy:fb_textSize="@dimen/subheading_main"
+                    fancy:fb_textColor="@color/text_color"
+                    android:id="@+id/btn_update_progress"
+                    android:layout_gravity="right" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:id="@+id/wbs_id"/>
+
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</android.support.v7.widget.CardView>

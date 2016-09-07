@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_marginTop="@dimen/activity_vertical_margin"
+    android:layout_marginBottom="@dimen/activity_vertical_margin"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.CardView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:background="#C5CAE9"
+        app:cardCornerRadius="20dp">
+
+        <RelativeLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/card_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/activity_horizontal_margin"
+                android:gravity="center_vertical"
+                android:orientation="vertical" >
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="Design Change Request  #"
+                        android:textSize="@dimen/heading_main"
+                        android:textColor="@color/fbColor"
+                        android:gravity="center_vertical"
+                        android:typeface="normal" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="1"
+                        android:textSize="@dimen/heading_main"
+                        android:textColor="@color/fbColor"
+                        android:gravity="center_vertical"
+                        android:typeface="normal"
+                        android:id="@+id/text_line_no" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="Title : "
+                        android:textSize="@dimen/subheading_main"
+                        android:textColor="@color/fbColor"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="Type-1"
+                        android:layout_marginRight="@dimen/activity_vertical_margin"
+                        android:textSize="@dimen/subheading_main"
+                        android:gravity="center"
+                        android:id="@+id/text_title"
+                        android:textColor="@color/main_color_grey_700" />
+                </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/activity_horizontal_margin"
+                        android:orientation="horizontal">
+
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:text="Project ID : "
+                            android:textColor="@color/fbColor"
+                            android:textSize="@dimen/subheading_main" />
+
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:text="14145"
+                            android:textSize="@dimen/subheading_main"
+                            android:id="@+id/text_project_id"
+                            android:textColor="@color/main_color_grey_700" />
+
+                    </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="Project Name : "
+                        android:textSize="@dimen/subheading_main"
+                        android:textColor="@color/fbColor"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="XYZ"
+                        android:layout_marginRight="@dimen/activity_vertical_margin"
+                        android:textSize="@dimen/subheading_main"
+                        android:gravity="center"
+                        android:textColor="@color/main_color_grey_700"
+                        android:id="@+id/text_project_name" />
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Created by : "
+                        android:textSize="@dimen/subheading_main"
+                        android:textColor="@color/fbColor"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Abcde"
+                        android:textSize="@dimen/subheading_main"
+                        android:textColor="@color/main_color_grey_700"
+                        android:id="@+id/text_created_by" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="Date created : "
+                        android:textSize="@dimen/subheading_main"
+                        android:textColor="@color/fbColor"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="01/03/2016"
+                        android:layout_marginRight="@dimen/activity_vertical_margin"
+                        android:textSize="@dimen/subheading_main"
+                        android:gravity="center"
+                        android:textColor="@color/main_color_grey_700"
+                        android:id="@+id/text_date_created" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="Due date : "
+                        android:textSize="@dimen/subheading_main"
+                        android:textColor="@color/fbColor"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="01/02/2016"
+                        android:layout_marginRight="@dimen/activity_vertical_margin"
+                        android:textSize="@dimen/subheading_main"
+                        android:gravity="center"
+                        android:textColor="@color/main_color_grey_700"
+                        android:id="@+id/text_due_date" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:weightSum="2"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginTop="@dimen/activity_horizontal_margin"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:text="Status : "
+                            android:textSize="@dimen/subheading_main"
+                            android:textColor="@color/fbColor"
+                            android:gravity="center" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:text="Processing"
+                            android:layout_marginRight="@dimen/activity_vertical_margin"
+                            android:textSize="@dimen/subheading_main"
+                            android:gravity="center"
+                            android:textColor="@color/main_color_grey_700"
+                            android:id="@+id/text_status" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </RelativeLayout>
+    </android.support.v7.widget.CardView>
+
+</LinearLayout>

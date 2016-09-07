@@ -1,0 +1,249 @@
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/small_margin"
+    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+    android:layout_marginRight="@dimen/activity_horizontal_margin"
+    android:layout_marginBottom="@dimen/very_small_margin"
+    android:background="#C5CAE9"
+    app:cardCornerRadius="20dp"
+    xmlns:fancy="http://schemas.android.com/apk/res-auto"
+    android:foreground="?attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:gravity="center_vertical"
+        android:orientation="vertical" >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Item ID : "
+                android:textColor="@color/fbColor"
+                android:gravity="center_vertical"
+                android:typeface="normal"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="12345"
+                android:textColor="@color/fbColor"
+                android:gravity="center_vertical"
+                android:typeface="normal"
+                android:id="@+id/item_id" />
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="@dimen/small_margin">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Line # : "
+                android:textSize="@dimen/subheading_main" />
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="1"
+                android:id="@+id/line_no"
+                android:textSize="@dimen/subheading_main" />
+        </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/small_margin"
+                android:orientation="vertical">
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="Item Description :- "
+                    android:textColor="@color/fbColor"
+                    android:textSize="@dimen/subheading_main" />
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="@dimen/very_very_small_margin"
+                    android:text="Item desciption will be written here. This is just a sample of desciption."
+                    android:textSize="@dimen/subheading_main"
+                    android:id="@+id/item_desc" />
+
+            </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+
+                <mehdi.sakout.fancybuttons.FancyButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="@dimen/very_very_small_margin"
+                    android:paddingLeft="@dimen/activity_vertical_margin"
+                    android:paddingRight="@dimen/activity_vertical_margin"
+                    android:paddingTop="@dimen/very_very_small_margin"
+                    fancy:fb_borderColor="@color/colorPrimary"
+                    fancy:fb_borderWidth="1dp"
+                    fancy:fb_radius="@dimen/_10sdp"
+                    fancy:fb_defaultColor="@color/white"
+                    fancy:fb_focusColor="@color/fbColor"
+                    fancy:fb_text="EDIT"
+                    fancy:fb_textSize="@dimen/subheading_main"
+                    fancy:fb_textColor="@color/text_color"
+                    android:id="@+id/editBtn" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:orientation="horizontal">
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="UOM : "
+                    android:textSize="@dimen/subheading_main" />
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="Bags"
+                    android:textSize="@dimen/subheading_main"
+                    android:id="@+id/item_uom" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/hiddenTextboxLayout"
+            android:visibility="gone"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/half_textbox_width"
+                        android:src="@drawable/custom_rect"
+                        android:id="@+id/imageView" />
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/half_textbox_width"
+                        android:padding="@dimen/very_small_margin"
+                        android:hint="Description of Non-conformance."
+                        android:imeOptions="actionNext"
+                        android:textSize="@dimen/subheading_main"
+                        android:background="@android:color/transparent"
+                        android:gravity="top"
+                        android:id="@+id/desc_of_noncomformance" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/half_textbox_width"
+                        android:src="@drawable/custom_rect"
+                        android:id="@+id/imageView2" />
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/half_textbox_width"
+                        android:padding="@dimen/very_small_margin"
+                        android:hint="Action taken to prevent misuse."
+                        android:imeOptions="actionDone"
+                        android:textSize="@dimen/subheading_main"
+                        android:background="@android:color/transparent"
+                        android:gravity="top"
+                        android:id="@+id/action_taken" />
+                </RelativeLayout>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+
+                        <!--<com.weiwangcn.betterspinner.library.BetterSpinner-->
+                            <!--android:layout_width="match_parent"-->
+                            <!--android:layout_height="match_parent"-->
+                            <!--android:gravity="center"-->
+                            <!--android:layout_weight="1"-->
+                            <!--android:text="Select UOM"-->
+                            <!--android:layout_marginRight="@dimen/very_small_margin"-->
+                            <!--android:background="@drawable/custom_rect"-->
+                            <!--android:textSize="@dimen/subheading_main"-->
+                            <!--android:id="@+id/uom_new" />-->
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:padding="@dimen/small_margin"
+                            android:background="@color/material_purple_400">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="@dimen/image_main"
+                                android:text="SAVE"
+                                android:id="@+id/saveBtn"
+                                android:textColor="@color/white"
+                                android:gravity="center"
+                                android:typeface="normal"
+                                android:layout_alignParentTop="true"/>
+                        </RelativeLayout>
+                    </LinearLayout>
+                </RelativeLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</android.support.v7.widget.CardView>

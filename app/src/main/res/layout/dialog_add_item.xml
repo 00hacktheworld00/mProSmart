@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="@dimen/_15sdp"
+        android:layout_margin="@dimen/_20sdp"
+        android:padding="@dimen/_20sdp"
+        android:visibility="invisible"
+        app:cardBackgroundColor="@color/colorAccent">
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="@dimen/_15sdp"
+        android:layout_margin="@dimen/_20sdp"
+        app:cardElevation="@dimen/_25sdp"
+        app:cardBackgroundColor="@color/back_light">
+
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="@dimen/_15sdp"
+            android:layout_margin="@dimen/_3sdp"
+            app:cardBackgroundColor="#fdfdfd"
+            android:id="@+id/view4">
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:layout_marginTop="@dimen/_20sdp"
+                        android:layout_marginBottom="@dimen/_20sdp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Add Line Item"
+                            android:textSize="@dimen/_20sdp"
+                            android:textColor="#000000"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="@dimen/activity_vertical_margin">
+
+                        <Spinner
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/_35sdp"
+                            android:padding="10dp"
+                            android:hint="Item"
+                            android:textColorHint="#000000"
+                            android:textColor="#000000"
+                            android:background="@drawable/edittext_states_red"
+                            android:layout_marginBottom="@dimen/activity_vertical_margin"
+                            android:layout_marginRight="@dimen/_5sdp"
+                            android:textSize="15sp"
+                            android:id="@+id/spinner_item" />
+
+                      <LinearLayout
+                          android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:orientation="vertical"
+                          android:id="@+id/hiddenLayout">
+                          <EditText
+                              android:layout_width="match_parent"
+                              android:layout_height="wrap_content"
+                              android:padding="10dp"
+                              android:hint="Item Name"
+                              android:maxLines="1"
+                              android:inputType="textCapSentences"
+                              android:imeOptions="actionNext"
+                              android:textColorHint="#000000"
+                              android:textColor="#000000"
+                              android:background="@drawable/edittext_states_red"
+                              android:layout_marginBottom="@dimen/activity_vertical_margin"
+                              android:textSize="15sp"
+                              android:id="@+id/text_item_name"
+                              android:enabled="false" />
+
+                          <EditText
+                              android:layout_width="match_parent"
+                              android:layout_height="wrap_content"
+                              android:padding="10dp"
+                              android:hint="Item Description"
+                              android:maxLines="1"
+                              android:inputType="textCapSentences"
+                              android:imeOptions="actionNext"
+                              android:textColorHint="#000000"
+                              android:textColor="#000000"
+                              android:background="@drawable/edittext_states_red"
+                              android:layout_marginBottom="@dimen/activity_vertical_margin"
+                              android:textSize="15sp"
+                              android:id="@+id/text_item_desc"
+                              android:enabled="false" />
+                      </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:weightSum="2"
+                            android:layout_marginBottom="@dimen/activity_vertical_margin">
+
+
+
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="10dp"
+                                android:hint="UOM"
+                                android:layout_weight="1"
+                                android:maxLines="1"
+                                android:inputType="number"
+                                android:layout_marginRight="@dimen/_5sdp"
+                                android:imeOptions="actionNext"
+                                android:textColorHint="#000000"
+                                android:textColor="#000000"
+                                android:background="@drawable/edittext_states_red"
+                                android:textSize="15sp"
+                                android:id="@+id/text_uom" />
+
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="10dp"
+                                android:hint="Quantity"
+                                android:layout_weight="1"
+                                android:maxLines="1"
+                                android:inputType="number"
+                                android:layout_marginLeft="@dimen/_5sdp"
+                                android:imeOptions="actionNext"
+                                android:textColorHint="#000000"
+                                android:textColor="#000000"
+                                android:background="@drawable/edittext_states_red"
+                                android:textSize="15sp"
+                                android:id="@+id/text_quantity" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="10dp"
+                            android:hint="Need By Date"
+                            android:textColorHint="#000000"
+                            android:textColor="#000000"
+                            android:background="@drawable/edittext_states_red"
+                            android:layout_marginBottom="@dimen/activity_vertical_margin"
+                            android:textSize="15sp"
+                            android:id="@+id/text_need_by_date" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:weightSum="2">
+
+                            <Spinner
+                                android:layout_width="match_parent"
+                                android:layout_height="@dimen/_35sdp"
+                                android:padding="10dp"
+                                android:hint="Currency"
+                                android:layout_weight="1"
+                                android:textColorHint="#000000"
+                                android:textColor="#000000"
+                                android:background="@drawable/edittext_states_red"
+                                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                android:layout_marginRight="@dimen/_5sdp"
+                                android:textSize="15sp"
+                                android:id="@+id/spinner_currency" />
+
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="10dp"
+                                android:hint="Unit Cost"
+                                android:layout_weight="1"
+                                android:maxLines="1"
+                                android:inputType="numberDecimal"
+                                android:layout_marginLeft="@dimen/_5sdp"
+                                android:imeOptions="actionDone"
+                                android:textColorHint="#000000"
+                                android:textColor="#000000"
+                                android:background="@drawable/edittext_states_red"
+                                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                android:textSize="15sp"
+                                android:id="@+id/text_unit_cost" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:weightSum="2">
+
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="10dp"
+                                android:layout_weight="1"
+                                android:text="Total Amount  =  "
+                                android:textColorHint="#000000"
+                                android:textColor="#ffffff"
+                                android:background="@color/success_green"
+                                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                android:textSize="15sp"
+                                android:gravity="center" />
+
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="10dp"
+                                android:layout_weight="1"
+                                android:text="0"
+                                android:textColorHint="#000000"
+                                android:textColor="#ffffff"
+                                android:background="@color/success_green"
+                                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                android:textSize="15sp"
+                                android:id="@+id/text_total_amount"
+                                android:gravity="center" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <Button
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#ffffff"
+                        android:text="ADD"
+                        android:layout_margin="@dimen/activity_vertical_margin"
+                        android:padding="@dimen/activity_vertical_margin"
+                        android:layout_marginTop="@dimen/activity_vertical_margin"
+                        android:gravity="center"
+                        android:background="@color/colorPrimary"
+                        android:layout_alignParentBottom="true"
+                        android:id="@+id/addBtn" />
+
+
+                </LinearLayout>
+
+            </ScrollView>
+        </android.support.v7.widget.CardView>
+    </android.support.v7.widget.CardView>
+</LinearLayout>

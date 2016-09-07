@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".Activities.SubcontractorActivity"
+    android:isScrollContainer="true"
+    xmlns:fancy="http://schemas.android.com/apk/res-auto"
+    tools:showIn="@layout/activity_subcontractor">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+
+        <mehdi.sakout.fancybuttons.FancyButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/very_very_small_margin"
+            android:paddingLeft="@dimen/activity_vertical_margin"
+            android:paddingRight="@dimen/activity_vertical_margin"
+            android:paddingTop="@dimen/very_very_small_margin"
+            fancy:fb_borderColor="@color/colorPrimary"
+            fancy:fb_borderWidth="1dp"
+            android:layout_margin="@dimen/activity_horizontal_margin"
+            fancy:fb_radius="@dimen/_10sdp"
+            fancy:fb_defaultColor="@color/white"
+            fancy:fb_focusColor="@color/fbColor"
+            fancy:fb_text="Add new item ."
+            fancy:fb_textSize="@dimen/subheading_main"
+            fancy:fb_textColor="@color/text_color"
+            android:id="@+id/editBtn" />
+
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/hiddenTextboxLayout"
+            android:layout_margin="@dimen/activity_vertical_margin"
+            android:visibility="gone"
+            android:scrollbars="none">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/half_textbox_width"
+                        android:src="@drawable/custom_rect"
+                        android:id="@+id/imageView" />
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/half_textbox_width"
+                        android:padding="@dimen/very_small_margin"
+                        android:hint="Enter Line No."
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:imeOptions="actionNext"
+                        android:textSize="@dimen/subheading_main"
+                        android:background="@android:color/transparent"
+                        android:gravity="top"
+                        android:id="@+id/text_line_no" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/half_textbox_width"
+                        android:src="@drawable/custom_rect"
+                        android:id="@+id/imageView2" />
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/half_textbox_width"
+                        android:padding="@dimen/very_small_margin"
+                        android:hint="Enter WBS."
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:imeOptions="actionNext"
+                        android:textSize="@dimen/subheading_main"
+                        android:background="@android:color/transparent"
+                        android:gravity="top"
+                        android:id="@+id/text_wbs" />
+                </RelativeLayout>
+
+
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/half_textbox_width"
+                        android:src="@drawable/custom_rect" />
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/half_textbox_width"
+                        android:padding="@dimen/very_small_margin"
+                        android:hint="Enter activities."
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:imeOptions="actionNext"
+                        android:textSize="@dimen/subheading_main"
+                        android:background="@android:color/transparent"
+                        android:gravity="top"
+                        android:id="@+id/text_activities" />
+                </RelativeLayout>
+
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/half_textbox_width"
+                        android:src="@drawable/custom_rect" />
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/half_textbox_width"
+                        android:padding="@dimen/very_small_margin"
+                        android:hint="Enter resource name."
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:imeOptions="actionNext"
+                        android:textSize="@dimen/subheading_main"
+                        android:background="@android:color/transparent"
+                        android:gravity="top"
+                        android:id="@+id/text_res_name" />
+                </RelativeLayout>
+
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/half_textbox_width"
+                        android:src="@drawable/custom_rect" />
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/half_textbox_width"
+                        android:padding="@dimen/very_small_margin"
+                        android:hint="Enter date."
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:imeOptions="actionNext"
+                        android:textSize="@dimen/subheading_main"
+                        android:background="@android:color/transparent"
+                        android:gravity="top"
+                        android:id="@+id/text_date" />
+                </RelativeLayout>
+
+
+
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/half_textbox_width"
+                        android:src="@drawable/custom_rect" />
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/half_textbox_width"
+                        android:padding="@dimen/very_small_margin"
+                        android:hint="Enter total hours."
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:imeOptions="actionDone"
+                        android:textSize="@dimen/subheading_main"
+                        android:background="@android:color/transparent"
+                        android:gravity="top"
+                        android:id="@+id/text_total_hours" />
+                </RelativeLayout>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:padding="@dimen/small_margin"
+                    android:background="@color/material_purple_400">
+
+                    <com.example.sadashivsinha.mprosmart.font.VarelaRoundRegular
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/image_main"
+                        android:text="SAVE"
+                        android:id="@+id/saveBtn"
+                        android:textSize="@dimen/heading_main"
+                        android:textColor="@color/white"
+                        android:gravity="center"
+                        android:typeface="normal"
+                        android:layout_alignParentTop="true"/>
+                </RelativeLayout>
+            </LinearLayout>
+        </ScrollView>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/my_recycler_view"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="vertical"/>
+
+    </LinearLayout>
+
+</android.support.v4.widget.NestedScrollView>

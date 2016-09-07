@@ -1,0 +1,186 @@
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:focusable="true"
+    android:clickable="true"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:layout_height="wrap_content"
+    android:id="@+id/cardview"
+    android:layout_marginTop="@dimen/activity_vertical_margin"
+    android:layout_marginLeft="@dimen/activity_vertical_margin"
+    android:layout_marginRight="@dimen/activity_vertical_margin"
+    android:transitionName="card"
+    android:background="@color/white"
+    android:elevation="@dimen/_3sdp"
+    tools:ignore="UnusedAttribute">
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="@dimen/_5sdp"
+        android:gravity="center">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#99ffffff"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center">
+
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingBottom="@dimen/_5sdp"
+                        android:paddingLeft="@dimen/_5sdp"
+                        android:paddingRight="@dimen/_5sdp"
+                        android:paddingTop="@dimen/_5sdp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:id="@+id/main_layout">
+
+                            <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Line No."
+                                android:textColor="@color/colorPrimary"/>
+
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="10dp"
+                                android:maxLines="1"
+                                android:inputType="textCapSentences"
+                                android:imeOptions="actionNext"
+                                android:textColorHint="#000000"
+                                android:textColor="#000000"
+                                android:background="@drawable/edittext_states_red"
+                                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                android:textSize="15sp"
+                                android:id="@+id/text_line_no"
+                                android:enabled="false" />
+
+                            <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Item ID"
+                                android:textColor="@color/colorPrimary"/>
+
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="10dp"
+                                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                android:textColorHint="#000000"
+                                android:textColor="#000000"
+                                android:inputType="textCapSentences"
+                                android:imeOptions="actionDone"
+                                android:background="@drawable/edittext_states_red"
+                                android:textSize="15sp"
+                                android:id="@+id/text_item_id"
+
+                                android:gravity="top"
+                                android:enabled="false" />
+
+                            <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Item Description"
+                                android:textColor="@color/colorPrimary"/>
+
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="10dp"
+                                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                android:textColorHint="#000000"
+                                android:textColor="#000000"
+                                android:background="@drawable/edittext_states_red"
+                                android:textSize="15sp"
+                                android:id="@+id/text_item_desc"
+                                android:enabled="false" />
+
+                            <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Quantitty"
+                                android:textColor="@color/colorPrimary"/>
+
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="10dp"
+                                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                android:textColorHint="#000000"
+                                android:textColor="#000000"
+                                android:background="@drawable/edittext_states_red"
+                                android:textSize="15sp"
+                                android:id="@+id/text_quantity"
+                                android:enabled="false" />
+
+                            <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="UOM"
+                                android:textColor="@color/colorPrimary"/>
+
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="10dp"
+                                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                android:textColorHint="#000000"
+                                android:textColor="#000000"
+                                android:background="@drawable/edittext_states_red"
+                                android:textSize="15sp"
+                                android:id="@+id/text_uom"
+                                android:enabled="false" />
+
+
+                            <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Need By Date"
+                                android:textColor="@color/colorPrimary"/>
+
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="10dp"
+                                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                android:textColorHint="#000000"
+                                android:textColor="#000000"
+                                android:background="@drawable/edittext_states_red"
+                                android:textSize="15sp"
+                                android:id="@+id/text_needed_by"
+                                android:enabled="false" />
+
+                            <Button
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="EDIT"
+                                android:id="@+id/editBtn"
+                                android:backgroundTint="@color/colorPrimary"
+                                android:textColor="#ffffff"/>
+
+                        </LinearLayout>
+                    </RelativeLayout>
+                </RelativeLayout>
+            </RelativeLayout>
+        </LinearLayout>
+    </RelativeLayout>
+</android.support.v7.widget.CardView>

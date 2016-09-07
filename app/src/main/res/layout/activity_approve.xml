@@ -1,0 +1,708 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+   <ScrollView
+       android:layout_width="match_parent"
+       android:layout_height="match_parent">
+
+       <LinearLayout
+           android:layout_width="match_parent"
+           android:layout_height="match_parent"
+           android:orientation="vertical">
+           <LinearLayout
+               android:orientation="horizontal"
+               android:layout_width="match_parent"
+               android:layout_height="@dimen/_140sdp">
+
+               <com.example.sadashivsinha.mprosmart.font.OswaldBold
+                   android:layout_width="@dimen/_40sdp"
+                   android:layout_height="wrap_content"
+                   android:layout_marginTop="@dimen/_10sdp"
+                   android:text="25 Jul"
+                   android:layout_marginLeft="@dimen/_10sdp"
+                   android:textSize="@dimen/_15sdp"
+                   android:id="@+id/text_date" />
+
+               <LinearLayout
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:orientation="vertical">
+
+                   <View
+                       android:layout_width="1dp"
+                       android:layout_marginLeft="@dimen/_3sdp"
+                       android:layout_height="@dimen/_30sdp"
+                       android:background="@color/new_grey"/>
+
+                   <de.hdodenhof.circleimageview.CircleImageView
+                       android:layout_width="@dimen/_7sdp"
+                       android:layout_height="@dimen/_7sdp"
+                       android:src="@color/new_grey"
+                       android:id="@+id/dot_color" />
+
+                   <View
+                       android:layout_width="1dp"
+                       android:layout_marginLeft="@dimen/_3sdp"
+                       android:layout_height="wrap_content"
+                       android:background="@color/new_grey"/>
+               </LinearLayout>
+
+
+
+               <android.support.v7.widget.CardView
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"
+                   app:cardElevation="@dimen/_3sdp"
+                   android:layout_marginTop="@dimen/_10sdp"
+                   android:layout_marginLeft="@dimen/_5sdp"
+                   android:layout_marginRight="@dimen/_5sdp">
+
+                   <RelativeLayout
+                       android:layout_width="match_parent"
+                       android:layout_height="wrap_content">
+                       <LinearLayout
+                           android:layout_width="match_parent"
+                           android:layout_height="wrap_content"
+                           android:orientation="vertical"
+                           android:layout_margin="@dimen/_10sdp"
+                           android:id="@+id/linearLayout2">
+
+                           <TextView
+                               android:layout_width="match_parent"
+                               android:layout_height="wrap_content"
+                               android:text="Request for Approval"
+                               android:textSize="@dimen/_15sdp"
+                               android:textColor="#000000"
+                               android:textStyle="bold"
+                               android:id="@+id/text_utility" />
+
+                           <TextView
+                               android:layout_width="match_parent"
+                               android:layout_height="wrap_content"
+                               android:text="New Vendor Added - V004"
+                               android:layout_marginRight="@dimen/_5sdp"
+                               android:textSize="@dimen/_12sdp"
+                               android:id="@+id/text_provider"
+                               android:layout_marginTop="@dimen/_5sdp"
+                               android:layout_marginBottom="@dimen/_5sdp" />
+
+                           <LinearLayout
+                               android:layout_width="match_parent"
+                               android:layout_height="wrap_content"
+                               android:orientation="horizontal"
+                               android:layout_marginTop="@dimen/_5sdp"
+                               android:layout_marginBottom="@dimen/_5sdp">
+
+                               <TextView
+                                   android:layout_width="wrap_content"
+                                   android:layout_height="wrap_content"
+                                   android:text="Status : "
+                                   android:textSize="@dimen/_13sdp"
+                                   android:id="@+id/account_title" />
+
+                               <TextView
+                                   android:layout_width="wrap_content"
+                                   android:layout_height="wrap_content"
+                                   android:text="PENDING"
+                                   android:textColor="@color/orange"
+                                   android:textSize="@dimen/_13sdp"
+                                   android:id="@+id/text_acc_no" />
+                           </LinearLayout>
+                       </LinearLayout>
+
+                       <LinearLayout
+                           android:layout_width="match_parent"
+                           android:layout_height="wrap_content"
+                           android:orientation="horizontal"
+                           android:id="@+id/hideToLayout"
+                           android:layout_alignParentBottom="true"
+                           android:weightSum="2">
+
+                           <Button
+                               android:layout_width="match_parent"
+                               android:layout_height="wrap_content"
+                               android:text="APPROVE"
+                               android:textColor="#ffffff"
+                               android:backgroundTint="@color/accept_green"
+                               android:layout_marginRight="@dimen/_2sdp"
+                               android:layout_weight="1"
+                               android:id="@+id/btn_approve" />
+
+                           <Button
+                               android:layout_width="match_parent"
+                               android:layout_height="wrap_content"
+                               android:text="REJECT"
+                               android:textColor="#ffffff"
+                               android:backgroundTint="@color/fancy_red"
+                               android:layout_marginLeft="@dimen/_2sdp"
+                               android:layout_weight="1"
+                               android:id="@+id/btn_reject" />
+
+                       </LinearLayout>
+
+                   </RelativeLayout>
+
+
+                   <RelativeLayout
+                       android:layout_width="wrap_content"
+                       android:layout_height="match_parent"
+                       android:layout_alignParentRight="true"
+                       android:layout_alignBottom="@+id/linearLayout"
+                       android:layout_alignTop="@+id/linearLayout"
+                       android:gravity="center"></RelativeLayout>
+               </android.support.v7.widget.CardView>
+
+           </LinearLayout>
+
+
+           <LinearLayout
+               android:orientation="horizontal"
+               android:layout_width="match_parent"
+               android:layout_height="@dimen/_120sdp">
+
+               <com.example.sadashivsinha.mprosmart.font.OswaldBold
+                   android:layout_width="@dimen/_40sdp"
+                   android:layout_height="wrap_content"
+                   android:layout_marginTop="@dimen/_10sdp"
+                   android:text="22 Jul"
+                   android:layout_marginLeft="@dimen/_10sdp"
+                   android:textSize="@dimen/_15sdp" />
+
+               <LinearLayout
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:orientation="vertical">
+
+                   <View
+                       android:layout_width="1dp"
+                       android:layout_marginLeft="@dimen/_3sdp"
+                       android:layout_height="@dimen/_30sdp"
+                       android:background="@color/new_grey"/>
+
+                   <de.hdodenhof.circleimageview.CircleImageView
+                       android:layout_width="@dimen/_7sdp"
+                       android:layout_height="@dimen/_7sdp"
+                       android:src="@color/new_grey" />
+
+                   <View
+                       android:layout_width="1dp"
+                       android:layout_marginLeft="@dimen/_3sdp"
+                       android:layout_height="wrap_content"
+                       android:background="@color/new_grey"/>
+               </LinearLayout>
+
+
+
+               <android.support.v7.widget.CardView
+                   android:layout_width="match_parent"
+                   android:layout_height="match_parent"
+                   app:cardElevation="@dimen/_3sdp"
+                   android:layout_marginTop="@dimen/_10sdp"
+                   android:layout_marginLeft="@dimen/_5sdp"
+                   android:layout_marginRight="@dimen/_5sdp">
+
+                   <RelativeLayout
+                       android:layout_width="match_parent"
+                       android:layout_height="wrap_content">
+                       <LinearLayout
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content"
+                           android:orientation="vertical"
+                           android:layout_margin="@dimen/_10sdp">
+
+                           <TextView
+                               android:layout_width="wrap_content"
+                               android:layout_height="wrap_content"
+                               android:text="Request for Approval"
+                               android:textSize="@dimen/_15sdp"
+                               android:textColor="#000000"
+                               android:textStyle="bold" />
+
+                           <TextView
+                               android:layout_width="wrap_content"
+                               android:layout_height="wrap_content"
+                               android:text="New Project Added - P0048"
+                               android:layout_marginRight="@dimen/_5sdp"
+                               android:textSize="@dimen/_12sdp"
+                               android:layout_marginTop="@dimen/_5sdp"
+                               android:layout_marginBottom="@dimen/_5sdp" />
+                           <LinearLayout
+                               android:layout_width="wrap_content"
+                               android:layout_height="wrap_content"
+                               android:orientation="horizontal"
+                               android:layout_marginTop="@dimen/_5sdp"
+                               android:layout_marginBottom="@dimen/_5sdp">
+
+                               <TextView
+                                   android:layout_width="wrap_content"
+                                   android:layout_height="wrap_content"
+                                   android:text="Status : "
+                                   android:textSize="@dimen/_13sdp"/>
+
+                               <TextView
+                                   android:layout_width="wrap_content"
+                                   android:layout_height="wrap_content"
+                                   android:text="APPROVED"
+                                   android:textColor="@color/success_green"
+                                   android:textSize="@dimen/_13sdp"/>
+                           </LinearLayout>
+
+                       </LinearLayout>
+
+                   </RelativeLayout>
+
+
+                   <RelativeLayout
+                       android:layout_width="wrap_content"
+                       android:layout_height="match_parent"
+                       android:layout_alignParentRight="true"
+                       android:layout_alignBottom="@+id/linearLayout"
+                       android:layout_alignTop="@+id/linearLayout"
+                       android:gravity="center"></RelativeLayout>
+               </android.support.v7.widget.CardView>
+
+           </LinearLayout>
+
+
+
+           <LinearLayout
+               android:orientation="horizontal"
+               android:layout_width="match_parent"
+               android:layout_height="@dimen/_120sdp">
+
+               <com.example.sadashivsinha.mprosmart.font.OswaldBold
+                   android:layout_width="@dimen/_40sdp"
+                   android:layout_height="wrap_content"
+                   android:layout_marginTop="@dimen/_10sdp"
+                   android:text="15 Jul"
+                   android:layout_marginLeft="@dimen/_10sdp"
+                   android:textSize="@dimen/_15sdp" />
+
+               <LinearLayout
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:orientation="vertical">
+
+                   <View
+                       android:layout_width="1dp"
+                       android:layout_marginLeft="@dimen/_3sdp"
+                       android:layout_height="@dimen/_30sdp"
+                       android:background="@color/new_grey"/>
+
+                   <de.hdodenhof.circleimageview.CircleImageView
+                       android:layout_width="@dimen/_7sdp"
+                       android:layout_height="@dimen/_7sdp"
+                       android:src="@color/new_grey" />
+
+                   <View
+                       android:layout_width="1dp"
+                       android:layout_marginLeft="@dimen/_3sdp"
+                       android:layout_height="wrap_content"
+                       android:background="@color/new_grey"/>
+               </LinearLayout>
+
+
+
+               <android.support.v7.widget.CardView
+                   android:layout_width="match_parent"
+                   android:layout_height="match_parent"
+                   app:cardElevation="@dimen/_3sdp"
+                   android:layout_marginTop="@dimen/_10sdp"
+                   android:layout_marginLeft="@dimen/_5sdp"
+                   android:layout_marginRight="@dimen/_5sdp">
+
+                   <RelativeLayout
+                       android:layout_width="match_parent"
+                       android:layout_height="wrap_content">
+                       <LinearLayout
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content"
+                           android:orientation="vertical"
+                           android:layout_margin="@dimen/_10sdp">
+
+                           <TextView
+                               android:layout_width="wrap_content"
+                               android:layout_height="wrap_content"
+                               android:text="Request for Approval"
+                               android:textSize="@dimen/_15sdp"
+                               android:textColor="#000000"
+                               android:textStyle="bold" />
+
+                           <TextView
+                               android:layout_width="wrap_content"
+                               android:layout_height="wrap_content"
+                               android:text="New PO Added - PO4154"
+                               android:layout_marginRight="@dimen/_5sdp"
+                               android:textSize="@dimen/_12sdp"
+                               android:layout_marginTop="@dimen/_5sdp"
+                               android:layout_marginBottom="@dimen/_5sdp" />
+                           <LinearLayout
+                               android:layout_width="wrap_content"
+                               android:layout_height="wrap_content"
+                               android:orientation="horizontal"
+                               android:layout_marginTop="@dimen/_5sdp"
+                               android:layout_marginBottom="@dimen/_5sdp">
+
+                               <TextView
+                                   android:layout_width="wrap_content"
+                                   android:layout_height="wrap_content"
+                                   android:text="Status : "
+                                   android:textSize="@dimen/_13sdp"/>
+
+                               <TextView
+                                   android:layout_width="wrap_content"
+                                   android:layout_height="wrap_content"
+                                   android:text="REJECTED"
+                                   android:textColor="@color/fancy_red"
+                                   android:textSize="@dimen/_13sdp"/>
+                           </LinearLayout>
+
+                       </LinearLayout>
+
+                   </RelativeLayout>
+
+
+                   <RelativeLayout
+                       android:layout_width="wrap_content"
+                       android:layout_height="match_parent"
+                       android:layout_alignParentRight="true"
+                       android:layout_alignBottom="@+id/linearLayout"
+                       android:layout_alignTop="@+id/linearLayout"
+                       android:gravity="center"></RelativeLayout>
+               </android.support.v7.widget.CardView>
+
+           </LinearLayout>
+
+
+
+           <LinearLayout
+               android:orientation="horizontal"
+               android:layout_width="match_parent"
+               android:layout_height="@dimen/_120sdp">
+
+               <com.example.sadashivsinha.mprosmart.font.OswaldBold
+                   android:layout_width="@dimen/_40sdp"
+                   android:layout_height="wrap_content"
+                   android:layout_marginTop="@dimen/_10sdp"
+                   android:text="01 Jun"
+                   android:layout_marginLeft="@dimen/_10sdp"
+                   android:textSize="@dimen/_15sdp" />
+
+               <LinearLayout
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:orientation="vertical">
+
+                   <View
+                       android:layout_width="1dp"
+                       android:layout_marginLeft="@dimen/_3sdp"
+                       android:layout_height="@dimen/_30sdp"
+                       android:background="@color/new_grey"/>
+
+                   <de.hdodenhof.circleimageview.CircleImageView
+                       android:layout_width="@dimen/_7sdp"
+                       android:layout_height="@dimen/_7sdp"
+                       android:src="@color/new_grey" />
+
+                   <View
+                       android:layout_width="1dp"
+                       android:layout_marginLeft="@dimen/_3sdp"
+                       android:layout_height="wrap_content"
+                       android:background="@color/new_grey"/>
+               </LinearLayout>
+
+
+
+               <android.support.v7.widget.CardView
+                   android:layout_width="match_parent"
+                   android:layout_height="match_parent"
+                   app:cardElevation="@dimen/_3sdp"
+                   android:layout_marginTop="@dimen/_10sdp"
+                   android:layout_marginLeft="@dimen/_5sdp"
+                   android:layout_marginRight="@dimen/_5sdp">
+
+                   <RelativeLayout
+                       android:layout_width="match_parent"
+                       android:layout_height="wrap_content">
+                       <LinearLayout
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content"
+                           android:orientation="vertical"
+                           android:layout_margin="@dimen/_10sdp">
+
+                           <TextView
+                               android:layout_width="wrap_content"
+                               android:layout_height="wrap_content"
+                               android:text="Request for Approval"
+                               android:textSize="@dimen/_15sdp"
+                               android:textColor="#000000"
+                               android:textStyle="bold" />
+
+                           <TextView
+                               android:layout_width="wrap_content"
+                               android:layout_height="wrap_content"
+                               android:text="New Resource Added - R018"
+                               android:layout_marginRight="@dimen/_5sdp"
+                               android:textSize="@dimen/_12sdp"
+                               android:layout_marginBottom="@dimen/_5sdp"
+                               android:layout_marginTop="@dimen/_5sdp" />
+                           <LinearLayout
+                               android:layout_width="wrap_content"
+                               android:layout_height="wrap_content"
+                               android:orientation="horizontal"
+                               android:layout_marginBottom="@dimen/_5sdp"
+                               android:layout_marginTop="@dimen/_5sdp">
+
+                               <TextView
+                                   android:layout_width="wrap_content"
+                                   android:layout_height="wrap_content"
+                                   android:text="Status : "
+                                   android:textSize="@dimen/_13sdp"/>
+
+                               <TextView
+                                   android:layout_width="wrap_content"
+                                   android:layout_height="wrap_content"
+                                   android:text="APPROVED"
+                                   android:textColor="@color/success_green"
+                                   android:textSize="@dimen/_13sdp"/>
+                           </LinearLayout>
+
+                       </LinearLayout>
+
+                   </RelativeLayout>
+
+
+                   <RelativeLayout
+                       android:layout_width="wrap_content"
+                       android:layout_height="match_parent"
+                       android:layout_alignParentRight="true"
+                       android:layout_alignBottom="@+id/linearLayout"
+                       android:layout_alignTop="@+id/linearLayout"
+                       android:gravity="center"></RelativeLayout>
+               </android.support.v7.widget.CardView>
+
+           </LinearLayout>
+
+
+
+           <LinearLayout
+               android:orientation="horizontal"
+               android:layout_width="match_parent"
+               android:layout_height="@dimen/_120sdp">
+
+               <com.example.sadashivsinha.mprosmart.font.OswaldBold
+                   android:layout_width="@dimen/_40sdp"
+                   android:layout_height="wrap_content"
+                   android:layout_marginTop="@dimen/_10sdp"
+                   android:text="15 May"
+                   android:layout_marginLeft="@dimen/_10sdp"
+                   android:textSize="@dimen/_15sdp" />
+
+               <LinearLayout
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:orientation="vertical">
+
+                   <View
+                       android:layout_width="1dp"
+                       android:layout_marginLeft="@dimen/_3sdp"
+                       android:layout_height="@dimen/_30sdp"
+                       android:background="@color/new_grey"/>
+
+                   <de.hdodenhof.circleimageview.CircleImageView
+                       android:layout_width="@dimen/_7sdp"
+                       android:layout_height="@dimen/_7sdp"
+                       android:src="@color/new_grey" />
+
+                   <View
+                       android:layout_width="1dp"
+                       android:layout_marginLeft="@dimen/_3sdp"
+                       android:layout_height="wrap_content"
+                       android:background="@color/new_grey"/>
+               </LinearLayout>
+
+
+
+               <android.support.v7.widget.CardView
+                   android:layout_width="match_parent"
+                   android:layout_height="match_parent"
+                   app:cardElevation="@dimen/_3sdp"
+                   android:layout_marginTop="@dimen/_10sdp"
+                   android:layout_marginLeft="@dimen/_5sdp"
+                   android:layout_marginRight="@dimen/_5sdp">
+
+                   <RelativeLayout
+                       android:layout_width="match_parent"
+                       android:layout_height="wrap_content">
+                       <LinearLayout
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content"
+                           android:orientation="vertical"
+                           android:layout_margin="@dimen/_10sdp">
+
+                           <TextView
+                               android:layout_width="wrap_content"
+                               android:layout_height="wrap_content"
+                               android:text="Request for Approval"
+                               android:textSize="@dimen/_15sdp"
+                               android:textColor="#000000"
+                               android:textStyle="bold" />
+
+                           <TextView
+                               android:layout_width="wrap_content"
+                               android:layout_height="wrap_content"
+                               android:text="New MOM Added - MOM001"
+                               android:layout_marginRight="@dimen/_5sdp"
+                               android:textSize="@dimen/_12sdp" />
+                           <LinearLayout
+                               android:layout_width="wrap_content"
+                               android:layout_height="wrap_content"
+                               android:orientation="horizontal">
+
+                               <TextView
+                                   android:layout_width="wrap_content"
+                                   android:layout_height="wrap_content"
+                                   android:text="Status : "
+                                   android:textSize="@dimen/_13sdp"/>
+
+                               <TextView
+                                   android:layout_width="wrap_content"
+                                   android:layout_height="wrap_content"
+                                   android:text="REJECTED"
+                                   android:textColor="@color/fancy_red"
+                                   android:textSize="@dimen/_13sdp"/>
+                           </LinearLayout>
+
+                       </LinearLayout>
+
+                   </RelativeLayout>
+
+
+                   <RelativeLayout
+                       android:layout_width="wrap_content"
+                       android:layout_height="match_parent"
+                       android:layout_alignParentRight="true"
+                       android:layout_alignBottom="@+id/linearLayout"
+                       android:layout_alignTop="@+id/linearLayout"
+                       android:gravity="center"></RelativeLayout>
+               </android.support.v7.widget.CardView>
+
+           </LinearLayout>
+
+
+
+           <LinearLayout
+               android:orientation="horizontal"
+               android:layout_width="match_parent"
+               android:layout_height="@dimen/_120sdp">
+
+               <com.example.sadashivsinha.mprosmart.font.OswaldBold
+                   android:layout_width="@dimen/_40sdp"
+                   android:layout_height="wrap_content"
+                   android:layout_marginTop="@dimen/_10sdp"
+                   android:text="01 May"
+                   android:layout_marginLeft="@dimen/_10sdp"
+                   android:textSize="@dimen/_15sdp" />
+
+               <LinearLayout
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:orientation="vertical">
+
+                   <View
+                       android:layout_width="1dp"
+                       android:layout_marginLeft="@dimen/_3sdp"
+                       android:layout_height="@dimen/_30sdp"
+                       android:background="@color/new_grey"/>
+
+                   <de.hdodenhof.circleimageview.CircleImageView
+                       android:layout_width="@dimen/_7sdp"
+                       android:layout_height="@dimen/_7sdp"
+                       android:src="@color/new_grey" />
+
+                   <View
+                       android:layout_width="1dp"
+                       android:layout_marginLeft="@dimen/_3sdp"
+                       android:layout_height="wrap_content"
+                       android:background="@color/new_grey"/>
+               </LinearLayout>
+
+
+
+               <android.support.v7.widget.CardView
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"
+                   app:cardElevation="@dimen/_3sdp"
+                   android:layout_marginTop="@dimen/_10sdp"
+                   android:layout_marginLeft="@dimen/_5sdp"
+                   android:layout_marginRight="@dimen/_5sdp">
+
+                   <RelativeLayout
+                       android:layout_width="match_parent"
+                       android:layout_height="wrap_content">
+                       <LinearLayout
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content"
+                           android:orientation="vertical"
+                           android:layout_margin="@dimen/_10sdp">
+
+                           <TextView
+                               android:layout_width="wrap_content"
+                               android:layout_height="wrap_content"
+                               android:text="Request for Approval"
+                               android:textSize="@dimen/_15sdp"
+                               android:textColor="#000000"
+                               android:textStyle="bold" />
+
+                           <TextView
+                               android:layout_width="wrap_content"
+                               android:layout_height="wrap_content"
+                               android:text="New Resource Added - R005"
+                               android:layout_marginTop="@dimen/_5sdp"
+                               android:layout_marginBottom="@dimen/_5sdp"
+                               android:layout_marginRight="@dimen/_5sdp"
+                               android:textSize="@dimen/_12sdp" />
+                           <LinearLayout
+                               android:layout_width="wrap_content"
+                               android:layout_height="wrap_content"
+                               android:orientation="horizontal"
+                               android:layout_marginTop="@dimen/_5sdp"
+                               android:layout_marginBottom="@dimen/_5sdp">
+
+                               <TextView
+                                   android:layout_width="wrap_content"
+                                   android:layout_height="wrap_content"
+                                   android:text="Status : "
+                                   android:textSize="@dimen/_13sdp"/>
+
+                               <TextView
+                                   android:layout_width="wrap_content"
+                                   android:layout_height="wrap_content"
+                                   android:text="APPROVED"
+                                   android:textColor="@color/text_color_accent"
+                                   android:textSize="@dimen/_13sdp"/>
+                           </LinearLayout>
+
+                       </LinearLayout>
+
+                   </RelativeLayout>
+
+
+                   <RelativeLayout
+                       android:layout_width="wrap_content"
+                       android:layout_height="match_parent"
+                       android:layout_alignParentRight="true"
+                       android:layout_alignBottom="@+id/linearLayout"
+                       android:layout_alignTop="@+id/linearLayout"
+                       android:gravity="center"></RelativeLayout>
+               </android.support.v7.widget.CardView>
+
+           </LinearLayout>
+
+       </LinearLayout>
+   </ScrollView>
+</LinearLayout>

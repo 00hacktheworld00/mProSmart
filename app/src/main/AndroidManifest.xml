@@ -1,0 +1,560 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.sadashivsinha.mprosmart">
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <permission
+        android:name="com.example.sadashivsinha.mprosmart.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name="com.example.sadashivsinha.mprosmart.permission.C2D_MESSAGE" />
+
+    <!-- Network State Permissions -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+
+    <application
+        android:name=".Utils.AppController"
+        android:allowBackup="true"
+        android:icon="@mipmap/icon_launcher"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:supportsRtl="true"
+        android:theme="@style/MyMaterialTheme">
+        <service android:name=".Utils.Communicator" />
+
+        <receiver android:name=".Utils.Communicator$PendingServices">
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
+        <!-- GCM Receiver -->
+        <receiver
+            android:name="com.google.android.gms.gcm.GcmReceiver"
+            android:exported="true"
+            android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+
+                <category android:name="com.gnirt69.gcmexample" />
+            </intent-filter>
+        </receiver>
+
+        <!-- GCM Receiver Service -->
+        <service
+            android:name=".GCMPushReceiverService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </service>
+
+        <!-- GCM Registration Intent Service -->
+        <service
+            android:name=".GCMRegistrationIntentService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.gms.iid.InstanceID" />
+            </intent-filter>
+        </service>
+
+        <activity
+            android:name=".Activities.PurchaseEntry"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.MainActivity"
+            android:label="@string/title_activity_main"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.Example"
+            android:label="@string/title_activity_main"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.NewPurchase"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.SeperatePurchase"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.NewActivity"
+            android:label="@string/app_name"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.SeperateItems"
+            android:windowSoftInputMode="adjustPan" />
+        <activity android:name=".Activities.LoginScreen">
+            <intent-filter>
+                <action
+                    android:name="android.intent.action.MAIN"
+                    android:windowSoftInputMode="adjustPan" />
+
+                <category
+                    android:name="android.intent.category.LAUNCHER"
+                    android:windowSoftInputMode="adjustPan" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".Activities.SeperatePurchaseActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.FormActivity"
+            android:label="@string/title_activity_form"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AttachmentActivity"
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllProjectsActivity"
+            android:label="WBS"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.QualityControl"
+            android:label="@string/title_activity_quality_control"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.WorklistActivity"
+            android:label="@string/title_activity_worklist"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.InspectionReportActivity"
+            android:label="@string/title_activity_inspection"
+            android:windowSoftInputMode="adjustPan" />
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key"
+            android:windowSoftInputMode="adjustPan" />
+
+        <activity
+            android:name=".Activities.WizardActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.WelcomeActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.NewPurchaseReceipts"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.PurchaseReceipts"
+            android:label="Purchase Receipt Items"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.PurchaseOrders"
+            android:label="Purchase Orders"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.MomActivity"
+            android:label="MOM Line Items"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.SiteDiaryActivity"
+            android:label="@string/title_activity_site_diary"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.SubmittalRegisterActivity"
+            android:label="Submittal Register Line Items"
+            android:theme="@style/MyMaterialTheme"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.SubmittalActivity"
+            android:label="Submittal Line Items"
+            android:theme="@style/MyMaterialTheme"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.ChangeOrders"
+            android:label=""
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.SubcontractorActivity"
+            android:label="Subcontractor Line Items"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.ResourceTimesheetActivity"
+            android:label="Resource Line Items"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.ViewPurchaseOrders"
+            android:label="@string/title_activity_purchase_order"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.MomCreateActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.SubmittalsCreateActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.SubmittalRegisterCreateActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.SubcontractorCreateActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.ResourceTimesheetCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.PurchaseReceiptsNew"
+            android:label="@string/title_activity_purchase_receipts_new"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.PunchListActivity"
+            android:label="@string/title_punch_list"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.PunchListItems"
+            android:label=""
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.PunchItemCreate"
+            android:label=""
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllPunchLists"
+            android:label="All Punch Lists"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.InvoiceSeperateItems"
+            android:label=""
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllInvoices"
+            android:label="All Invoices"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.InvoiceCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllMom"
+            android:label="All MOMs"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllSubmittals"
+            android:label="All Submittals"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllSubmittalsRegister"
+            android:label="All Submittal Registers"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllSubcontractor"
+            android:label="All Subcontractor Timesheets"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllResource"
+            android:label="All Resource Timesheets"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.MomItemCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.SubmittalItemCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.SubRegisterItemCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.SubcontractorItemCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.ResourceItemCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllQualityControl"
+            android:label="All Quality Controls"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.QualityControlItemCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.QualityControlCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.PurchaseOrderCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.PunchListCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.TestQualityControl"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.TestAttachmentActivity"
+            android:theme="@style/AppDialogTheme"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.BarChartActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.DashboardActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.ChartRejection"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.ChartComplete"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.ChartDelay"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.NewAllProjects"
+            android:label="Projects"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.PurchaseItems"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.PurchaseReceiptAndItems"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.CustomerSupport"
+            android:label="@string/title_cus_support"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.PurchaseOrderLineItems"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.WbsCreateActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.CreateNewAllProject"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.ChangePasswordActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AddVendorsActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AddResourceActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.CompletionListActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.ExpenseManagement"
+            android:label="Expense Management"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.GraphActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.BudgetTransfer"
+            android:label="Budget Transfer"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.BudgetApproval"
+            android:label="Budget Approval"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.BudgetChanges"
+            android:label="Budget Changes"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.ProjectDetails"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.MyProfileActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.QualityPlanActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllQualityPlans"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.QualityPlanItemCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllQualityStandards"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.QualityStandardActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.QualityStandardItemCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.QualityStandardCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.QualityCheckListActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllQualityChecklist"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.QualityChecklistCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.QualityChecklistItemCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllBoq"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.BoqActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.BOQCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.MaterialIssueActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllMaterialIssue"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.MaterialItemCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.InventoryManagementActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllInventoryManagement"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.InventoryItemCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.InventoryCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.PurchaseRequisition"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllPurchaseRequisition"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.PurchaseRequisitionItemCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.WbsActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.WebViewWbsGantt"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllExpenses"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.ExpenseManagementCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.InventoryNew"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.MapsActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.ActivityCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.PurchaseReceiptCreateNew"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.QualityControlNew"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AddBoqItems"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.InventoryItemsDisplay"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllChangeOrders"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllBudgetApproval"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllBudgetTransfer"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllBudgetChanges"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.BudgetChangeCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.BudgetApprovalCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.BudgetTransferCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.BudgetChangeAllCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.DailyProgressActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.DailyProgressCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.DailyProgressDetails"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllVendors"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.VendorActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.VendorCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllAddResources"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.ApproveActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.InventoryView"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.PurchaseReceiptItems"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AddItemsActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllSiteDiary"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllBudgetApprovalCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.AllBudgetTransferCreate"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.ChangeOrdersNew"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activities.SelectPurchaseRequisitionItems"
+            android:windowSoftInputMode="adjustPan" />
+        <activity android:name=".Activities.InvoiceNew" />
+        <activity android:name=".Activities.AllItemsActivity" />
+        <activity
+            android:name=".Activities.ApproveRejectActivity"
+            android:label="@string/title_activity_approve_reject"
+            android:theme="@style/MyMaterialTheme" />
+        <activity
+            android:name=".Activities.LockScreen"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_lock_screen" />
+        <activity android:name=".Activities.AllPurchaseReceipts"></activity>
+    </application>
+
+</manifest>

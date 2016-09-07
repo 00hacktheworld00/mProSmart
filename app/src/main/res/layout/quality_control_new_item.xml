@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/_5sdp"
+    android:layout_marginBottom="@dimen/_5sdp">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:focusable="true"
+            android:clickable="true"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:layout_height="wrap_content"
+            android:id="@+id/cardview"
+            app:cardElevation="@dimen/very_small_margin"
+            android:layout_marginTop="@dimen/very_small_margin"
+            android:layout_marginLeft="@dimen/very_small_margin"
+            android:layout_marginRight="@dimen/very_small_margin"
+            android:transitionName="card"
+            tools:ignore="UnusedAttribute">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="@dimen/activity_vertical_margin"
+                    android:paddingTop="@dimen/activity_vertical_margin"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:layout_marginLeft="@dimen/small_margin">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center">
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="@dimen/activity_vertical_margin"
+                            android:orientation="horizontal"
+                            android:weightSum="1">
+
+
+                            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:textSize="@dimen/_12sdp"
+                                android:layout_weight="0.4"
+                                android:text="Item ID : "
+                                />
+
+                            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:textSize="@dimen/_12sdp"
+                                android:layout_weight="0.6"
+                                android:text="I00154"
+                                android:id="@+id/item_id" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="@dimen/activity_vertical_margin"
+                            android:orientation="horizontal"
+                            android:weightSum="1"
+                            android:layout_marginTop="@dimen/very_small_margin">
+
+
+                            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:textSize="@dimen/_12sdp"
+                                android:layout_weight="0.4"
+                                android:text="PO Quantity : "
+                                />
+
+                            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:textSize="@dimen/_12sdp"
+                                android:layout_weight="0.6"
+                                android:text="100"
+                                android:id="@+id/po_quantity" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/very_small_margin"
+                            android:orientation="horizontal"
+                            android:weightSum="1"
+                            android:layout_marginLeft="@dimen/activity_vertical_margin">
+
+                            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="0.4"
+                                android:textSize="@dimen/_12sdp"
+                                android:text="Unit Cost : " />
+
+                            <RelativeLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0.6">
+
+
+                                <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="@dimen/_12sdp"
+                                    android:layout_weight="0.6"
+                                    android:text="0"
+                                    android:id="@+id/unit_cost" />
+
+                            </RelativeLayout>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/very_small_margin"
+                            android:orientation="horizontal"
+                            android:weightSum="1"
+                            android:layout_marginLeft="@dimen/activity_vertical_margin">
+
+                            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="0.4"
+                                android:textSize="@dimen/_12sdp"
+                                android:text="Quantity Received : " />
+
+                            <RelativeLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0.6">
+
+
+                                <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="@dimen/_12sdp"
+                                    android:layout_weight="0.6"
+                                    android:text="0"
+                                    android:id="@+id/new_quantity" />
+
+                            </RelativeLayout>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/very_small_margin"
+                            android:orientation="horizontal"
+                            android:weightSum="1"
+                            android:layout_marginLeft="@dimen/activity_vertical_margin">
+
+                            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="0.4"
+                                android:textSize="@dimen/_12sdp"
+                                android:text="Rejected : " />
+
+                            <RelativeLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0.6">
+
+
+                                <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="0"
+                                    android:maxLines="1"
+                                    android:imeOptions="actionDone"
+                                    android:textColorHint="#ffffff"
+                                    android:textSize="@dimen/_12sdp"
+                                    android:layout_gravity="right"
+                                    android:id="@+id/text_rejected" />
+
+                            </RelativeLayout>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/very_small_margin"
+                            android:orientation="horizontal"
+                            android:weightSum="1"
+                            android:layout_marginLeft="@dimen/activity_vertical_margin">
+
+                            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="0.4"
+                                android:textSize="@dimen/_12sdp"
+                                android:text="Accepted : " />
+
+                            <RelativeLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0.6">
+
+
+
+                                <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="0"
+                                    android:maxLines="1"
+                                    android:imeOptions="actionDone"
+                                    android:textColorHint="#ffffff"
+                                    android:textSize="@dimen/_12sdp"
+                                    android:layout_gravity="right"
+                                    android:id="@+id/text_accepted"
+                                    android:layout_toStartOf="@+id/btn_update_quantity" />
+
+                                <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="UPDATE"
+                                    android:layout_alignParentRight="true"
+                                    android:textColor="@color/colorPrimary"
+                                    android:layout_marginRight="@dimen/very_small_margin"
+                                    android:id="@+id/btn_update_quantity" />
+
+                            </RelativeLayout>
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </LinearLayout>
+
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
+    </LinearLayout>
+</LinearLayout>

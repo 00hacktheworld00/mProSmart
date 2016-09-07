@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/back_five"
+    tools:context=".Activities.FormActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:background="?attr/colorPrimary"
+        android:elevation="6dp"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+
+    <android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/DrawerLayout"
+        android:layout_below="@id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="7dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/activity_vertical_margin"
+            android:gravity="center">
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#99ffffff"
+                android:layout_above="@+id/addBtn">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center">
+
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <RelativeLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:paddingBottom="@dimen/activity_vertical_margin"
+                                android:paddingLeft="@dimen/activity_horizontal_margin"
+                                android:paddingRight="@dimen/activity_horizontal_margin"
+                                android:paddingTop="@dimen/activity_vertical_margin">
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical"
+                                    android:id="@+id/main_layout">
+
+                                    <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:textSize="25sp"
+                                        android:text="Add BOQ Line Items"
+                                        android:textColor="@color/colorPrimary"
+                                        android:layout_marginBottom="@dimen/_10sdp"
+                                        android:gravity="center"
+                                        android:id="@+id/title" />
+
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="vertical"
+                                        android:padding="@dimen/activity_vertical_margin">
+
+
+                                        <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="match_parent"
+                                            android:text="Item ID"
+                                            android:layout_marginBottom="@dimen/_1sdp"
+                                            android:textColor="@color/colorPrimary" />
+
+                                        <Spinner
+                                            android:layout_width="match_parent"
+                                            android:layout_height="@dimen/_35sdp"
+                                            android:padding="10dp"
+                                            android:hint="Item"
+                                            android:textColorHint="#000000"
+                                            android:textColor="#000000"
+                                            android:background="@drawable/edittext_states_red"
+                                            android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                            android:layout_marginRight="@dimen/_5sdp"
+                                            android:textSize="15sp"
+                                            android:id="@+id/spinner_item" />
+
+                                        <LinearLayout
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:orientation="vertical"
+                                            android:id="@+id/hiddenLayout">
+
+
+
+                                            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                                                android:layout_width="wrap_content"
+                                                android:layout_height="match_parent"
+                                                android:text="Item Name"
+                                                android:layout_marginBottom="@dimen/_1sdp"
+                                                android:textColor="@color/colorPrimary" />
+
+                                            <EditText
+                                                android:layout_width="match_parent"
+                                                android:layout_height="wrap_content"
+                                                android:padding="10dp"
+                                                android:hint="Item Name"
+                                                android:maxLines="1"
+                                                android:inputType="textCapSentences"
+                                                android:imeOptions="actionNext"
+                                                android:textColorHint="#000000"
+                                                android:textColor="#000000"
+                                                android:background="@drawable/edittext_states_red"
+                                                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                                android:textSize="15sp"
+                                                android:id="@+id/text_item_name" />
+
+
+                                            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                                                android:layout_width="wrap_content"
+                                                android:layout_height="match_parent"
+                                                android:text="Item Description"
+                                                android:layout_marginBottom="@dimen/_1sdp"
+                                                android:textColor="@color/colorPrimary"
+                                                android:gravity="center" />
+
+                                            <EditText
+                                                android:layout_width="match_parent"
+                                                android:layout_height="wrap_content"
+                                                android:padding="10dp"
+                                                android:hint="Item Description"
+                                                android:maxLines="1"
+                                                android:inputType="textCapSentences"
+                                                android:imeOptions="actionNext"
+                                                android:textColorHint="#000000"
+                                                android:textColor="#000000"
+                                                android:background="@drawable/edittext_states_red"
+                                                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                                android:textSize="15sp"
+                                                android:id="@+id/text_item_desc" />
+                                        </LinearLayout>
+
+                                        <LinearLayout
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:orientation="horizontal"
+                                            android:weightSum="2"
+                                            android:layout_marginBottom="@dimen/activity_vertical_margin">
+
+
+                                            <LinearLayout
+                                                android:layout_width="match_parent"
+                                                android:layout_height="wrap_content"
+                                                android:layout_weight="1"
+                                                android:layout_marginRight="@dimen/_5sdp"
+                                                android:orientation="vertical">
+
+
+                                                <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                                                    android:layout_width="match_parent"
+                                                    android:layout_height="match_parent"
+                                                    android:text="UOM"
+                                                    android:layout_marginBottom="@dimen/_1sdp"
+                                                    android:textColor="@color/colorPrimary" />
+
+                                                <Spinner
+                                                    android:layout_width="match_parent"
+                                                    android:layout_height="@dimen/_33sdp"
+                                                    android:padding="10dp"
+                                                    android:hint="UOM"
+                                                    android:textColorHint="#000000"
+                                                    android:textColor="#000000"
+                                                    android:background="@drawable/edittext_states_red"
+                                                    android:textSize="15sp"
+                                                    android:id="@+id/spinner_uom" />
+                                            </LinearLayout>
+
+
+
+                                            <LinearLayout
+                                                android:layout_width="match_parent"
+                                                android:layout_height="wrap_content"
+                                                android:layout_weight="1"
+                                                android:layout_marginLeft="@dimen/_5sdp"
+                                                android:orientation="vertical">
+
+
+                                                <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                                                    android:layout_width="match_parent"
+                                                    android:layout_height="match_parent"
+                                                    android:text="Currency"
+                                                    android:layout_marginRight="@dimen/_5sdp"
+                                                    android:layout_marginBottom="@dimen/_1sdp"
+                                                    android:textColor="@color/colorPrimary" />
+
+                                                <TextView
+                                                    android:layout_width="match_parent"
+                                                    android:layout_height="wrap_content"
+                                                    android:padding="10dp"
+                                                    android:layout_weight="1"
+                                                    android:textColorHint="#000000"
+                                                    android:textColor="#000000"
+                                                    android:background="@drawable/edittext_states_red"
+                                                    android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                                    android:textSize="15sp"
+                                                    android:id="@+id/text_currency"
+                                                    android:text="" />
+                                                </LinearLayout>
+                                        </LinearLayout>
+
+
+                                        <LinearLayout
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:orientation="horizontal"
+                                            android:weightSum="2">
+
+                                            <LinearLayout
+                                                android:layout_width="match_parent"
+                                                android:layout_height="wrap_content"
+                                                android:layout_weight="1"
+                                                android:layout_marginRight="@dimen/_5sdp"
+                                                android:orientation="vertical">
+
+
+                                                <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                                                    android:layout_width="match_parent"
+                                                    android:layout_height="match_parent"
+                                                    android:text="Quantity"
+                                                    android:layout_marginBottom="@dimen/_1sdp"
+                                                    android:textColor="@color/colorPrimary" />
+
+
+                                                <EditText
+                                                    android:layout_width="match_parent"
+                                                    android:layout_height="wrap_content"
+                                                    android:padding="10dp"
+                                                    android:hint="Quantity"
+                                                    android:maxLines="1"
+                                                    android:inputType="numberDecimal"
+                                                    android:imeOptions="actionNext"
+                                                    android:textColorHint="#000000"
+                                                    android:textColor="#000000"
+                                                    android:background="@drawable/edittext_states_red"
+                                                    android:textSize="15sp"
+                                                    android:id="@+id/text_quantity" />
+                                                </LinearLayout>
+
+
+                                            <LinearLayout
+                                                android:layout_width="match_parent"
+                                                android:layout_height="wrap_content"
+                                                android:layout_weight="1"
+                                                android:layout_marginLeft="@dimen/_5sdp"
+                                                android:layout_marginRight="@dimen/_5sdp"
+                                                android:orientation="vertical">
+
+
+                                                <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                                                    android:layout_width="match_parent"
+                                                    android:layout_height="match_parent"
+                                                    android:text="Unit Cost"
+                                                    android:layout_marginBottom="@dimen/_1sdp"
+                                                    android:textColor="@color/colorPrimary" />
+
+                                                <EditText
+                                                    android:layout_width="match_parent"
+                                                    android:layout_height="wrap_content"
+                                                    android:padding="10dp"
+                                                    android:hint="0"
+                                                    android:layout_weight="1"
+                                                    android:maxLines="1"
+                                                    android:inputType="numberDecimal"
+                                                    android:imeOptions="actionDone"
+                                                    android:textColorHint="#000000"
+                                                    android:textColor="#000000"
+                                                    android:background="@drawable/edittext_states_red"
+                                                    android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                                    android:textSize="15sp"
+                                                    android:id="@+id/text_unit_cost" />
+                                                </LinearLayout>
+                                        </LinearLayout>
+
+                                        <LinearLayout
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:orientation="horizontal"
+                                            android:layout_marginBottom="@dimen/activity_vertical_margin">
+
+
+                                            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                                                android:layout_width="wrap_content"
+                                                android:layout_height="match_parent"
+                                                android:text="Total Amount"
+                                                android:layout_marginRight="@dimen/activity_vertical_margin"
+                                                android:textColor="@color/colorPrimary"
+                                                android:gravity="center"
+                                                android:textSize="@dimen/_13sdp" />
+
+                                            <TextView
+                                                android:layout_width="match_parent"
+                                                android:layout_height="wrap_content"
+                                                android:padding="10dp"
+                                                android:hint="0"
+                                                android:textColorHint="#000000"
+                                                android:textColor="#000000"
+                                                android:background="@drawable/edittext_states_red"
+                                                android:textSize="15sp"
+                                                android:id="@+id/text_total_amount"
+                                                android:gravity="center" />
+                                        </LinearLayout>
+
+                                    </LinearLayout>
+
+                                </LinearLayout>
+                            </RelativeLayout>
+                        </RelativeLayout>
+                    </RelativeLayout>
+
+                </LinearLayout>
+            </ScrollView>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#ffffff"
+                android:text="ADD"
+                android:padding="@dimen/activity_vertical_margin"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:gravity="center"
+                android:background="@color/colorPrimary"
+                android:layout_alignParentBottom="true"
+                android:id="@+id/addBtn" />
+        </RelativeLayout>
+    </android.support.v4.widget.DrawerLayout>
+</RelativeLayout>

@@ -1,0 +1,220 @@
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:transitionName="card"
+    android:id="@+id/cardview"
+    android:layout_marginTop="@dimen/very_small_margin"
+    android:layout_marginLeft="@dimen/very_small_margin"
+    android:layout_marginRight="@dimen/very_small_margin"
+    android:layout_marginBottom="@dimen/activity_vertical_margin"
+    android:background="@color/white"
+    tools:ignore="UnusedAttribute">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:orientation="horizontal">
+
+
+    <View
+        android:layout_width="5dp"
+        android:layout_height="match_parent"
+        android:background="#fe5a5a"/>
+
+    <LinearLayout
+        android:layout_width="@dimen/logo_back"
+        android:layout_height="@dimen/logo_back"
+        android:layout_margin="@dimen/activity_horizontal_margin">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/company_logo"
+            android:layout_width="@dimen/logo_back"
+            android:layout_height="@dimen/logo_back" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/small_margin"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/layout"
+                    android:layout_marginTop="@dimen/_5sdp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Expense Management No : "
+                        android:textSize="@dimen/heading_main"
+                        android:textColor="@color/fbColor"
+                        android:layout_below="@+id/product_category"
+                        android:layout_alignParentStart="true"
+                        android:gravity="center_vertical"
+                        android:typeface="normal"
+                        android:id="@+id/title" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="1145"
+                        android:textSize="@dimen/heading_main"
+                        android:textColor="@color/fbColor"
+                        android:gravity="center_vertical"
+                        android:typeface="normal"
+                        android:id="@+id/expense_id"
+                        android:layout_alignTop="@+id/title"
+                        android:layout_toEndOf="@+id/title" />
+
+                </RelativeLayout>
+            </LinearLayout>
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:id="@+id/hiddenLayout"
+              android:orientation="vertical">
+              <LinearLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="vertical"
+                  android:layout_marginTop="@dimen/_5sdp">
+
+              </LinearLayout>
+
+              <LinearLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="vertical"
+                  android:gravity="end"
+                  android:weightSum="2">
+
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_weight="1"
+                      android:orientation="horizontal">
+
+                      <TextView
+                          android:layout_width="wrap_content"
+                          android:layout_height="match_parent"
+                          android:text="Date created : "
+                          android:textStyle="bold" />
+
+                      <TextView
+                          android:layout_width="wrap_content"
+                          android:layout_height="match_parent"
+                          android:id="@+id/date" />
+
+                  </LinearLayout>
+
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:orientation="horizontal"
+                      android:layout_weight="1"
+                      android:layout_marginRight="@dimen/small_margin"
+                      android:layout_marginTop="@dimen/_5sdp">
+
+                      <TextView
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:text="Created by : "
+                          android:textStyle="bold" />
+
+                      <TextView
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:id="@+id/created_by" />
+
+                  </LinearLayout>
+              </LinearLayout>
+
+
+              <LinearLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="vertical"
+                  android:gravity="end"
+                  android:weightSum="2">
+
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_weight="1"
+                      android:orientation="horizontal"
+                      android:layout_marginTop="@dimen/_5sdp">
+
+                      <TextView
+                          android:layout_width="wrap_content"
+                          android:layout_height="match_parent"
+                          android:text="Expense Type : "
+                          android:textStyle="bold" />
+
+                      <TextView
+                          android:layout_width="wrap_content"
+                          android:layout_height="match_parent"
+                          android:id="@+id/expense_type" />
+
+                  </LinearLayout>
+
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:orientation="horizontal"
+                      android:layout_weight="1"
+                      android:layout_marginTop="@dimen/_5sdp">
+
+                      <TextView
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:text="Total Expense : "
+                          android:textStyle="bold" />
+
+                      <TextView
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:id="@+id/total_expense" />
+
+                  </LinearLayout>
+              </LinearLayout>
+
+
+              <LinearLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginTop="@dimen/_5sdp"
+                  android:orientation="vertical">
+
+                  <TextView
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="Expense Description :- "
+                      android:textStyle="bold" />
+
+                  <TextView
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="@dimen/very_very_small_margin"
+                      android:id="@+id/expense_desc" />
+
+              </LinearLayout>
+          </LinearLayout>
+
+            </LinearLayout>
+     </LinearLayout>
+    </LinearLayout>
+</android.support.v7.widget.CardView>

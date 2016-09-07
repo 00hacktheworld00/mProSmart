@@ -1,0 +1,147 @@
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/card_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/small_margin"
+    android:background="#C5CAE9"
+    android:foreground="?attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/very_small_margin"
+        android:orientation="vertical" >
+
+        <com.example.sadashivsinha.mprosmart.font.HelveticaMedium
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/text_message"
+            android:textSize="@dimen/_11sdp"
+            android:textColor="@color/baby_blue"
+            android:text="A PROJECT HAS BEEN CREATED" />
+
+
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="@dimen/very_small_margin"
+            android:id="@+id/id_layout"
+            android:weightSum="2">
+
+            <com.example.sadashivsinha.mprosmart.font.HelveticaMedium
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/_9sdp"
+                android:text="ID"
+                android:layout_weight="1"/>
+
+            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/_9sdp"
+                android:text=" : "/>
+
+            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/text_id"
+                android:gravity="right"
+                android:textSize="@dimen/_9sdp"
+                android:text="PO001"
+                android:layout_weight="1"/>
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="@dimen/very_small_margin"
+            android:id="@+id/created_by_layout"
+            android:weightSum="2">
+
+            <com.example.sadashivsinha.mprosmart.font.HelveticaMedium
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/_9sdp"
+                android:text="CREATED BY"
+                android:layout_weight="1"/>
+
+            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/_9sdp"
+                android:text=" : "/>
+
+            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/text_created_by"
+                android:gravity="right"
+                android:textSize="@dimen/_9sdp"
+                android:text="USER001"
+                android:layout_weight="1"/>
+        </LinearLayout>
+
+
+
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="@dimen/very_small_margin"
+            android:id="@+id/created_on_layout"
+            android:weightSum="2">
+
+            <com.example.sadashivsinha.mprosmart.font.HelveticaMedium
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/_9sdp"
+                android:text="CREATED ON"
+                android:layout_weight="1"/>
+
+            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/_9sdp"
+                android:text=" : "/>
+
+            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/text_created_on"
+                android:gravity="right"
+                android:textSize="@dimen/_9sdp"
+                android:text="25-08-2016"
+                android:layout_weight="1"/>
+        </LinearLayout>
+
+
+
+        <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:id="@+id/entityName"
+            android:gravity="right"
+            android:visibility="gone"
+            android:textSize="@dimen/_9sdp"
+            android:layout_weight="1"/>
+
+
+
+        <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:id="@+id/entityTName"
+            android:gravity="right"
+            android:textSize="@dimen/_9sdp"
+            android:visibility="gone"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
+</android.support.v7.widget.CardView>

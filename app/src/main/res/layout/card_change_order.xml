@@ -1,0 +1,302 @@
+<ScrollView android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fancy="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+    <android.support.v7.widget.CardView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/card_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:padding="@dimen/activity_horizontal_margin"
+        android:background="#C5CAE9"
+        app:cardCornerRadius="5dp"
+        android:foreground="?attr/selectableItemBackground">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/activity_horizontal_margin"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/activity_horizontal_margin">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/half_textbox_width"
+                    android:src="@drawable/custom_rect"
+                    android:id="@+id/imageView" />
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/half_textbox_width"
+                    android:padding="@dimen/very_small_margin"
+                    android:hint="Change Description."
+                    android:imeOptions="actionNext"
+                    android:textSize="@dimen/subheading_main"
+                    android:background="@android:color/transparent"
+                    android:gravity="top"
+                    android:id="@+id/edit_sub_title" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/activity_horizontal_margin">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/half_textbox_width"
+                    android:src="@drawable/custom_rect"
+                    android:id="@+id/imageView2" />
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/half_textbox_width"
+                    android:padding="@dimen/very_small_margin"
+                    android:hint="Justification."
+                    android:imeOptions="actionDone"
+                    android:textSize="@dimen/subheading_main"
+                    android:background="@android:color/transparent"
+                    android:gravity="top"
+                    android:id="@+id/edit_sub_type" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/activity_horizontal_margin">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/half_textbox_width"
+                    android:src="@drawable/custom_rect"
+                    android:id="@+id/imageView3" />
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/half_textbox_width"
+                    android:padding="@dimen/very_small_margin"
+                    android:hint="Project Impact."
+                    android:imeOptions="actionDone"
+                    android:textSize="@dimen/subheading_main"
+                    android:background="@android:color/transparent"
+                    android:gravity="top"
+                    android:id="@+id/edit_contract_id" />
+            </RelativeLayout>
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:padding="@dimen/activity_horizontal_margin"
+        android:background="#C5CAE9"
+        app:cardCornerRadius="5dp"
+        android:foreground="?attr/selectableItemBackground">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/activity_horizontal_margin"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/activity_horizontal_margin">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/half_textbox_width"
+                    android:src="@drawable/custom_rect" />
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/half_textbox_width"
+                    android:padding="@dimen/very_small_margin"
+                    android:hint="Budget Impact."
+                    android:imeOptions="actionNext"
+                    android:textSize="@dimen/subheading_main"
+                    android:background="@android:color/transparent"
+                    android:gravity="top" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/activity_horizontal_margin">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/half_textbox_width"
+                    android:src="@drawable/custom_rect" />
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/half_textbox_width"
+                    android:padding="@dimen/very_small_margin"
+                    android:hint="Schedule Impact."
+                    android:imeOptions="actionDone"
+                    android:textSize="@dimen/subheading_main"
+                    android:background="@android:color/transparent"
+                    android:gravity="top" />
+            </RelativeLayout>
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/activity_horizontal_margin"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:background="#C5CAE9"
+            app:cardCornerRadius="5dp"
+            android:foreground="?attr/selectableItemBackground">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/activity_horizontal_margin"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/half_textbox_width"
+                        android:src="@drawable/custom_rect" />
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/half_textbox_width"
+                        android:padding="@dimen/very_small_margin"
+                        android:hint="Documents impacted and updated."
+                        android:imeOptions="actionNext"
+                        android:textSize="@dimen/subheading_main"
+                        android:background="@android:color/transparent"
+                        android:gravity="top" />
+                </RelativeLayout>
+
+                <mehdi.sakout.fancybuttons.FancyButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="right"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:paddingBottom="@dimen/very_very_small_margin"
+                    android:paddingLeft="@dimen/activity_vertical_margin"
+                    android:paddingRight="@dimen/activity_vertical_margin"
+                    android:paddingTop="@dimen/very_very_small_margin"
+                    fancy:fb_borderColor="@color/colorPrimary"
+                    fancy:fb_borderWidth="1dp"
+                    fancy:fb_radius="@dimen/_10sdp"
+                    fancy:fb_defaultColor="@color/white"
+                    fancy:fb_focusColor="@color/fbColor"
+                    fancy:fb_text="Add Attachments"
+                    fancy:fb_textSize="@dimen/subheading_main"
+                    fancy:fb_textColor="@color/text_color"
+                    android:id="@+id/button_attachment"
+                    android:layout_gravity="right" />
+
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/activity_horizontal_margin"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:background="#C5CAE9"
+            app:cardCornerRadius="5dp"
+            android:foreground="?attr/selectableItemBackground">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/activity_horizontal_margin"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/half_textbox_width"
+                        android:src="@drawable/custom_rect" />
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/half_textbox_width"
+                        android:padding="@dimen/very_small_margin"
+                        android:hint="Decision."
+                        android:imeOptions="actionNext"
+                        android:textSize="@dimen/subheading_main"
+                        android:background="@android:color/transparent"
+                        android:gravity="top" />
+                </RelativeLayout>
+
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
+
+   <LinearLayout
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:layout_marginTop="@dimen/activity_horizontal_margin">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="2">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="@dimen/small_margin"
+                    android:background="@color/material_purple_400">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/image_main"
+                        android:text="SAVE"
+                        android:id="@+id/saveBtn"
+                        android:textSize="@dimen/heading_main"
+                        android:textColor="@color/white"
+                        android:gravity="center"
+                        android:typeface="normal"
+                        android:layout_alignParentTop="true"/>
+                </RelativeLayout>
+            </LinearLayout>
+        </RelativeLayout>
+    </LinearLayout>
+    </LinearLayout>
+</ScrollView>
