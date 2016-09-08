@@ -47,7 +47,7 @@ public class MaterialIssueAdapter extends RecyclerView.Adapter<MaterialIssueAdap
                 .inflate(R.layout.card_material_issue, parent, false);
         return new MyViewHolder(itemView);
     }
-
+//nothing
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
         MaterialIssueList items = materialList.get(position);
