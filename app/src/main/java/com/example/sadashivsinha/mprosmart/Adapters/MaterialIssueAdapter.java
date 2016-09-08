@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import com.example.sadashivsinha.mprosmart.ModelLists.MaterialIssueList;
 import com.example.sadashivsinha.mprosmart.R;
+import com.example.sadashivsinha.mprosmart.font.HelveticaBold;
 
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class MaterialIssueAdapter extends RecyclerView.Adapter<MaterialIssueAdap
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
         public TextView text_line_no, text_item_id, text_item_desc, text_quantity_issued, text_uom;
+        public HelveticaBold text_desc_label;
 
         public MyViewHolder(final View view) {
             super(view);
@@ -29,6 +31,8 @@ public class MaterialIssueAdapter extends RecyclerView.Adapter<MaterialIssueAdap
             text_item_desc = (TextView) view.findViewById(R.id.text_item_desc);
             text_quantity_issued = (TextView) view.findViewById(R.id.text_quantity_issued);
             text_uom = (TextView) view.findViewById(R.id.text_uom);
+
+            text_desc_label = (HelveticaBold) view.findViewById(R.id.text_desc_label);
 
         }
     }
@@ -52,6 +56,12 @@ public class MaterialIssueAdapter extends RecyclerView.Adapter<MaterialIssueAdap
         holder.text_item_desc.setText(items.getText_item_desc());
         holder.text_quantity_issued.setText(items.getText_quantity_issued());
         holder.text_uom.setText(items.getText_uom());
+
+        if(items.getText_item_desc().equals(""))
+        {
+            holder.text_item_desc.setVisibility(View.GONE);
+            holder.text_desc_label.setVisibility(View.GONE);
+        }
 
     }
 

@@ -137,8 +137,8 @@ public class MaterialIssueActivity extends AppCompatActivity {
             @Override
             protected Void doInBackground(Void... params) {
 
-                String boqid = pm.getString("itemIdBoq");
-                prepareBoqItems(boqid);
+                String boqId = pm.getString("itemIdBoq");
+                getAllUom(boqId);
                 return null;
             }
 
@@ -159,7 +159,7 @@ public class MaterialIssueActivity extends AppCompatActivity {
         }
     }
 
-    public void prepareBoqItems(final String boqId)
+    public void prepareBoqItems(final String boqId, final String[] uomArray, final String[] uomNameArray)
     {
         Log.d("CURRENT BOQ ID", boqId);
         RequestQueue requestQueue = Volley.newRequestQueue(this);
@@ -199,7 +199,12 @@ public class MaterialIssueActivity extends AppCompatActivity {
 //                                        text_currency = dataObject.getString("currency");
 //                                        text_totalCost = dataObject.getString("totalCost");
 
-                                        qualityItem = new MaterialIssueList(String.valueOf(i+1), id, text_item, text_quantity, text_uom);
+                                        for(int j=0; j<uomArray.length; j++)
+                                        {
+                                            if(text_uom.equals(uomArray[j]));
+                                            text_uom = uomNameArray[j];
+                                        }
+                                        qualityItem = new MaterialIssueList(id, text_item, "", text_quantity, text_uom);
                                         materialList.add(qualityItem);
 
                                         materialIssueAdapter.notifyDataSetChanged();
@@ -221,6 +226,63 @@ public class MaterialIssueActivity extends AppCompatActivity {
                 }
         );
         requestQueue.add(jor);
+    }
+
+    public void getAllUom(final String boqId)
+    {
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+
+        String url = getResources().getString(R.string.server_url) + "/getUom";
+
+        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        try{
+                            String type = response.getString("type");
+
+                            if(type.equals("ERROR"))
+                            {
+                                Toast.makeText(MaterialIssueActivity.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
+                            }
+
+                            String[] uomArray, uomNameArray;
+
+                            if(type.equals("INFO"))
+                            {
+                                dataArray = response.getJSONArray("data");
+                                uomArray = new String[dataArray.length()+1];
+                                uomNameArray = new String[dataArray.length()+1];
+
+                                uomArray[0]="UOM";
+                                uomNameArray[0]="UOM";
+
+                                for(int i=0; i<dataArray.length();i++)
+                                {
+                                    dataObject = dataArray.getJSONObject(i);
+                                    uomArray[i+1] = dataObject.getString("uomCode");
+                                    uomNameArray[i+1] = dataObject.getString("uomName");
+                                }
+
+                                prepareBoqItems(boqId, uomArray, uomNameArray);
+                            }
+
+                        }
+                        catch(JSONException e){
+                            e.printStackTrace();}
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("Volley","Error");
+                    }
+                }
+        );
+
+        requestQueue.add(jor);
+
     }
 
     public void prepareItems()

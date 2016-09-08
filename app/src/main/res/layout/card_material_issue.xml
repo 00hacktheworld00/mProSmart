@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:focusable="true"
     android:clickable="true"
-    android:foreground="?android:attr/selectableItemBackground"
     android:layout_height="wrap_content"
     android:id="@+id/cardview"
     android:layout_marginTop="@dimen/activity_vertical_margin"
@@ -99,7 +98,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Item Description"
-                                android:textColor="@color/colorPrimary"/>
+                                android:textColor="@color/colorPrimary"
+                                android:id="@+id/item_desc_label" />
 
                             <TextView
                                 android:layout_width="match_parent"
