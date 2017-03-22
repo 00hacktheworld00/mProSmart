@@ -47,7 +47,7 @@ public class DailyProgressDetails extends AppCompatActivity {
     String currentProgressDate, currentProjectNo;
     ProgressDialog pDialog;
     public static final String TAG = DailyProgressDetails.class.getSimpleName();
-    String wbs_name, activity, completed, res_worked, percent_completed_today, percent_completed_total;
+    String wbs_name, activity, completed, percent_completed_today, percent_completed_total;
     JSONObject dataObject;
     JSONArray dataArray;
     HelveticaRegular text_no_progress;
@@ -70,6 +70,8 @@ public class DailyProgressDetails extends AppCompatActivity {
 
         url = pm.getString("SERVER_URL") + "/getDailyProgressWbs?projectId=\""+ currentProjectNo
                 +"\"&date=\"" + currentProgressDate + "\"";
+
+        Log.d("DAILY URL", url);
 
         cd = new ConnectionDetector(getApplicationContext());
         isInternetPresent = cd.isConnectingToInternet();
@@ -119,11 +121,11 @@ public class DailyProgressDetails extends AppCompatActivity {
                             wbs_name = dataObject.getString("wbsName");
                             activity = dataObject.getString("activityName");
                             completed = dataObject.getString("status");
-                            res_worked = dataObject.getString("firstName");
+//                            res_worked = dataObject.getString("firstName");
                             percent_completed_today = dataObject.getString("progress");
                             percent_completed_total = dataObject.getString("totalProgress");
 
-                            items = new DailyProgressDetailsList(wbs_name, activity, completed, res_worked,
+                            items = new DailyProgressDetailsList(wbs_name, activity, completed,
                                     percent_completed_today, percent_completed_total);
                             dailyList.add(items);
 
@@ -177,11 +179,11 @@ public class DailyProgressDetails extends AppCompatActivity {
                                    wbs_name = dataObject.getString("wbsName");
                                    activity = dataObject.getString("activityName");
                                    completed = dataObject.getString("status");
-                                   res_worked = dataObject.getString("firstName");
+//                                   res_worked = dataObject.getString("firstName");
                                    percent_completed_today = dataObject.getString("progress");
                                    percent_completed_total = dataObject.getString("totalProgress");
 
-                                   items = new DailyProgressDetailsList(wbs_name, activity, completed, res_worked,
+                                   items = new DailyProgressDetailsList(wbs_name, activity, completed,
                                            percent_completed_today, percent_completed_total);
                                    dailyList.add(items);
 

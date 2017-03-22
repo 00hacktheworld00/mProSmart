@@ -5,15 +5,14 @@ package com.example.sadashivsinha.mprosmart.ModelLists;
  */
 public class DailyProgressDetailsList {
     String wbs_name, activity;
-    String completed, res_worked, percent_completed_today, percent_completed_total;
+    String completed, percent_completed_today, percent_completed_total;
 
-    public DailyProgressDetailsList(String wbs_name, String activity, String completed, String res_worked,
+    public DailyProgressDetailsList(String wbs_name, String activity, String completed,
                                     String percent_completed_today, String percent_completed_total)
     {
         this.wbs_name = wbs_name;
         this.activity = activity;
         this.completed = completed;
-        this.res_worked = res_worked;
         this.percent_completed_today = percent_completed_today;
         this.percent_completed_total = percent_completed_total;
     }
@@ -35,9 +34,5 @@ public class DailyProgressDetailsList {
     }
     public String getCompleted() {
         return completed;
-    }
-
-    public String getRes_worked() {
-        return res_worked;
     }
 }

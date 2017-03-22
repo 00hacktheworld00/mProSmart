@@ -22,7 +22,7 @@ public class DailyProgressDetailsAdapter extends RecyclerView.Adapter<DailyProgr
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         HelveticaBold wbs_name, activity;
-        HelveticaRegular completed, res_worked, percent_completed_today, percent_completed_total;
+        HelveticaRegular completed, percent_completed_today, percent_completed_total;
         ProgressBar progress_bar_total, progress_bar_today;
 
         public MyViewHolder(final View view) {
@@ -31,7 +31,6 @@ public class DailyProgressDetailsAdapter extends RecyclerView.Adapter<DailyProgr
             activity = (HelveticaBold) view.findViewById(R.id.activity);
 
             completed = (HelveticaRegular) view.findViewById(R.id.completed);
-            res_worked = (HelveticaRegular) view.findViewById(R.id.res_worked);
             percent_completed_today = (HelveticaRegular) view.findViewById(R.id.percent_completed_today);
             percent_completed_total = (HelveticaRegular) view.findViewById(R.id.percent_completed_total);
 
@@ -57,7 +56,6 @@ public class DailyProgressDetailsAdapter extends RecyclerView.Adapter<DailyProgr
         holder.wbs_name.setText(String.valueOf(items.getWbs_name()));
         holder.activity.setText(String.valueOf(items.getActivity()));
         holder.completed.setText(String.valueOf(items.getCompleted()));
-        holder.res_worked.setText(String.valueOf(items.getRes_worked()));
         holder.percent_completed_today.setText(String.valueOf(items.getPercent_completed_today()));
         holder.percent_completed_total.setText(String.valueOf(items.getPercent_completed_total()));
 

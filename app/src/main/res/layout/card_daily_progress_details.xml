@@ -138,34 +138,34 @@
                             android:gravity="right" />
                     </LinearLayout>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:weightSum="2"
-                        android:layout_marginLeft="@dimen/activity_vertical_margin"
-                        android:layout_marginTop="@dimen/very_very_small_margin"
-                        android:orientation="horizontal"
-                        android:layout_marginRight="@dimen/activity_vertical_margin">
+                    <!--<LinearLayout-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:weightSum="2"-->
+                        <!--android:layout_marginLeft="@dimen/activity_vertical_margin"-->
+                        <!--android:layout_marginTop="@dimen/very_very_small_margin"-->
+                        <!--android:orientation="horizontal"-->
+                        <!--android:layout_marginRight="@dimen/activity_vertical_margin">-->
 
-                        <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Resource Worked"
-                            android:layout_weight="1" />
+                        <!--<com.example.sadashivsinha.mprosmart.font.HelveticaRegular-->
+                            <!--android:layout_width="match_parent"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:text="Resource Worked"-->
+                            <!--android:layout_weight="1" />-->
 
-                        <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text=" : " />
+                        <!--<com.example.sadashivsinha.mprosmart.font.HelveticaRegular-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:text=" : " />-->
 
-                        <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Sadashiv"
-                            android:layout_weight="1"
-                            android:id="@+id/res_worked"
-                            android:gravity="right" />
-                    </LinearLayout>
+                        <!--<com.example.sadashivsinha.mprosmart.font.HelveticaRegular-->
+                            <!--android:layout_width="match_parent"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:text="Sadashiv"-->
+                            <!--android:layout_weight="1"-->
+                            <!--android:id="@+id/res_worked"-->
+                            <!--android:gravity="right" />-->
+                    <!--</LinearLayout>-->
 
 
 

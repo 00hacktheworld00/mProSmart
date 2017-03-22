@@ -141,10 +141,7 @@ public class PurchaseReceiptCreateNew extends AppCompatActivity {
                         e.printStackTrace();
                     }
 //                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    // TODO Auto-generated catch block
+                } catch (UnsupportedEncodingException | JSONException e) {
                     e.printStackTrace();
                 }
                 if (pDialog != null)
