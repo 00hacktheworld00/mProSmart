@@ -30,13 +30,14 @@ public class MomCreateActivity extends AppCompatActivity {
     EditText text_project_id,text_project_name, text_created_by;
     ProgressDialog pDialog;
     String currentProjectNo, currentProjectName, currentUserId;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mom_create);
 
-        final PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
         currentProjectName = pm.getString("projectName");
         currentUserId = pm.getString("userId");
@@ -103,14 +104,14 @@ public class MomCreateActivity extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(MomCreateActivity.this);
 
-        String url = MomCreateActivity.this.getResources().getString(R.string.server_url) + "/postMom";
+        String url = MomCreateActivity.this.pm.getString("SERVER_URL") + "/postMom";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            Toast.makeText(MomCreateActivity.this, response.getString("msg").toString(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MomCreateActivity.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
                             pDialog.dismiss();
 
                         } catch (JSONException e) {

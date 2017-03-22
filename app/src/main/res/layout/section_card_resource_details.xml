@@ -138,6 +138,32 @@
                 android:id="@+id/spinner_res_type"
                 android:textSize="@dimen/_10sdp" />
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:id="@+id/layout_subcontractor">
+
+                <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Subcontractor"
+                    android:layout_marginLeft="@dimen/very_very_small_margin"
+                    android:textColor="@color/colorPrimary"
+                    android:layout_marginBottom="@dimen/very_small_margin"/>
+
+                <Spinner
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_35sdp"
+                    android:text="Choose Subcontractor"
+                    android:textColorHint="#000000"
+                    android:textColor="#000000"
+                    android:layout_marginBottom="@dimen/activity_vertical_margin"
+                    android:background="@drawable/edittext_states_red"
+                    android:id="@+id/spinner_subcontractor"
+                    android:textSize="@dimen/_10sdp" />
+            </LinearLayout>
+
             <com.example.sadashivsinha.mprosmart.font.HelveticaBold
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -146,20 +172,17 @@
                 android:textColor="@color/colorPrimary"
                 android:layout_marginBottom="@dimen/very_small_margin"/>
 
-            <EditText
+            <com.weiwangcn.betterspinner.library.BetterSpinner
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
                 android:hint="Designation"
-                android:maxLines="1"
-                android:imeOptions="actionNext"
                 android:textColorHint="#000000"
                 android:textColor="#000000"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
                 android:background="@drawable/edittext_states_red"
-                android:id="@+id/text_designation"
-                android:textSize="@dimen/_10sdp"
-                android:inputType="textCapSentences" />
+                android:id="@+id/spinner_designation"
+                android:textSize="@dimen/_10sdp" />
 
             <com.example.sadashivsinha.mprosmart.font.HelveticaBold
                 android:layout_width="match_parent"

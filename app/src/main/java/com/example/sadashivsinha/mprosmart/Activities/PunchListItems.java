@@ -1,9 +1,7 @@
 package com.example.sadashivsinha.mprosmart.Activities;
 
 import android.app.ProgressDialog;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,18 +9,20 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.android.volley.Cache;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.Adapters.MyAdapter;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
+import com.example.sadashivsinha.mprosmart.Utils.AppController;
 import com.example.sadashivsinha.mprosmart.Utils.ConnectionDetector;
 import com.example.sadashivsinha.mprosmart.font.HelveticaRegular;
 
@@ -30,10 +30,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 
 public class PunchListItems extends NewActivity {
 
@@ -45,10 +49,12 @@ public class PunchListItems extends NewActivity {
     ConnectionDetector cd;
     public static final String TAG = PunchListItems.class.getSimpleName();
     Boolean isInternetPresent = false;
-    String current_line_no, current_punch_list_no;
+    String current_line_no, current_punch_list_no, current_punch_list_original_no;
 
-    com.example.sadashivsinha.mprosmart.font.HelveticaRegular text_line_no, text_location, text_item_desc, text_item_type, text_notes, text_responsible, text_priority, text_status,
+    HelveticaRegular text_line_no, text_location, text_item_desc, text_item_type, text_notes, text_responsible, text_priority, text_status,
             text_schedule_complete, text_date, text_architect;
+    String url;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,9 +66,12 @@ public class PunchListItems extends NewActivity {
 
         getSupportActionBar().setTitle("Punch List Item");
 
-        final PreferenceManager pm = new PreferenceManager(PunchListItems.this);
+        pm = new PreferenceManager(PunchListItems.this);
+        current_punch_list_original_no = pm.getString("originalLineNo");
         current_line_no = pm.getString("lineNo");
         current_punch_list_no = pm.getString("punchListNo");
+
+        url = pm.getString("SERVER_URL") + "/getPunchListLines?punchListId=\""+current_punch_list_no+"\"";
 
         text_line_no = (HelveticaRegular) findViewById(R.id.text_line_no);
         text_location = (HelveticaRegular) findViewById(R.id.text_location);
@@ -87,28 +96,90 @@ public class PunchListItems extends NewActivity {
         if (!isInternetPresent) {
             // Internet connection is not present
             // Ask user to connect to Internet
-            Snackbar snackbar = Snackbar.make(main_content,getResources().getString(R.string.no_internet_error), Snackbar.LENGTH_LONG);
-            snackbar.show();
-        }
-        pDialog = new ProgressDialog(PunchListItems.this);
-        pDialog.setMessage("Getting Data ...");
-        pDialog.setIndeterminate(false);
-        pDialog.setCancelable(true);
-        pDialog.show();
+            LinearLayout main_layout = (LinearLayout) findViewById(R.id.main_layout);
+            Crouton.cancelAllCroutons();
+            Crouton.makeText(PunchListItems.this, R.string.no_internet_error, Style.ALERT, main_layout).show();
+
+            pDialog = new ProgressDialog(PunchListItems.this);
+            pDialog.setMessage("Getting cache data");
+            pDialog.show();
+
+            Cache cache = AppController.getInstance().getRequestQueue().getCache();
+            Cache.Entry entry = cache.get(url);
+            if (entry != null) {
+                //Cache data available.
+                try {
+                    String data = new String(entry.data, "UTF-8");
+                    Log.d("CACHE DATA", data);
+                    JSONObject jsonObject = new JSONObject(data);
+                    try {
+                        dataArray = jsonObject.getJSONArray("data");
+
+                        for (int i = 0; i < dataArray.length(); i++) {
+                            dataObject = dataArray.getJSONObject(i);
+                            puncListLinesId = dataObject.getString("puncListLinesId");
+
+                            if (puncListLinesId.equals(current_punch_list_original_no)) {
+                                location = dataObject.getString("location");
+                                description = dataObject.getString("description");
+                                itemType = dataObject.getString("itemType");
+                                notes = dataObject.getString("notes");
+                                responsible = dataObject.getString("responsible");
+                                priority = dataObject.getString("priority");
+                                status = dataObject.getString("status");
+                                scheduleToComplete = dataObject.getString("scheduleToComplete");
+                                dateComplted = dataObject.getString("dateComplted");
+                                architectAccepted = dataObject.getString("architectAccepted");
 
 
-        class MyTask extends AsyncTask<Void, Void, Void>
-        {
-            @Override
-            protected Void doInBackground(Void... params)
+                                Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(dateComplted);
+
+                                String formattedDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+                                text_date.setText(String.valueOf(formattedDate));
+
+
+                                tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(scheduleToComplete);
+
+                                String formattedDate2 = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+                                text_schedule_complete.setText(String.valueOf(formattedDate2));
+
+
+                                text_line_no.setText(current_line_no);
+                                text_location.setText(location);
+                                text_item_desc.setText(description);
+                                text_item_type.setText(itemType);
+                                text_notes.setText(notes);
+                                text_responsible.setText(responsible);
+                                text_priority.setText(priority);
+                                text_status.setText(status);
+                                text_architect.setText(architectAccepted);
+
+                            }
+                        }
+//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    if (pDialog != null)
+                        pDialog.dismiss();
+                }
+                catch ( JSONException | UnsupportedEncodingException | ParseException e) {
+                    e.printStackTrace();
+                }
+                }
+
+            else
             {
-                prepareItems();
-                return null;
+                Toast.makeText(PunchListItems.this, "Offline Data Not available for this Punch List", Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
             }
-
         }
 
-        new MyTask().execute();
+        else
+        {
+            // Cache data not exist.
+            callJsonArrayRequest();
+        }
 
         mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView); // Assigning the RecyclerView Object to the xml View
         mRecyclerView.setHasFixedSize(true);                            // Letting the system know that the list objects are of fixed size
@@ -141,86 +212,81 @@ public class PunchListItems extends NewActivity {
         mDrawerToggle.syncState();               // Finally we set the drawer toggle sync State
     }
 
-    public void prepareItems()
-    {
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getPunchListLines?punchListId=\""+current_punch_list_no+"\"";
+    private void callJsonArrayRequest() {
+        // TODO Auto-generated method stub
 
-        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
+        pDialog = new ProgressDialog(PunchListItems.this);
+        pDialog.setMessage("Getting server data");
+        pDialog.show();
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-
-                        try{
-
-                            String type = response.getString("type");
-
-                            if(type.equals("ERROR"))
+                        try
+                        {
+//                            dataObject = response.getJSONObject(0);
+                            dataArray = response.getJSONArray("data");
+                            for(int i=0; i<dataArray.length();i++)
                             {
-                                Toast.makeText(PunchListItems.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
-                            }
+                                dataObject = dataArray.getJSONObject(i);
 
-                            if(type.equals("INFO"))
-                            {
-                                dataArray = response.getJSONArray("data");
-                                for(int i=0; i<dataArray.length();i++)
-                                {
-                                    dataObject = dataArray.getJSONObject(i);
-                                    puncListLinesId = dataObject.getString("puncListLinesId");
+                                puncListLinesId = dataObject.getString("puncListLinesId");
 
-                                    if(puncListLinesId.equals(current_line_no))
-                                    {
-                                        location = dataObject.getString("location");
-                                        description = dataObject.getString("description");
-                                        itemType = dataObject.getString("itemType");
-                                        notes = dataObject.getString("notes");
-                                        responsible = dataObject.getString("responsible");
-                                        priority = dataObject.getString("priority");
-                                        status = dataObject.getString("status");
-                                        scheduleToComplete = dataObject.getString("scheduleToComplete");
-                                        dateComplted = dataObject.getString("dateComplted");
-                                        architectAccepted = dataObject.getString("architectAccepted");
+                                if(puncListLinesId.equals(current_punch_list_original_no)) {
+                                    location = dataObject.getString("location");
+                                    description = dataObject.getString("description");
+                                    itemType = dataObject.getString("itemType");
+                                    notes = dataObject.getString("notes");
+                                    responsible = dataObject.getString("responsible");
+                                    priority = dataObject.getString("priority");
+                                    status = dataObject.getString("status");
+                                    scheduleToComplete = dataObject.getString("scheduleToComplete");
+                                    dateComplted = dataObject.getString("dateComplted");
+                                    architectAccepted = dataObject.getString("architectAccepted");
 
 
-                                        Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(dateComplted);
+                                    Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(dateComplted);
 
-                                        String formattedDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
-                                        text_date.setText(String.valueOf(formattedDate));
-
-
-                                        tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(scheduleToComplete);
-
-                                        String formattedDate2 = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
-                                        text_schedule_complete.setText(String.valueOf(formattedDate2));
+                                    String formattedDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+                                    text_date.setText(String.valueOf(formattedDate));
 
 
-                                        text_line_no.setText(puncListLinesId);
-                                        text_location.setText(location);
-                                        text_item_desc.setText(description);
-                                        text_item_type.setText(itemType);
-                                        text_notes.setText(notes);
-                                        text_responsible.setText(responsible);
-                                        text_priority.setText(priority);
-                                        text_status.setText(status);
-                                        text_architect.setText(architectAccepted);
-                                    }
+                                    tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(scheduleToComplete);
+
+                                    String formattedDate2 = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+                                    text_schedule_complete.setText(String.valueOf(formattedDate2));
+
+
+                                    text_line_no.setText(current_line_no);
+                                    text_location.setText(location);
+                                    text_item_desc.setText(description);
+                                    text_item_type.setText(itemType);
+                                    text_notes.setText(notes);
+                                    text_responsible.setText(responsible);
+                                    text_priority.setText(priority);
+                                    text_status.setText(status);
+                                    text_architect.setText(architectAccepted);
                                 }
                             }
-                            pDialog.dismiss();
-                        }catch(JSONException e){e.printStackTrace();} catch (ParseException e) {
+                        } catch (JSONException | ParseException e) {
                             e.printStackTrace();
                         }
+//                        setData(response,false);
                     }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("Volley","Error");
-
-                    }
-                }
-        );
-        requestQueue.add(jor);
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        });
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(jsonObjectRequest);
+        if(pDialog!=null)
+            pDialog.dismiss();
     }
 }

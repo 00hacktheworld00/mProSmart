@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -28,12 +29,20 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.sadashivsinha.mprosmart.Activities.WbsActivity;
 import com.example.sadashivsinha.mprosmart.ModelLists.ActivitiesInWbsList;
 import com.example.sadashivsinha.mprosmart.R;
+import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
+import com.example.sadashivsinha.mprosmart.Utils.AppController;
 import com.example.sadashivsinha.mprosmart.Utils.DatePickerFragment;
+import com.example.sadashivsinha.mprosmart.font.HelveticaBold;
+import com.example.sadashivsinha.mprosmart.font.HelveticaMedium;
+import com.example.sadashivsinha.mprosmart.font.HelveticaRegular;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,6 +56,7 @@ import java.util.Locale;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.codetail.animation.SupportAnimator;
 import io.codetail.animation.ViewAnimationUtils;
+import me.drakeet.materialdialog.MaterialDialog;
 
 /**
  * Created by saDashiv sinha on 02-Jul-16.
@@ -54,38 +64,48 @@ import io.codetail.animation.ViewAnimationUtils;
 public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbsAdapter.MyViewHolder> {
 
     private List<ActivitiesInWbsList> activitiesList;
-    TextView textViewDate;
+    TextView textViewDate, textViewDelay;
     Button date_status;
     String whichDate, currentDate;
     int dateCurrentStart, dateCurrentEnd, monthCurrentStart, monthCurrentEnd, yearCurrentStart, yearCurrentEnd;
     Context context;
     String currentActivityId;
     String[] dateArray;
+    PreferenceManager pm;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        private TextView text_activities, text_status, activity_progress, start_date, end_date, activity_id, text_resource, text_boq;
-        private ImageButton success_icon, btn_complete, btn_in_progress, btn_cancel,  edit_btn, btn_yet_to_start, edit_dates_btn;
+        private ImageButton success_icon, btn_complete, btn_cancel,  edit_btn, btn_yet_to_start;
         private CircleImageView dot_color;
-        public LinearLayout hidden_layout, event_layout, progress_layout, hidden_layout_date;
+        public LinearLayout hidden_layout, event_layout, progress_layout;
         EditText text_progress;
-        Button save_btn, close_btn, close_dates_layout, start_date_change, end_date_change;
+        Button save_btn, close_btn, start_date_change, end_date_change;
+
+        private HelveticaBold text_resource, text_original_resource;
+        private HelveticaMedium text_activities, text_status, text_delays;
+        private HelveticaRegular activity_progress, start_date, end_date ,activity_id, text_boq;
 
         public MyViewHolder(final View view) {
             super(view);
-            text_activities = (TextView) view.findViewById(R.id.text_activities);
-            text_status = (TextView) view.findViewById(R.id.text_status);
-            activity_progress = (TextView) view.findViewById(R.id.activity_progress);
-            start_date = (TextView) view.findViewById(R.id.start_date);
-            end_date = (TextView) view.findViewById(R.id.end_date);
-            activity_id = (TextView) view.findViewById(R.id.activity_id);
-            text_resource = (TextView) view.findViewById(R.id.text_resource);
-            text_boq = (TextView) view.findViewById(R.id.text_boq);
+
+            pm = new PreferenceManager(view.getContext());
+
+            text_activities = (HelveticaMedium) view.findViewById(R.id.text_activities);
+            text_status = (HelveticaMedium) view.findViewById(R.id.text_status);
+            activity_progress = (HelveticaRegular) view.findViewById(R.id.activity_progress);
+            start_date = (HelveticaRegular) view.findViewById(R.id.start_date);
+            end_date = (HelveticaRegular) view.findViewById(R.id.end_date);
+            activity_id = (HelveticaRegular) view.findViewById(R.id.activity_id);
+            text_boq = (HelveticaRegular) view.findViewById(R.id.text_boq);
+
+            text_resource = (HelveticaBold) view.findViewById(R.id.text_resource);
+            text_original_resource = (HelveticaBold) view.findViewById(R.id.text_original_resource);
+
+            text_delays = (HelveticaMedium) view.findViewById(R.id.text_delays);
 
             text_progress = (EditText) view.findViewById(R.id.text_progress);
 
             save_btn = (Button) view.findViewById(R.id.save_btn);
             close_btn = (Button) view.findViewById(R.id.close_btn);
-            close_dates_layout = (Button) view.findViewById(R.id.close_dates_layout);
 
             start_date_change = (Button) view.findViewById(R.id.start_date_change);
             end_date_change = (Button) view.findViewById(R.id.end_date_change);
@@ -95,21 +115,13 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
             success_icon = (ImageButton) view.findViewById(R.id.success_icon);
             btn_complete = (ImageButton) view.findViewById(R.id.btn_complete);
             btn_yet_to_start = (ImageButton) view.findViewById(R.id.btn_yet_to_start);
-            btn_in_progress = (ImageButton) view.findViewById(R.id.btn_in_progress);
             btn_cancel = (ImageButton) view.findViewById(R.id.btn_cancel);
             edit_btn = (ImageButton) view.findViewById(R.id.edit_btn);
-            edit_dates_btn = (ImageButton) view.findViewById(R.id.edit_dates_btn);
-
 
             hidden_layout = (LinearLayout) view.findViewById(R.id.hidden_layout);
             event_layout = (LinearLayout) view.findViewById(R.id.event_layout);
 
             progress_layout = (LinearLayout) view.findViewById(R.id.progress_layout);
-            progress_layout.setVisibility(View.INVISIBLE);
-
-            hidden_layout_date = (LinearLayout) view.findViewById(R.id.hidden_layout_date);
-
-            hidden_layout_date.setVisibility(View.GONE);
 
             hidden_layout.setVisibility(View.GONE);
 
@@ -117,14 +129,6 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
                 @Override
                 public void onClick(View v) {
                     circularRevealEffect(hidden_layout);
-                    event_layout.setVisibility(View.GONE);
-                }
-            });
-
-            edit_dates_btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    circularRevealEffect(hidden_layout_date);
                     event_layout.setVisibility(View.GONE);
                 }
             });
@@ -143,16 +147,36 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
 
     @Override
     public void onBindViewHolder(final MyViewHolder holder, int position) {
-        ActivitiesInWbsList items = activitiesList.get(position);
+        final ActivitiesInWbsList items = activitiesList.get(position);
         holder.activity_id.setText(items.getId());
         holder.text_activities.setText(items.getActivityName());
         holder.activity_progress.setText(items.getProgress());
-        holder.text_resource.setText(items.getResourceAllocated());
         holder.text_boq.setText(items.getBoq());
 
-        currentActivityId = holder.activity_id.getText().toString();
+        holder.text_original_resource.setText(items.getResourceAllocated());
 
-        String startDate = null, endDate = null;
+        context = holder.itemView.getContext();
+
+        holder.text_resource.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                final MaterialDialog mMaterialDialog = new MaterialDialog(context);
+
+                mMaterialDialog.setPositiveButton("DISMISS", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mMaterialDialog.dismiss();
+                    }
+                });
+                mMaterialDialog.setMessage(holder.text_original_resource.getText().toString());
+
+
+                mMaterialDialog.show();
+            }
+        });
+
+        String startDate = null, endDate = null, newEndDate = null;
 
         Date tradeDate = null;
         try
@@ -162,6 +186,21 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
 
             tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(items.getEndDate());
             endDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+
+            if(!items.getNewEndDate().equals("0000-00-00"))
+            {
+                tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(items.getNewEndDate());
+                newEndDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+
+                holder.text_delays.setText("Ended On : " + String.valueOf(newEndDate));
+                holder.text_delays.setTextColor(holder.itemView.getResources().getColor(R.color.fancy_red));
+            }
+            else
+            {
+                holder.text_delays.setText("No Delay");
+                holder.text_delays.setTextColor(holder.itemView.getResources().getColor(R.color.material_grey_500));
+            }
+
         } catch (ParseException e)
 
         {
@@ -169,10 +208,23 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
         }
 
 
+        holder.text_delays.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(!holder.text_delays.getText().toString().equals("No Delay"))
+                {
+                    ProgressDialog pDialog = new ProgressDialog(context);
+                    pDialog.setMessage("Getting server data");
+                    pDialog.show();
+
+                    getAllEndDates(holder.itemView.getContext(), holder.activity_id.getText().toString(), pDialog);
+                }
+            }
+        });
+
+
         holder.start_date.setText(startDate);
         holder.end_date.setText(endDate);
-
-
 
         currentDate = holder.start_date.getText().toString();
 
@@ -182,7 +234,6 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
         monthCurrentStart = Integer.parseInt(dateArray[1]);
         yearCurrentStart = Integer.parseInt(dateArray[2]);
 
-
         currentDate = holder.end_date.getText().toString();
 
         dateArray = currentDate.split("-");
@@ -190,11 +241,6 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
         dateCurrentEnd = Integer.parseInt(dateArray[0]);
         monthCurrentEnd = Integer.parseInt(dateArray[1]);
         yearCurrentEnd = Integer.parseInt(dateArray[2]);
-
-
-
-
-
 
         switch (items.getStatus()) {
             case "Yet to start":
@@ -215,6 +261,8 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
                 holder.dot_color.setImageResource(R.color.success_green);
                 holder.success_icon.setBackgroundResource(R.drawable.ic_success);
                 holder.text_status.setText("Completed");
+                holder.progress_layout.setVisibility(View.GONE);
+                holder.edit_btn.setVisibility(View.GONE);
 
                 break;
 
@@ -222,6 +270,9 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
                 holder.dot_color.setImageResource(R.color.fancy_red);
                 holder.success_icon.setBackgroundResource(R.drawable.ic_cancel);
                 holder.text_status.setText("Cancelled");
+                holder.progress_layout.setVisibility(View.GONE);
+
+                holder.edit_btn.setVisibility(View.GONE);
 
                 break;
         }
@@ -246,50 +297,40 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
             }
         });
 
-
-
-        holder.btn_in_progress.setOnClickListener(new View.OnClickListener() {
+        holder.save_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                holder.progress_layout.setVisibility(View.VISIBLE);
+                if(holder.text_progress.getText().toString().isEmpty())
+                {
+                    holder.text_progress.setError("Enter Progress");
+                }
+
+                else if (Integer.parseInt(holder.text_progress.getText().toString())<0 || Integer.parseInt(holder.text_progress.getText().toString())>100)
+                {
+                    holder.text_progress.setError("Value should be between 0 and 100 only");
+                }
+                else if(Integer.parseInt(holder.text_progress.getText().toString())<Integer.parseInt(holder.activity_progress.getText().toString()))
+                {
+                    holder.text_progress.setError("Progress update cannot be less that current progress - " + holder.activity_progress.getText().toString());
+                }
+                else
+                {
+                    setCorrectStatusAndColors(holder, "In-Progress");
+                    String valueWithNoZerosStart = holder.text_progress.getText().toString().replaceFirst("^0+(?!$)", "");
 
 
-                holder.save_btn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if(holder.text_progress.getText().toString().isEmpty())
-                        {
-                            holder.text_progress.setError("Enter Progress");
-                        }
+                    pDialog.setMessage("Updating Status ...");
+                    pDialog.setIndeterminate(false);
+                    pDialog.setCancelable(true);
+                    pDialog.show();
 
-                        else if (Integer.parseInt(holder.text_progress.getText().toString())<0 || Integer.parseInt(holder.text_progress.getText().toString())>100)
-                        {
-                            holder.text_progress.setError("Value should be between 0 and 100 only");
-                        }
-                        else if(Integer.parseInt(holder.text_progress.getText().toString())<Integer.parseInt(holder.activity_progress.getText().toString()))
-                        {
-                            holder.text_progress.setError("Progress update cannot be less that current progress - " + holder.activity_progress.getText().toString());
-                        }
-                        else
-                        {
-                            setCorrectStatusAndColors(holder, "In-Progress");
-                            String valueWithNoZerosStart = holder.text_progress.getText().toString().replaceFirst("^0+(?!$)", "");
+                    String status = "2";
 
-
-                            pDialog.setMessage("Updating Status ...");
-                            pDialog.setIndeterminate(false);
-                            pDialog.setCancelable(true);
-                            pDialog.show();
-
-                            String status = "2";
-
-                            updateProgressAndStatus(holder.itemView, pDialog, holder.activity_progress, holder.itemView.getContext(), holder.activity_id.getText().toString(),
-                                    valueWithNoZerosStart, status,
-                                    holder.progress_layout, holder.hidden_layout, holder.event_layout, holder.text_progress ,
-                                    holder, "In-Progress");
-                        }
-                    }
-                });
+                    updateProgressAndStatus(holder.itemView, pDialog, holder.activity_progress, holder.itemView.getContext(), holder.activity_id.getText().toString(),
+                            valueWithNoZerosStart, status,
+                            holder.progress_layout, holder.hidden_layout, holder.event_layout, holder.text_progress ,
+                            holder, "In-Progress");
+                }
             }
         });
 
@@ -329,10 +370,9 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
                         "0",status,
                         holder.progress_layout, holder.hidden_layout, holder.event_layout, holder.text_progress ,
                         holder, "Cancelled");
+
             }
         });
-
-
 
         holder.close_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -343,24 +383,17 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
             }
         });
 
-        holder.close_dates_layout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                holder.hidden_layout_date.setVisibility(View.GONE);
-                holder.event_layout.setVisibility(View.VISIBLE);
-                holder.start_date_change.setText("CHANGE START DATE");
-                holder.end_date_change.setText("CHANGE END DATE");
-            }
-        });
-
         holder.start_date_change.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                currentActivityId = holder.activity_id.getText().toString();
 
                 switch (holder.text_status.getText().toString()) {
                     case "Yet to start":
 
                         textViewDate = holder.start_date;
+                        textViewDelay = holder.text_delays;
                         date_status = holder.start_date_change;
                         whichDate = "start";
 
@@ -402,10 +435,13 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
             @Override
             public void onClick(View v) {
 
+                currentActivityId = holder.activity_id.getText().toString();
+
                 switch (holder.text_status.getText().toString()) {
                     case "Yet to start":
 
                         textViewDate = holder.end_date;
+                        textViewDelay = holder.text_delays;
                         date_status = holder.end_date_change;
                         whichDate = "end";
 
@@ -416,6 +452,14 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
                         dateCurrentEnd = Integer.parseInt(dateArray[0]);
                         monthCurrentEnd = Integer.parseInt(dateArray[1]);
                         yearCurrentEnd = Integer.parseInt(dateArray[2]);
+
+                        currentDate = holder.start_date.getText().toString();
+
+                        dateArray = currentDate.split("-");
+
+                        dateCurrentStart = Integer.parseInt(dateArray[0]);
+                        monthCurrentStart = Integer.parseInt(dateArray[1]);
+                        yearCurrentStart = Integer.parseInt(dateArray[2]);
 
                         context = holder.itemView.getContext();
                         showDatePicker(context);
@@ -425,6 +469,7 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
                     case "In-Progress":
 
                         textViewDate = holder.end_date;
+                        textViewDelay = holder.text_delays;
                         date_status = holder.end_date_change;
                         whichDate = "end";
 
@@ -435,6 +480,14 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
                         dateCurrentEnd = Integer.parseInt(dateArray[0]);
                         monthCurrentEnd = Integer.parseInt(dateArray[1]);
                         yearCurrentEnd = Integer.parseInt(dateArray[2]);
+
+                        currentDate = holder.start_date.getText().toString();
+
+                        dateArray = currentDate.split("-");
+
+                        dateCurrentStart = Integer.parseInt(dateArray[0]);
+                        monthCurrentStart = Integer.parseInt(dateArray[1]);
+                        yearCurrentStart = Integer.parseInt(dateArray[2]);
 
                         context = holder.itemView.getContext();
                         showDatePicker(context);
@@ -564,11 +617,10 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
         }
     }
 
-    public void updateProgressAndStatus(final View view, final ProgressDialog pDialog, final TextView activity_progress, final Context context, String currentActivityId, final String progress, String status,
+    public void updateProgressAndStatus(final View view, final ProgressDialog pDialog, final TextView activity_progress, final Context context, final String currentActivityId, final String progress, String status,
                                         final LinearLayout progress_layout, final LinearLayout hidden_layout,
                                         final LinearLayout event_layout, final EditText text_progress, final MyViewHolder holder, final String statusString )
     {
-
         InputMethodManager imm = (InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 
@@ -577,8 +629,8 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
 
         try {
 
-            if(statusString.equals("In_Progress"))
-                object.put("progress",text_progress );
+            if(statusString.equals("In-Progress"))
+                object.put("progress",text_progress.getText().toString());
             else
                 object.put("progress",progress);
 
@@ -591,13 +643,21 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
 
         RequestQueue requestQueue = Volley.newRequestQueue(context);
 
-        String url = context.getResources().getString(R.string.server_url) + "/putWbsActivity?id=\""+currentActivityId +"\"";
+        String url = pm.getString("SERVER_URL") + "/putWbsActivity?id=\""+currentActivityId +"\"";
+        Log.d("WBS URL", url);
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.PUT, url, object,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Toast.makeText(context, "Values Saved" , Toast.LENGTH_SHORT).show();
+
+                        Log.d("PROG UP RES", response.toString());
+
+                        float todaysProgress = 0;
+                        if(statusString.equals("In-Progress"))
+                        {
+                            todaysProgress = Float.parseFloat(text_progress.getText().toString()) - Float.parseFloat(holder.activity_progress.getText().toString());
+                        }
 
                         progress_layout.setVisibility(View.INVISIBLE);
                         setCorrectStatusAndColors(holder, statusString);
@@ -606,7 +666,72 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
                         activity_progress.setText(progress);
                         holder.text_progress.setText("");
 
+                        if(statusString.equals("Cancelled"))
+                        {
+                            holder.edit_btn.setVisibility(View.GONE);
+                            holder.progress_layout.setVisibility(View.GONE);
+                        }
+
+                        if(statusString.equals("Completed"))
+                        {
+                            holder.edit_btn.setVisibility(View.GONE);
+                            holder.progress_layout.setVisibility(View.GONE);
+                        }
+
+                        Log.d("RESPONSE ON PROGup", response.toString());
+
+                        if(statusString.equals("In-Progress"))
+                        {
+                            updateForDailyProgress(context, pDialog, currentActivityId, todaysProgress);
+                        }
+                        else {
+                            pDialog.dismiss();
+                            Intent intent = new Intent(context, WbsActivity.class);
+                            context.startActivity(intent);
+                        }
+                        //response success message display
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("Volley", "Error");
                         pDialog.dismiss();
+                    }
+                }
+        );
+        requestQueue.add(jor);
+    }
+
+    public void updateForDailyProgress(final Context context, final ProgressDialog pDialog, final String currentActivityId, float todaysProgress)
+    {
+        JSONObject object = new JSONObject();
+
+        try {
+
+            object.put("wbsActivityId",currentActivityId);
+            object.put("progress",todaysProgress);
+
+            Log.d("OBJECT SENT JSON", object.toString());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        RequestQueue requestQueue = Volley.newRequestQueue(context);
+
+        String url = pm.getString("SERVER_URL") + "/postDailyProgressWbsActivity";
+
+        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Toast.makeText(context, "Values Saved" , Toast.LENGTH_SHORT).show();
+
+                        Log.d("Daily Progress", response.toString());
+                        pDialog.dismiss();
+                        Intent intent = new Intent(context, WbsActivity.class);
+                        context.startActivity(intent);
 
                         //response success message display
                     }
@@ -640,8 +765,6 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
         date.setCallBack(ondate);
 
         date.show(((Activity) context).getFragmentManager(), "Date Picker");
-
-
     }
 
     DatePickerDialog.OnDateSetListener ondate = new DatePickerDialog.OnDateSetListener() {
@@ -670,23 +793,23 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
                     else
                     {
 
-                    final ProgressDialog pDialog = new ProgressDialog(context);
-                    pDialog.setMessage("Getting Data ...");
-                    pDialog.setIndeterminate(false);
-                    pDialog.setCancelable(true);
-                    pDialog.show();
+                        final ProgressDialog pDialog = new ProgressDialog(context);
+                        pDialog.setMessage("Getting Data ...");
+                        pDialog.setIndeterminate(false);
+                        pDialog.setCancelable(true);
+                        pDialog.show();
 
-                    class MyTask extends AsyncTask<Void, Void, Void> {
+                        class MyTask extends AsyncTask<Void, Void, Void> {
 
-                        @Override
-                        protected Void doInBackground(Void... params) {
+                            @Override
+                            protected Void doInBackground(Void... params) {
 
-                            updateStartDate(textViewDate, date_status, newDate, currentActivityId, pDialog);
-                            return null;
+                                updateStartDate(textViewDate, date_status, newDate, currentActivityId , pDialog);
+                                return null;
+                            }
+
                         }
-
-                    }
-                    new MyTask().execute();
+                        new MyTask().execute();
 
                         currentDate = newDate;
 
@@ -722,25 +845,25 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
                     else
                     {
 
-                    final ProgressDialog pDialog = new ProgressDialog(context);
-                    pDialog.setMessage("Getting Data ...");
-                    pDialog.setIndeterminate(false);
-                    pDialog.setCancelable(true);
-                    pDialog.show();
+                        final ProgressDialog pDialog = new ProgressDialog(context);
+                        pDialog.setMessage("Getting Data ...");
+                        pDialog.setIndeterminate(false);
+                        pDialog.setCancelable(true);
+                        pDialog.show();
 
-                    class MyTask extends AsyncTask<Void, Void, Void> {
+                        class MyTask extends AsyncTask<Void, Void, Void> {
 
-                        @Override
-                        protected Void doInBackground(Void... params) {
+                            @Override
+                            protected Void doInBackground(Void... params) {
 
-                            updateEndDate(textViewDate, date_status, newDate, currentActivityId, pDialog);
-                            return null;
+                                updateEndDate(textViewDate, textViewDelay , date_status, newDate, currentActivityId, pDialog);
+                                return null;
+                            }
+
                         }
+                        new MyTask().execute();
 
-                    }
-                    new MyTask().execute();
-
-                    currentDate = newDate;
+                        currentDate = newDate;
 
                         String[] dateArray = currentDate.split("-");
 
@@ -773,15 +896,13 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
 
             Log.d("REQUEST SENT OF JSON :" , object.toString());
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
+        } catch (JSONException | ParseException e) {
             e.printStackTrace();
         }
 
         RequestQueue requestQueue = Volley.newRequestQueue(context);
 
-        String url = context.getResources().getString(R.string.server_url) + "/putWbsStartDate?id="+ currentActivityId;
+        String url = pm.getString("SERVER_URL") + "/putWbsStartDate?id="+ currentActivityId;
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.PUT, url, object,
                 new Response.Listener<JSONObject>() {
@@ -791,9 +912,128 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
 
                             if(response.getString("msg").equals("success"))
                             {
-                                Toast.makeText(context, "Start Date Updated", Toast.LENGTH_SHORT).show();
                                 startDate.setText(updatedDate);
-                                statusDate.setText("New Start Date : "+updatedDate);
+                                statusDate.setText("NEW START DATE : " + updatedDate);
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            pDialog.dismiss();
+                        }
+                        //response success message display
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("Volley", "Error");
+                        pDialog.dismiss();
+                    }
+                }
+        );
+        requestQueue.add(jor);
+    }
+
+
+
+
+
+    public void updateEndDate(final TextView startDate, final TextView textViewDelay, final TextView statusDate, final String updatedDate,
+                              final String currentActivityId, final ProgressDialog pDialog)
+    {
+        JSONObject object = new JSONObject();
+
+        try {
+
+            Date tradeDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).parse(updatedDate);
+            String updatedDateFormatted = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).format(tradeDate);
+
+            object.put("extendedEndDate",updatedDateFormatted);
+
+            Log.d("REQUEST SENT OF JSON :" , object.toString());
+
+        } catch (JSONException | ParseException e) {
+            e.printStackTrace();
+        }
+
+        RequestQueue requestQueue = Volley.newRequestQueue(context);
+
+        String url = pm.getString("SERVER_URL") + "/putWbsEndDate?id="+ currentActivityId;
+
+        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.PUT, url, object,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+
+                            PreferenceManager pm = new PreferenceManager(context);
+
+                            String currentUser = pm.getString("userId");
+                            if(response.getString("msg").equals("success"))
+                            {
+                                Date tradeDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).parse(updatedDate);
+                                String updatedDateFormatted = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).format(tradeDate);
+
+                                updateEndDateChanged(pDialog, updatedDateFormatted, currentActivityId, currentUser);
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            pDialog.dismiss();
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                        //response success message display
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("Volley", "Error");
+                        pDialog.dismiss();
+                    }
+                }
+        );
+        requestQueue.add(jor);
+    }
+
+
+
+
+
+    public void updateEndDateChanged(final ProgressDialog pDialog, final String updatedDateFormatted, String wbsId, String currentUser)
+    {
+        JSONObject object = new JSONObject();
+
+        try {
+
+            object.put("wbsActivityId",wbsId);
+            object.put("extendedDate",updatedDateFormatted);
+            object.put("userId", currentUser);
+
+            Log.d("REQUEST SENT OF JSON :" , object.toString());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        RequestQueue requestQueue = Volley.newRequestQueue(context);
+
+        String url = pm.getString("SERVER_URL") + "/postExtendedDate";
+
+        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+
+                            if(response.getString("msg").equals("success"))
+                            {
+                                Toast.makeText(context, "End Date Updated", Toast.LENGTH_SHORT).show();
+
+                                textViewDelay.setText("Ended On : " + String.valueOf(updatedDateFormatted));
+                                textViewDelay.setTextColor(context.getResources().getColor(R.color.fancy_red));
+
                                 pDialog.dismiss();
                             }
 
@@ -815,59 +1055,76 @@ public class ActivitiesInWbsAdapter extends RecyclerView.Adapter<ActivitiesInWbs
         requestQueue.add(jor);
     }
 
-    public void updateEndDate(final TextView startDate, final TextView statusDate, final String updatedDate, String currentActivityId, final ProgressDialog pDialog)
+    public void getAllEndDates(final Context context, String currentActivityId, final ProgressDialog pDialog)
     {
-        JSONObject object = new JSONObject();
+        final MaterialDialog mMaterialDialog = new MaterialDialog(context);
 
-        try {
+        mMaterialDialog.setPositiveButton("DISMISS", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMaterialDialog.dismiss();
+            }
+        });
 
-            Date tradeDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).parse(updatedDate);
-            String updatedDateFormatted = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).format(tradeDate);
+        String url = pm.getString("SERVER_URL") + "/getWbsExtendedDate?wbsActivityId=\"" + currentActivityId + "\"";
 
-            object.put("endDate",updatedDateFormatted);
-
-            Log.d("REQUEST SENT OF JSON :" , object.toString());
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        RequestQueue requestQueue = Volley.newRequestQueue(context);
-
-        String url = context.getResources().getString(R.string.server_url) + "/putWbsEndDate?id="+ currentActivityId;
-
-        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.PUT, url, object,
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        try {
+                        try
+                        {
 
-                            if(response.getString("msg").equals("success"))
+                            if(response.getString("msg").equals("No data"))
                             {
-                                Toast.makeText(context, "End Date Updated", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, "There is no data for this activity's end date", Toast.LENGTH_SHORT).show();
+                            }
+                            else
+                            {
+//                            dataObject = response.getJSONObject(0);
+                                JSONArray dataArray = response.getJSONArray("data");
 
-                                startDate.setText(updatedDate);
-                                statusDate.setText("New End Date : "+updatedDate);
-                                pDialog.dismiss();
+                                JSONObject dataObject;
+                                String dates = "";
+                                String extendedDate, userName;
+
+                                Date tradeDate;
+                                String dateNew;
+
+                                for(int i=0; i<dataArray.length();i++)
+                                {
+                                    dataObject = dataArray.getJSONObject(i);
+                                    extendedDate =  dataObject.getString("extendedDate");
+                                    userName =  dataObject.getString("userName");
+
+                                    tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(extendedDate);
+                                    dateNew = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+
+                                    dates = dates + String.valueOf(i+1) + ". Delayed to : " + dateNew + " by " + userName + "\n";
+
+                                }
+
+                                mMaterialDialog.setMessage(dates);
+                                mMaterialDialog.show();
                             }
 
-                        } catch (JSONException e) {
-                            e.printStackTrace();
                             pDialog.dismiss();
+
+                        } catch (JSONException | ParseException e) {
+                            e.printStackTrace();
                         }
-                        //response success message display
+//                        setData(response,false);
                     }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("Volley", "Error");
-                        pDialog.dismiss();
-                    }
-                }
-        );
-        requestQueue.add(jor);
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d("", "Error: " + error.getMessage());
+                Toast.makeText(context,
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        });
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(jsonObjectRequest);
     }
 }

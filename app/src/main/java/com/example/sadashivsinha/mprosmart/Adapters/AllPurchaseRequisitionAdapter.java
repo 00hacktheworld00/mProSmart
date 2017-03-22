@@ -152,6 +152,10 @@ public class AllPurchaseRequisitionAdapter extends RecyclerView.Adapter<AllPurch
         {
             holder.convert_po_btn.setVisibility(View.GONE);
         }
+        else
+        {
+            holder.convert_po_btn.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -251,7 +255,7 @@ public class AllPurchaseRequisitionAdapter extends RecyclerView.Adapter<AllPurch
 
         RequestQueue requestQueue = Volley.newRequestQueue(context);
 
-        String url =context.getResources().getString(R.string.server_url) + "/postPurchaseOrder";
+        String url =pm.getString("SERVER_URL")  + "/postPurchaseOrder";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -351,7 +355,7 @@ public class AllPurchaseRequisitionAdapter extends RecyclerView.Adapter<AllPurch
     {
         RequestQueue requestQueue = Volley.newRequestQueue(context);
 
-        String url = context.getResources().getString(R.string.server_url) + "/getVendors";
+        String url = pm.getString("SERVER_URL")  + "/getVendors";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {

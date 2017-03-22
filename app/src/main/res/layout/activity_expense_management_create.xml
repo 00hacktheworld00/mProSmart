@@ -78,92 +78,122 @@
                                         android:gravity="center"
                                         android:id="@+id/title" />
 
-                                    <Spinner
-                                        android:layout_width="match_parent"
-                                        android:layout_height="@dimen/_35sdp"
-                                        android:padding="10dp"
-                                        android:hint="Item Name"
-                                        android:layout_marginBottom="@dimen/activity_vertical_margin"
-                                        android:textColorHint="#000000"
-                                        android:textColor="#000000"
-                                        android:background="@drawable/edittext_states_red"
-                                        android:textSize="15sp"
-                                        android:id="@+id/spinner_item" />
-
-                                    <TextView
+                                    <LinearLayout
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
-                                        android:padding="10dp"
-                                        android:hint="Item Description"
-                                        android:inputType="textCapSentences"
-                                        android:imeOptions="actionNext"
-                                        android:textColorHint="#000000"
-                                        android:textColor="#000000"
-                                        android:background="@drawable/edittext_states_red"
-                                        android:layout_marginBottom="@dimen/activity_vertical_margin"
-                                        android:textSize="15sp"
-                                        android:id="@+id/item_desc"
-                                        android:gravity="top" />
+                                        android:orientation="vertical"
+                                        android:id="@+id/layout_project">
 
-                                    <TextView
+                                        <Spinner
+                                            android:layout_width="match_parent"
+                                            android:layout_height="@dimen/_35sdp"
+                                            android:padding="10dp"
+                                            android:hint="Item Name"
+                                            android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                            android:textColorHint="#000000"
+                                            android:textColor="#000000"
+                                            android:background="@drawable/edittext_states_red"
+                                            android:textSize="15sp"
+                                            android:id="@+id/spinner_item" />
+
+                                        <TextView
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:padding="10dp"
+                                            android:hint="Item Description"
+                                            android:inputType="textCapSentences"
+                                            android:imeOptions="actionNext"
+                                            android:textColorHint="#000000"
+                                            android:textColor="#000000"
+                                            android:background="@drawable/edittext_states_red"
+                                            android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                            android:textSize="15sp"
+                                            android:id="@+id/item_desc"
+                                            android:gravity="top" />
+
+                                        <TextView
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:padding="10dp"
+                                            android:hint="UOM"
+                                            android:textColorHint="#000000"
+                                            android:textColor="#000000"
+                                            android:background="@drawable/edittext_states_red"
+                                            android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                            android:textSize="15sp"
+                                            android:gravity="top"
+                                            android:id="@+id/text_uom" />
+
+                                        <Spinner
+                                            android:layout_width="match_parent"
+                                            android:layout_height="@dimen/_35sdp"
+                                            android:padding="10dp"
+                                            android:hint="Select WBS"
+                                            android:maxLines="1"
+                                            android:inputType="textCapSentences"
+                                            android:imeOptions="actionNext"
+                                            android:textColorHint="#000000"
+                                            android:textColor="#000000"
+                                            android:background="@drawable/edittext_states_red"
+                                            android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                            android:textSize="15sp"
+                                            android:id="@+id/spinner_wbs"
+                                            android:layout_gravity="center_horizontal" />
+
+                                        <Spinner
+                                            android:layout_width="match_parent"
+                                            android:layout_height="@dimen/_35sdp"
+                                            android:padding="10dp"
+                                            android:hint="Select Activity"
+                                            android:maxLines="1"
+                                            android:inputType="textCapSentences"
+                                            android:imeOptions="actionNext"
+                                            android:textColorHint="#000000"
+                                            android:textColor="#000000"
+                                            android:background="@drawable/edittext_states_red"
+                                            android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                            android:textSize="15sp"
+                                            android:id="@+id/spinner_activity"
+                                            />
+
+                                        <EditText
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:padding="10dp"
+                                            android:hint="Quantity"
+                                            android:inputType="number"
+                                            android:imeOptions="actionNext"
+                                            android:textColorHint="#000000"
+                                            android:textColor="#000000"
+                                            android:background="@drawable/edittext_states_red"
+                                            android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                            android:textSize="15sp"
+                                            android:gravity="top"
+                                            android:id="@+id/text_quantity" />
+                                    </LinearLayout>
+
+                                    <RelativeLayout
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
-                                        android:padding="10dp"
-                                        android:hint="UOM"
-                                        android:textColorHint="#000000"
-                                        android:textColor="#000000"
                                         android:background="@drawable/edittext_states_red"
-                                        android:layout_marginBottom="@dimen/activity_vertical_margin"
-                                        android:textSize="15sp"
-                                        android:gravity="top"
-                                        android:id="@+id/text_uom" />
+                                        android:id="@+id/layout_personal"
+                                        android:layout_marginBottom="@dimen/activity_vertical_margin">
 
-                                    <Spinner
-                                        android:layout_width="match_parent"
-                                        android:layout_height="@dimen/_35sdp"
-                                        android:padding="10dp"
-                                        android:hint="Select WBS"
-                                        android:maxLines="1"
-                                        android:inputType="textCapSentences"
-                                        android:imeOptions="actionNext"
-                                        android:textColorHint="#000000"
-                                        android:textColor="#000000"
-                                        android:background="@drawable/edittext_states_red"
-                                        android:layout_marginBottom="@dimen/activity_vertical_margin"
-                                        android:textSize="15sp"
-                                        android:id="@+id/spinner_wbs"
-                                        android:layout_gravity="center_horizontal" />
+                                        <EditText
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:hint="“Expense Description"
+                                            android:imeOptions="actionNext"
+                                            android:textColorHint="#000000"
+                                            android:padding="10dp"
+                                            android:textColor="#000000"
+                                            android:background="@null"
+                                            android:textSize="15sp"
+                                            android:inputType="textCapSentences"
+                                            android:id="@+id/text_expense_type" />
 
-                                    <Spinner
-                                        android:layout_width="match_parent"
-                                        android:layout_height="@dimen/_35sdp"
-                                        android:padding="10dp"
-                                        android:hint="Select Activity"
-                                        android:maxLines="1"
-                                        android:inputType="textCapSentences"
-                                        android:imeOptions="actionNext"
-                                        android:textColorHint="#000000"
-                                        android:textColor="#000000"
-                                        android:background="@drawable/edittext_states_red"
-                                        android:layout_marginBottom="@dimen/activity_vertical_margin"
-                                        android:textSize="15sp"
-                                        android:id="@+id/spinner_activity"
-                                        />
+                                    </RelativeLayout>
 
-                                    <EditText
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:padding="10dp"
-                                        android:hint="Quantity"
-                                        android:inputType="number"
-                                        android:imeOptions="actionNext"
-                                        android:textColorHint="#000000"
-                                        android:textColor="#000000"
-                                        android:background="@drawable/edittext_states_red"
-                                        android:layout_marginBottom="@dimen/activity_vertical_margin"
-                                        android:textSize="15sp"
-                                        android:gravity="top"
-                                        android:id="@+id/text_quantity" />
 
                                     <RelativeLayout
                                         android:layout_width="match_parent"
@@ -198,12 +228,22 @@
                                             android:id="@+id/text_currency" />
                                     </RelativeLayout>
 
-
                                 </LinearLayout>
                             </RelativeLayout>
                         </RelativeLayout>
                     </RelativeLayout>
-
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="end">
+                        <Button
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Add Attachment"
+                            android:id="@+id/attachBtn"
+                            android:backgroundTint="@color/colorPrimary"
+                            style="@style/Widget.AppCompat.Button.Colored"/>
+                    </LinearLayout>
                 </LinearLayout>
             </ScrollView>
 

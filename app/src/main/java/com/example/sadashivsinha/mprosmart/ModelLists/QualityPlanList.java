@@ -6,8 +6,11 @@ package com.example.sadashivsinha.mprosmart.ModelLists;
 public class QualityPlanList {
 
     String sl_no, id, process_desc, activity, procedure, accept_criteria, supplier, subcontractor, third_party, customer_client;
+    String no_of_attachments;
 
-    public QualityPlanList(String sl_no, String id, String process_desc, String activity, String procedure, String accept_criteria, String supplier, String subcontractor, String third_party, String customer_client) {
+    public QualityPlanList(String sl_no, String id, String process_desc, String activity, String procedure,
+                           String accept_criteria, String supplier, String subcontractor, String third_party,
+                           String customer_client, String no_of_attachments) {
         this.sl_no = sl_no;
         this.process_desc = process_desc;
         this.activity = activity;
@@ -18,6 +21,11 @@ public class QualityPlanList {
         this.third_party = third_party;
         this.customer_client = customer_client;
         this.id = id;
+        this.no_of_attachments = no_of_attachments;
+    }
+
+    public String getNo_of_attachments() {
+        return no_of_attachments;
     }
 
     public String getId() {

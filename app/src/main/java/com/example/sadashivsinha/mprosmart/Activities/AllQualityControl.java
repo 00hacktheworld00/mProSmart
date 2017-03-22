@@ -25,7 +25,6 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
-
 import com.android.volley.Cache;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -60,7 +59,6 @@ public class AllQualityControl extends NewActivity implements View.OnClickListen
     private List<MomList> momList = new ArrayList<>();
     private RecyclerView recyclerView;
     private AllQualityAdapter allQualityAdapter;
-    String flag = "false";
     MomList items;
     JSONArray dataArray;
     JSONObject dataObject;
@@ -99,9 +97,9 @@ public class AllQualityControl extends NewActivity implements View.OnClickListen
         allQualityAdapter = new AllQualityAdapter(momList);
         recyclerView.setAdapter(allQualityAdapter);
 
-        url = getResources().getString(R.string.server_url) + "/getAllQualityControls?projectId='"+currentProjectNo+"'";
+        url = pm.getString("SERVER_URL") + "/getAllQualityControls?projectId='"+currentProjectNo+"'";
 
-        po_url = getResources().getString(R.string.server_url) + "/getPurchaseOrders?projectId='"+currentProjectNo+"'";
+        po_url = pm.getString("SERVER_URL") + "/getPurchaseOrders?projectId='"+currentProjectNo+"'";
 
         cd = new ConnectionDetector(getApplicationContext());
         isInternetPresent = cd.isConnectingToInternet();
@@ -144,14 +142,36 @@ public class AllQualityControl extends NewActivity implements View.OnClickListen
                             allQualityAdapter.notifyDataSetChanged();
                             pDialog.dismiss();
                         }
+
+                        Boolean createQirPending = pm.getBoolean("createQirPending");
+
+                        if(createQirPending)
+                        {
+
+                            String jsonObjectVal = pm.getString("objectQIR");
+                            Log.d("JSON QIR PENDING :", jsonObjectVal);
+
+                            JSONObject jsonObjectPending = new JSONObject(jsonObjectVal);
+                            Log.d("JSONObj QIR PENDING :", jsonObjectPending.toString());
+
+                            vendorId = jsonObjectPending.getString("vendorId");
+                            receiptNo = jsonObjectPending.getString("receiptNo");
+                            projectId = jsonObjectPending.getString("projectId");
+                            createdBy = jsonObjectPending.getString("createdBy");
+                            purchaseOrderNo = jsonObjectPending.getString("purchaseOrderNo");
+
+                            items = new MomList(String.valueOf(dataArray.length()), getResources().getString(R.string.waiting_to_connect)
+                                    , vendorId, receiptNo, projectId, createdBy, purchaseOrderNo, 0);
+                            momList.add(items);
+
+                            allQualityAdapter.notifyDataSetChanged();
+                        }
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
 //                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    // TODO Auto-generated catch block
+                } catch (UnsupportedEncodingException | JSONException e) {
                     e.printStackTrace();
                 }
                 if (pDialog != null)
@@ -346,10 +366,7 @@ public class AllQualityControl extends NewActivity implements View.OnClickListen
                                 e.printStackTrace();
                             }
 //                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
-                        } catch (UnsupportedEncodingException e) {
-                            e.printStackTrace();
-                        } catch (JSONException e) {
-                            // TODO Auto-generated catch block
+                        } catch (UnsupportedEncodingException | JSONException e) {
                             e.printStackTrace();
                         }
                         if (pDialog != null)
@@ -381,7 +398,7 @@ public class AllQualityControl extends NewActivity implements View.OnClickListen
                         else
                         {
                             final String currentPo = spinner_po.getSelectedItem().toString();
-                            String receiptUrl = getResources().getString(R.string.server_url) + "/getPurchaseReceipts?projectId=\""+currentProjectNo+"\"";
+                            String receiptUrl = pm.getString("SERVER_URL") + "/getPurchaseReceipts?projectId=\""+currentProjectNo+"\"";
 
                             if (!isInternetPresent)
                             {
@@ -454,10 +471,7 @@ public class AllQualityControl extends NewActivity implements View.OnClickListen
                                             e.printStackTrace();
                                         }
 //                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
-                                    } catch (UnsupportedEncodingException e) {
-                                        e.printStackTrace();
-                                    } catch (JSONException e) {
-                                        // TODO Auto-generated catch block
+                                    } catch (UnsupportedEncodingException | JSONException e) {
                                         e.printStackTrace();
                                     }
                                     if (pDialog != null)
@@ -561,7 +575,7 @@ public class AllQualityControl extends NewActivity implements View.OnClickListen
 
         RequestQueue requestQueue = Volley.newRequestQueue(AllQualityControl.this);
 
-        String url = AllQualityControl.this.getResources().getString(R.string.server_url) + "/postQualityInspection";
+        String url = AllQualityControl.this.pm.getString("SERVER_URL") + "/postQualityInspection";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -574,6 +588,9 @@ public class AllQualityControl extends NewActivity implements View.OnClickListen
                                 Toast.makeText(AllQualityControl.this, successMsg, Toast.LENGTH_SHORT).show();
 
                                 updateReceiptIsSelected(pDialog, response.getString("data"), receiptNo);
+
+                                Intent intent = new Intent(AllQualityControl.this, AllQualityControl.class);
+                                startActivity(intent);
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -614,6 +631,9 @@ public class AllQualityControl extends NewActivity implements View.OnClickListen
                 pm.putString("urlQIR", url);
                 pm.putString("toastMessageQIR", "QIR Created");
                 pm.putBoolean("createQirPending", true);
+
+                Intent intent = new Intent(AllQualityControl.this, AllQualityControl.class);
+                startActivity(intent);
             }
         }
         else
@@ -622,9 +642,6 @@ public class AllQualityControl extends NewActivity implements View.OnClickListen
         }
         if(pDialog!=null)
             pDialog.dismiss();
-
-        Intent intent = new Intent(AllQualityControl.this, AllQualityControl.class);
-        startActivity(intent);
     }
 
     public void updateReceiptIsSelected(final ProgressDialog pDialog, String currentQir, String currentReceiptNo)
@@ -632,7 +649,6 @@ public class AllQualityControl extends NewActivity implements View.OnClickListen
         JSONObject object = new JSONObject();
 
         try {
-            object.put("isSelected","1");
             object.put("qualityInspectionReportId", currentQir);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -640,7 +656,7 @@ public class AllQualityControl extends NewActivity implements View.OnClickListen
 
         RequestQueue requestQueue = Volley.newRequestQueue(AllQualityControl.this);
 
-        String url = AllQualityControl.this.getResources().getString(R.string.server_url) + "/putPurchaseReceiptQirIs?purchaseReceiptId=\""+ currentReceiptNo + "\"";
+        String url = AllQualityControl.this.pm.getString("SERVER_URL") + "/putPurchaseReceiptQirIs?purchaseReceiptId=\""+ currentReceiptNo + "\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.PUT, url, object,
                 new Response.Listener<JSONObject>() {
@@ -889,7 +905,7 @@ public class AllQualityControl extends NewActivity implements View.OnClickListen
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(AllQualityControl.this, ViewPurchaseOrders.class);
+        Intent intent = new Intent(AllQualityControl.this, QualityControlMain.class);
         intent.putExtra("projectNo","1");
         startActivity(intent);
     }

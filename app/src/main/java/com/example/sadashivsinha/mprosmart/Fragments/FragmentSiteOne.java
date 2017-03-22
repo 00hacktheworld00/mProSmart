@@ -1,8 +1,8 @@
 package com.example.sadashivsinha.mprosmart.Fragments;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -13,23 +13,31 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.android.volley.Cache;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.sadashivsinha.mprosmart.Activities.AllSiteDiary;
 import com.example.sadashivsinha.mprosmart.Adapters.SiteAdapter;
 import com.example.sadashivsinha.mprosmart.ModelLists.SiteList;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
+import com.example.sadashivsinha.mprosmart.Utils.AppController;
+import com.example.sadashivsinha.mprosmart.Utils.Communicator;
+import com.example.sadashivsinha.mprosmart.Utils.ConnectionDetector;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,6 +45,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 
 /**
  * Created by saDashiv sinha on 14-Mar-16.
@@ -49,10 +60,14 @@ public class FragmentSiteOne extends Fragment {
     EditText text_notes;
     JSONArray dataArray;
     JSONObject dataObject;
-    String currentUser, currentDate, currentSiteDiary, currentSiteDate;
+    ConnectionDetector cd;
+    PreferenceManager pm;
+    Boolean isInternetPresent = false;
+    String currentUser, currentDate, currentSiteDiary, currentSiteDate, newDate;
     ProgressDialog pDialog, progressDialog;
     SiteList items;
-    String id, description, date, createdBy;
+    String id, description, date, createdBy, url;
+    public static final String TAG = AllSiteDiary.class.getSimpleName();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -65,14 +80,14 @@ public class FragmentSiteOne extends Fragment {
         text_notes = (EditText) view.findViewById(R.id.text_notes);
 
         saveBtn = (Button) view.findViewById(R.id.saveBtn);
-        PreferenceManager pm = new PreferenceManager(view.getContext());
+        pm = new PreferenceManager(view.getContext());
         currentUser = pm.getString("userId");
         currentSiteDiary = pm.getString("currentSiteDiary");
+        currentSiteDate = pm.getString("currentSiteDate");
 
         Calendar c = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
         currentDate = sdf.format(c.getTime());
-
 
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,15 +97,18 @@ public class FragmentSiteOne extends Fragment {
                 {
                     text_notes.setError("Field cannot be empty");
                 }
-
                 else
                 {
                     progressDialog = new ProgressDialog(view.getContext(),R.style.MyTheme);
                     progressDialog.setProgressStyle(android.R.style.Widget_ProgressBar_Small);
-                    progressDialog.setCancelable(false);
+                    progressDialog.setCancelable(true);
                     progressDialog.show();
 
-                    saveItems(view.getContext());
+                    try {
+                        saveItems(view.getContext());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                     recycler_view.setVisibility(View.VISIBLE);
                     text_notes.setText("");
                 }
@@ -104,27 +122,90 @@ public class FragmentSiteOne extends Fragment {
         recycler_view.setHasFixedSize(true);
         recycler_view.setAdapter(siteAdapter);
 
-        pDialog = new ProgressDialog(view.getContext());
-        pDialog.setMessage("Getting Data ...");
-        pDialog.setIndeterminate(false);
-        pDialog.setCancelable(true);
-        pDialog.show();
+        cd = new ConnectionDetector(getContext());
+        isInternetPresent = cd.isConnectingToInternet();
 
-        final Context mContext = view.getContext();
+        url = pm.getString("SERVER_URL") + "/getVisitorsOnSite?siteDairyId='"+currentSiteDiary+"'";
 
-        class MyTask extends AsyncTask<Void, Void, Void>
-        {
+        if (!isInternetPresent) {
+            // Internet connection is not present
+            // Ask user to connect to Internet
+            RelativeLayout main_layout = (RelativeLayout) view.findViewById(R.id.main_layout);
+            Crouton.cancelAllCroutons();
+            Crouton.makeText((Activity) getContext(), R.string.no_internet_error, Style.ALERT, main_layout).show();
 
-            @Override
-            protected Void doInBackground(Void... params)
-            {
-                prepareItems(mContext, pDialog);
-                return null;
+            pDialog = new ProgressDialog(getContext());
+            pDialog.setMessage("Getting cache data");
+            pDialog.show();
+
+            Cache cache = AppController.getInstance().getRequestQueue().getCache();
+            Cache.Entry entry = cache.get(url);
+            if (entry != null) {
+                //Cache data available.
+                try {
+                    String data = new String(entry.data, "UTF-8");
+                    Log.d("CACHE DATA", data);
+                    JSONObject jsonObject = new JSONObject(data);
+                    try {
+                        dataArray = jsonObject.getJSONArray("data");
+                        for(int i=0; i<dataArray.length();i++)
+                        {
+                            dataObject = dataArray.getJSONObject(i);
+                            id = dataObject.getString("id");
+                            description = dataObject.getString("description");
+                            date = dataObject.getString("date");
+                            createdBy = dataObject.getString("createdBy");
+
+                            Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(date);
+                            date = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+
+                            items = new SiteList(description, createdBy, date, String.valueOf(i+1));
+                            siteList.add(items);
+                            siteAdapter.notifyDataSetChanged();
+                            pDialog.dismiss();
+                        }
+
+                        Boolean createVisitorsSiteDiaryPending = pm.getBoolean("createVisitorsSiteDiaryPending");
+
+                        if (createVisitorsSiteDiaryPending) {
+
+                            String jsonObjectVal = pm.getString("objectVisitorsSiteDiary");
+                            Log.d("JSON QIR PENDING :", jsonObjectVal);
+
+                            JSONObject jsonObjectPending = new JSONObject(jsonObjectVal);
+                            Log.d("JSONObj QIR PENDING :", jsonObjectPending.toString());
+
+                            description = dataObject.getString("description");
+                            createdBy = dataObject.getString("createdBy");
+
+                            items = new SiteList(description, createdBy, currentSiteDate, String.valueOf(dataArray.length()+1));
+                            siteList.add(items);
+                            siteAdapter.notifyDataSetChanged();
+                            pDialog.dismiss();
+                        }
+
+                    } catch (JSONException | ParseException e) {
+                        e.printStackTrace();
+                    }
+//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
+                } catch (UnsupportedEncodingException | JSONException e) {
+                    e.printStackTrace();
+                }
+                if (pDialog != null)
+                    pDialog.dismiss();
             }
-
+            else
+            {
+                Toast.makeText(getContext(), "Offline Data Not available for Visitors on Site", Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
         }
 
-        new MyTask().execute();
+        else
+        {
+            // Cache data not exist.
+            callJsonArrayRequest(getContext());
+        }
 
 //        text_title.setText("Visitors on site");
         text_notes.setHint("Add notes for visitors on site.");
@@ -133,8 +214,7 @@ public class FragmentSiteOne extends Fragment {
 
     }
 
-    public void saveItems(final Context context)
-    {
+    public void saveItems(final Context context) throws JSONException {
         JSONObject object = new JSONObject();
 
         try {
@@ -143,22 +223,20 @@ public class FragmentSiteOne extends Fragment {
             object.put("createdBy", currentUser);
 
             Date tradeDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).parse(currentDate);
-            currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).format(tradeDate);
+            newDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).format(tradeDate);
 
-            object.put("date", currentDate);
+            object.put("date", newDate);
 
 
             Log.d("REQUEST SENT OF JSON :" , object.toString());
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
+        } catch (JSONException | ParseException e) {
             e.printStackTrace();
         }
 
         RequestQueue requestQueue = Volley.newRequestQueue(context);
 
-        String url = getResources().getString(R.string.server_url) + "/postVisitorsOnSite";
+        String url = pm.getString("SERVER_URL") + "/postVisitorsOnSite";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -169,24 +247,13 @@ public class FragmentSiteOne extends Fragment {
                             if(response.getString("msg").equals("success"))
                             {
                                 Toast.makeText(context, "Visitors added " , Toast.LENGTH_SHORT).show();
-
-                                class MyTask extends AsyncTask<Void, Void, Void>
-                                {
-                                    @Override
-                                    protected Void doInBackground(Void... params)
-                                    {
-                                        prepareItems(context, progressDialog);
-                                        return null;
-                                    }
-
-                                }
-                                new MyTask().execute();
+                                callJsonArrayRequest(context);
 
                             }
 
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            pDialog.dismiss();
+                            progressDialog.dismiss();
                         }
                         //response success message display
                     }
@@ -195,72 +262,95 @@ public class FragmentSiteOne extends Fragment {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.e("Volley", "Error");
-                        pDialog.dismiss();
+                        progressDialog.dismiss();
                     }
                 }
         );
-        requestQueue.add(jor);
+        if (!isInternetPresent)
+        {
+            progressDialog.dismiss();
+            // Internet connection is not present
+
+            Communicator communicator = new Communicator();
+            Log.d("object", object.toString());
+
+            Boolean createVisitorsSiteDiaryPending = pm.getBoolean("createVisitorsSiteDiaryPending");
+            if(createVisitorsSiteDiaryPending)
+            {
+                Toast.makeText(getContext(), "Already an Visitors creation is in progress. Please try after sometime.", Toast.LENGTH_LONG).show();
+            }
+            else
+            {
+                Toast.makeText(getContext(), "Internet not currently available. Visitors will automatically get created on internet connection.", Toast.LENGTH_SHORT).show();
+
+                pm.putString("objectVisitorsSiteDiary", object.toString());
+                pm.putString("urlVisitorsSiteDiary", url);
+                pm.putString("toastMessageVisitorsSiteDiary", "Visitors Added on Site Diary");
+                pm.putBoolean("createVisitorsSiteDiaryPending", true);
+
+
+                description = object.getString("description");
+                createdBy = object.getString("createdBy");
+
+                items = new SiteList(description, createdBy, currentSiteDate, String.valueOf(dataArray.length()+1));
+                siteList.add(items);
+                siteAdapter.notifyDataSetChanged();
+            }
+        }
+        else
+        {
+            requestQueue.add(jor);
+        }
     }
+    private void callJsonArrayRequest(final Context context) {
+        // TODO Auto-generated method stub
 
-
-    public void prepareItems(final Context context, final ProgressDialog pDialog)
-    {
         siteList.clear();
 
-        RequestQueue requestQueue = Volley.newRequestQueue(context);
-
-        String url = getResources().getString(R.string.server_url) + "/getVisitorsOnSite?siteDairyId='"+currentSiteDiary+"'";
-
-        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-
-                        try{
-
-                            String type = response.getString("type");
-
-                            if(type.equals("ERROR"))
+                        try
+                        {
+//                            dataObject = response.getJSONObject(0);
+                            dataArray = response.getJSONArray("data");
+                            for(int i=0; i<dataArray.length();i++)
                             {
-                                Toast.makeText(context, response.getString("msg"), Toast.LENGTH_SHORT).show();
+                                dataObject = dataArray.getJSONObject(i);
+
+                                id = dataObject.getString("id");
+                                description = dataObject.getString("description");
+                                date = dataObject.getString("date");
+                                createdBy = dataObject.getString("createdBy");
+
+                                Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(date);
+                                date = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+
+                                items = new SiteList(description, createdBy, date, String.valueOf(i+1));
+                                siteList.add(items);
+                                siteAdapter.notifyDataSetChanged();
+
+                                if(progressDialog!=null)
+                                    progressDialog.dismiss();
                             }
-
-                            if(type.equals("INFO"))
-                            {
-                                dataArray = response.getJSONArray("data");
-                                for(int i=0; i<dataArray.length();i++)
-                                {
-                                    dataObject = dataArray.getJSONObject(i);
-
-                                    id = dataObject.getString("id");
-                                    description = dataObject.getString("description");
-                                    date = dataObject.getString("date");
-                                    createdBy = dataObject.getString("createdBy");
-
-                                    Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(date);
-                                    date = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
-
-                                    items = new SiteList(description, createdBy, date, String.valueOf(i+1));
-                                    siteList.add(items);
-                                    siteAdapter.notifyDataSetChanged();
-
-                                    pDialog.dismiss();
-                                }
-                            }
-                            pDialog.dismiss();
-                        }catch(JSONException e){e.printStackTrace();} catch (ParseException e) {
+                        } catch (JSONException | ParseException e) {
                             e.printStackTrace();
                         }
+//                        setData(response,false);
                     }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("Volley","Error");
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                Toast.makeText(context,
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
 
-                    }
-                }
-        );
-        requestQueue.add(jor);
+                if(progressDialog!=null)
+                    progressDialog.dismiss();
+            }
+        });
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(jsonObjectRequest);
     }
 }

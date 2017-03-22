@@ -42,14 +42,14 @@ public class InventoryCreate extends AppCompatActivity implements DatePickerDial
     ProgressDialog pDialog;
     JSONArray dataArray;
     JSONObject dataObject;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_inventory_create);
 
-
-        PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
         currentProjectName = pm.getString("projectName");
         currentUserId = pm.getString("userId");
@@ -199,14 +199,14 @@ public class InventoryCreate extends AppCompatActivity implements DatePickerDial
 
         RequestQueue requestQueue = Volley.newRequestQueue(InventoryCreate.this);
 
-        String url = InventoryCreate.this.getResources().getString(R.string.server_url) + "/postInventoryManagement";
+        String url = InventoryCreate.this.pm.getString("SERVER_URL") + "/postInventoryManagement";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            Toast.makeText(InventoryCreate.this, response.getString("msg").toString(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(InventoryCreate.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
                             pDialog.dismiss();
 
                         } catch (JSONException e) {

@@ -17,6 +17,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -30,6 +31,7 @@ import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.sadashivsinha.mprosmart.Adapters.MomAdapter;
 import com.example.sadashivsinha.mprosmart.Adapters.MyAdapter;
+import com.example.sadashivsinha.mprosmart.ModelLists.AllBoqList;
 import com.example.sadashivsinha.mprosmart.ModelLists.MomList;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
@@ -43,9 +45,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
@@ -67,7 +73,7 @@ public class MomActivity extends NewActivity implements View.OnClickListener  {
     TextView mom_id, project_id, project_name, created_by, date;
     int myYear, myMonth, myDay;
     PreferenceManager pm;
-    String url;
+    String url, searchText;
 
 
     @Override
@@ -76,6 +82,16 @@ public class MomActivity extends NewActivity implements View.OnClickListener  {
         setContentView(R.layout.activity_mom);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        if (getIntent().hasExtra("search")) {
+            if (getIntent().getStringExtra("search").equals("yes")) {
+
+                searchText = getIntent().getStringExtra("searchText");
+
+                getSupportActionBar().setTitle("MOM Item Search Results : " + searchText);
+            }
+        }
+
         pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
         currentmomId = pm.getString("momId");
@@ -95,11 +111,9 @@ public class MomActivity extends NewActivity implements View.OnClickListener  {
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(momAdapter);
 
-        url = getResources().getString(R.string.server_url) + "/getMomLineItems?momId=\""+currentmomId+"\"";
-
+        url = pm.getString("SERVER_URL") + "/getMomLineItems?momId=\""+currentmomId+"\"";
 
         prepareHeader();
-
 
         // check for Internet status
         if (!isInternetPresent) {
@@ -131,20 +145,59 @@ public class MomActivity extends NewActivity implements View.OnClickListener  {
                             dueDate = dataObject.getString("dueDate");
                             numberOfAttachments = dataObject.getString("numberOfAttachments");
 
-                            items = new MomList(lineId,matterDiscussed,responsible,numberOfAttachments,dueDate);
+                            if (getIntent().hasExtra("search"))
+                            {
+                                if (getIntent().getStringExtra("search").equals("yes")) {
+
+                                    if (lineId.toLowerCase().contains(searchText.toLowerCase()) || matterDiscussed.toLowerCase().contains(searchText.toLowerCase())) {
+                                        items = new MomList(String.valueOf(i+1), Integer.parseInt(lineId) ,matterDiscussed,responsible,numberOfAttachments,dueDate);
+                                        momList.add(items);
+
+                                        momAdapter.notifyDataSetChanged();
+                                    }
+                                }
+                            }
+                            else
+                            {items = new MomList(String.valueOf(i+1), Integer.parseInt(lineId) ,matterDiscussed,responsible,numberOfAttachments,dueDate);
+                                momList.add(items);
+
+                                momAdapter.notifyDataSetChanged();
+                            }
+
+
+                            pDialog.dismiss();
+                        }
+
+                        Boolean createMOMPendingLine = pm.getBoolean("createMOMPendingLine");
+
+                        if(createMOMPendingLine)
+                        {
+
+                            String jsonObjectVal = pm.getString("objectMOMLine");
+                            Log.d("JSON MOMLINE PENDING :", jsonObjectVal);
+
+                            JSONObject jsonObjectPending = new JSONObject(jsonObjectVal);
+                            Log.d("JSONObj MOMIT PENDING :", jsonObjectPending.toString());
+
+                            lineId = jsonObjectPending.getString("lineId");
+                            matterDiscussed = jsonObjectPending.getString("matterDiscussed");
+                            responsible = jsonObjectPending.getString("responsible");
+                            dueDate = jsonObjectPending.getString("dueDate");
+                            numberOfAttachments = jsonObjectPending.getString("numberOfAttachments");
+
+                            items = new MomList( getResources().getString(R.string.waiting_to_connect),dataArray.length()+1
+                                    ,matterDiscussed,responsible,numberOfAttachments,dueDate);
                             momList.add(items);
 
                             momAdapter.notifyDataSetChanged();
                             pDialog.dismiss();
                         }
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
 //                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    // TODO Auto-generated catch block
+                } catch (UnsupportedEncodingException | JSONException e) {
                     e.printStackTrace();
                 }
                 if (pDialog != null)
@@ -289,13 +342,26 @@ public class MomActivity extends NewActivity implements View.OnClickListener  {
             case R.id.fab_search:
             {
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setTitle("Search MOM !");
+                alert.setTitle("Search MOM Item by Line No or Matter !");
                 // Set an EditText view to get user input
                 final EditText input = new EditText(this);
+                input.setMaxLines(1);
+                input.setImeOptions(EditorInfo.IME_ACTION_DONE);
                 alert.setView(input);
                 alert.setPositiveButton("Search", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        Toast.makeText(MomActivity.this, "Search for it .", Toast.LENGTH_SHORT).show();
+
+                        if (input.getText().toString().isEmpty()) {
+                            input.setError("Enter Search Field");
+                        } else {
+                            Intent intent = new Intent(MomActivity.this, MomActivity.class);
+                            intent.putExtra("search", "yes");
+                            intent.putExtra("searchText", input.getText().toString());
+
+                            Log.d("SEARCH TEXT", input.getText().toString());
+
+                            startActivity(intent);
+                        }
                     }
                 });
                 alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -334,11 +400,30 @@ public class MomActivity extends NewActivity implements View.OnClickListener  {
                                 dueDate = dataObject.getString("dueDate");
                                 numberOfAttachments = dataObject.getString("numberOfAttachments");
 
-                                items = new MomList(lineId,matterDiscussed,responsible,numberOfAttachments,dueDate);
-                                momList.add(items);
+                                if (getIntent().hasExtra("search"))
+                                {
+                                    if (getIntent().getStringExtra("search").equals("yes")) {
 
-                                momAdapter.notifyDataSetChanged();
-                            }
+                                        if (lineId.toLowerCase().contains(searchText.toLowerCase()) || matterDiscussed.toLowerCase().contains(searchText.toLowerCase())) {
+
+                                            items = new MomList(String.valueOf(i+1),Integer.parseInt(lineId) ,matterDiscussed,responsible,numberOfAttachments,dueDate);
+                                            momList.add(items);
+
+                                            momAdapter.notifyDataSetChanged();
+
+                                        }
+                                    }
+                                }
+                                else
+                                {
+
+                                    items = new MomList(String.valueOf(i+1),Integer.parseInt(lineId) ,matterDiscussed,responsible,numberOfAttachments,dueDate);
+                                    momList.add(items);
+
+                                    momAdapter.notifyDataSetChanged();
+
+                                }
+                                }
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }

@@ -66,6 +66,7 @@ public class QualityControl extends NewActivity implements View.OnClickListener 
     private ProgressDialog pDialog1, pDialog2;
     String currentQirNo,currentProjectNo;
     int totalQuantity, rejectedQuantity, acceptedQuantity;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +74,7 @@ public class QualityControl extends NewActivity implements View.OnClickListener 
         setContentView(R.layout.activity_quality_control);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
 
         qirNo = (TextView) findViewById(R.id.qir_no);
         purchaseOrder = (TextView) findViewById(R.id.purchase_order);
@@ -267,7 +268,7 @@ public class QualityControl extends NewActivity implements View.OnClickListener 
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getQualityInspection?qualityInspectionId="+"'"+currentQirNo+"'";
+        String url = pm.getString("SERVER_URL") + "/getQualityInspection?qualityInspectionId="+"'"+currentQirNo+"'";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -326,7 +327,7 @@ public class QualityControl extends NewActivity implements View.OnClickListener 
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getAllQualityControls?projectId='"+currentProjectNo+"'";
+        String url = pm.getString("SERVER_URL") + "/getAllQualityControls?projectId='"+currentProjectNo+"'";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {

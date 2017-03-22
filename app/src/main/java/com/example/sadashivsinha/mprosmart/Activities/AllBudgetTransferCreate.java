@@ -2,7 +2,6 @@ package com.example.sadashivsinha.mprosmart.Activities;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -14,10 +13,12 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Cache;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -26,13 +27,20 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
+import com.example.sadashivsinha.mprosmart.Utils.AppController;
+import com.example.sadashivsinha.mprosmart.Utils.Communicator;
+import com.example.sadashivsinha.mprosmart.Utils.ConnectionDetector;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 
 public class AllBudgetTransferCreate extends AppCompatActivity {
 
@@ -47,15 +55,20 @@ public class AllBudgetTransferCreate extends AppCompatActivity {
     String currentProjectNo;
     CardView card_to;
     Button createBtn;
+    String wbs_url;
     int totalBudgetFrom, totalBudgetTo, currentBudgetFrom, currentBudgetTo;
     String currentUserId, currentDate, currentWbsFromId, currentWbsToId;
+    Boolean isInternetPresent = false;
+    ConnectionDetector cd;
+    PreferenceManager pm;
+    public static final String TAG = AllBudgetTransferCreate.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_all_budget_transfer_create);
 
-        PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
         currentUserId = pm.getString("userId");
 
@@ -87,23 +100,83 @@ public class AllBudgetTransferCreate extends AppCompatActivity {
 
         spinner_wbs_from.requestFocus();
 
-        pDialog = new ProgressDialog(AllBudgetTransferCreate.this);
-        pDialog.setMessage("Getting WBS...");
-        pDialog.setIndeterminate(false);
-        pDialog.setCancelable(true);
-        pDialog.show();
+        wbs_url = pm.getString("SERVER_URL") + "/getWbs?projectId=\""+currentProjectNo+"\"";
 
-        class MyTask extends AsyncTask<Void, Void, Void>
-        {
-            @Override
-            protected Void doInBackground(Void... params)
+        cd = new ConnectionDetector(getApplicationContext());
+        isInternetPresent = cd.isConnectingToInternet();
+
+        if (!isInternetPresent) {
+            // Internet connection is not present
+            // Ask user to connect to Internet
+            RelativeLayout main_layout = (RelativeLayout) findViewById(R.id.main_content);
+            Crouton.cancelAllCroutons();
+            Crouton.makeText(AllBudgetTransferCreate.this, R.string.no_internet_error, Style.ALERT, main_layout).show();
+
+            pDialog = new ProgressDialog(AllBudgetTransferCreate.this);
+            pDialog.setMessage("Getting cache data");
+            pDialog.show();
+
+            Cache cache = AppController.getInstance().getRequestQueue().getCache();
+            Cache.Entry entry = cache.get(wbs_url);
+            if (entry != null) {
+                //Cache data available.
+                try {
+                    String data = new String(entry.data, "UTF-8");
+                    Log.d("CACHE DATA", data);
+                    JSONObject jsonObject = new JSONObject(data);
+                    try {
+                        dataArray = jsonObject.getJSONArray("data");
+                        wbsNameArray = new String[dataArray.length() + 1];
+                        wbsIdArray = new String[dataArray.length() + 1];
+                        totalBudgetArray = new String[dataArray.length() + 1];
+                        currencyCodeArray = new String[dataArray.length() + 1];
+
+                        wbsNameArray[0]= "Select WBS";
+                        wbsIdArray[0]= "";
+                        totalBudgetArray[0]= "";
+                        currencyCodeArray[0]= "";
+
+                        for(int i=0; i<dataArray.length();i++)
+                        {
+                            dataObject = dataArray.getJSONObject(i);
+                            wbsName = dataObject.getString("wbsName");
+                            wbsId = dataObject.getString("wbsId");
+                            totalBudget = dataObject.getString("totalBudget");
+                            currencyCode = dataObject.getString("currencyCode");
+
+                            wbsNameArray[i+1]=wbsName;
+                            wbsIdArray[i+1]=wbsId;
+                            totalBudgetArray[i+1]=totalBudget;
+                            currencyCodeArray[i+1]=currencyCode;
+                        }
+
+                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(AllBudgetTransferCreate.this,
+                            R.layout.spinner_small_text,wbsNameArray);
+                        spinner_wbs_from.setAdapter(adapter);
+                    pDialog.dismiss();
+
+                    }catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
+                } catch (UnsupportedEncodingException | JSONException e) {
+                    e.printStackTrace();
+                }
+                if (pDialog != null)
+                    pDialog.dismiss();
+            }
+
+            else
             {
-                getAllWbs(spinner_wbs_from);
-                return null;
+                Toast.makeText(AllBudgetTransferCreate.this, "Offline Data Not available for WBS", Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
             }
         }
-
-        new MyTask().execute();
+        else
+        {
+            // Cache data not exist.
+            getAllWbs(spinner_wbs_from);
+        }
 
         createBtn = (Button) findViewById(R.id.createBtn);
 
@@ -125,23 +198,7 @@ public class AllBudgetTransferCreate extends AppCompatActivity {
                 }
                 else
                 {
-                    pDialog = new ProgressDialog(AllBudgetTransferCreate.this);
-                    pDialog.setMessage("Sending Data ...");
-                    pDialog.setIndeterminate(false);
-                    pDialog.setCancelable(true);
-                    pDialog.show();
-
-                    class MyTask extends AsyncTask<Void, Void, Void> {
-
-                        @Override
-                        protected Void doInBackground(Void... params) {
-
-                            saveBudgetTransfer();
-                            return null;
-                        }
-                    }
-
-                    new MyTask().execute();
+                    saveBudgetTransfer();
                 }
             }
         });
@@ -173,7 +230,78 @@ public class AllBudgetTransferCreate extends AppCompatActivity {
                     if(budget_allocated_from.getText()!=null)
                     currentBudgetFrom = Integer.parseInt(budget_allocated_from.getText().toString());
 
-                    getAllWbs(spinner_wbs_to);
+                    if (!isInternetPresent) {
+                        // Internet connection is not present
+                        // Ask user to connect to Internet
+                        RelativeLayout main_layout = (RelativeLayout) findViewById(R.id.main_content);
+                        Crouton.cancelAllCroutons();
+                        Crouton.makeText(AllBudgetTransferCreate.this, R.string.no_internet_error, Style.ALERT, main_layout).show();
+
+                        pDialog = new ProgressDialog(AllBudgetTransferCreate.this);
+                        pDialog.setMessage("Getting cache data");
+                        pDialog.show();
+
+                        Cache cache = AppController.getInstance().getRequestQueue().getCache();
+                        Cache.Entry entry = cache.get(wbs_url);
+                        if (entry != null) {
+                            //Cache data available.
+                            try {
+                                String data = new String(entry.data, "UTF-8");
+                                Log.d("CACHE DATA", data);
+                                JSONObject jsonObject = new JSONObject(data);
+                                try {
+                                    dataArray = jsonObject.getJSONArray("data");
+                                    wbsNameArray = new String[dataArray.length() + 1];
+                                    wbsIdArray = new String[dataArray.length() + 1];
+                                    totalBudgetArray = new String[dataArray.length() + 1];
+                                    currencyCodeArray = new String[dataArray.length() + 1];
+
+                                    wbsNameArray[0]= "Select WBS";
+                                    wbsIdArray[0]= "";
+                                    totalBudgetArray[0]= "";
+                                    currencyCodeArray[0]= "";
+
+                                    for(int i=0; i<dataArray.length();i++)
+                                    {
+                                        dataObject = dataArray.getJSONObject(i);
+                                        wbsName = dataObject.getString("wbsName");
+                                        wbsId = dataObject.getString("wbsId");
+                                        totalBudget = dataObject.getString("totalBudget");
+                                        currencyCode = dataObject.getString("currencyCode");
+
+                                        wbsNameArray[i+1]=wbsName;
+                                        wbsIdArray[i+1]=wbsId;
+                                        totalBudgetArray[i+1]=totalBudget;
+                                        currencyCodeArray[i+1]=currencyCode;
+                                    }
+
+                                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(AllBudgetTransferCreate.this,
+                                            R.layout.spinner_small_text,wbsNameArray);
+                                    spinner_wbs_to.setAdapter(adapter);
+                                    pDialog.dismiss();
+
+                                }catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
+                            } catch (UnsupportedEncodingException | JSONException e) {
+                                e.printStackTrace();
+                            }
+                            if (pDialog != null)
+                                pDialog.dismiss();
+                        }
+
+                        else
+                        {
+                            Toast.makeText(AllBudgetTransferCreate.this, "Offline Data Not available for WBS", Toast.LENGTH_SHORT).show();
+                            pDialog.dismiss();
+                        }
+                    }
+                    else
+                    {
+                        // Cache data not exist.
+                        getAllWbs(spinner_wbs_to);
+                    }
                 }
             }
 
@@ -234,7 +362,6 @@ public class AllBudgetTransferCreate extends AppCompatActivity {
 
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @Override
@@ -262,10 +389,13 @@ public class AllBudgetTransferCreate extends AppCompatActivity {
                 else
                 {
                     transferFromAmount = Float.parseFloat(s.toString());
-                    budgetAllocatedToAmount = Float.parseFloat(budget_allocated_from.getText().toString());
+                    if(!budget_allocated_to.getText().toString().isEmpty())
+                    {
+                        budgetAllocatedToAmount = Float.parseFloat(budget_allocated_to.getText().toString());
 
-                    newToAmount = transferFromAmount + budgetAllocatedToAmount ;
-                    new_budget_to.setText(String.valueOf(newToAmount));
+                        newToAmount = transferFromAmount + budgetAllocatedToAmount ;
+                        new_budget_to.setText(String.valueOf(newToAmount));
+                    }
                 }
             }
         };
@@ -275,7 +405,6 @@ public class AllBudgetTransferCreate extends AppCompatActivity {
 
     public void saveBudgetTransfer()
     {
-
         totalBudgetFrom = currentBudgetFrom - Integer.parseInt(transfer_amount_from.getText().toString());
         totalBudgetTo = currentBudgetTo + Integer.parseInt(transfer_amount_from.getText().toString());
 
@@ -297,7 +426,7 @@ public class AllBudgetTransferCreate extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(AllBudgetTransferCreate.this);
 
-        String url = AllBudgetTransferCreate.this.getResources().getString(R.string.server_url) + "/postBudgetTransfer";
+        String url = AllBudgetTransferCreate.this.pm.getString("SERVER_URL") + "/postBudgetTransfer";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -313,7 +442,8 @@ public class AllBudgetTransferCreate extends AppCompatActivity {
 
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            pDialog.dismiss();
+                            if(pDialog!=null)
+                                pDialog.dismiss();
                         }
                         //response success message display
                     }
@@ -322,11 +452,44 @@ public class AllBudgetTransferCreate extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.e("Volley", "Error");
-                        pDialog.dismiss();
+                        if(pDialog!=null)
+                            pDialog.dismiss();
                     }
                 }
         );
-        requestQueue.add(jor);
+        if (!isInternetPresent)
+        {
+            // Internet connection is not present
+
+            Communicator communicator = new Communicator();
+            Log.d("object", object.toString());
+
+            Boolean createBudgetTransferPending = pm.getBoolean("createBudgetTransferPending");
+
+            if(createBudgetTransferPending)
+            {
+                Toast.makeText(AllBudgetTransferCreate.this, "Already a Budget Transfer creation is in progress. Please try after sometime.", Toast.LENGTH_LONG).show();
+            }
+            else
+            {
+                Toast.makeText(AllBudgetTransferCreate.this, "Internet not currently available. Budget Transfer will automatically get created on internet connection.", Toast.LENGTH_SHORT).show();
+
+                pm.putString("objectBudgetTransfer", object.toString());
+                pm.putString("urlBudgetTransfer", url);
+                pm.putString("toastMessageBudgetTransfer", "Budget Transfer Created");
+                pm.putBoolean("createBudgetTransferPending", true);
+            }
+
+
+            if(pDialog!=null)
+                pDialog.dismiss();
+
+            updateWbsBudgetFrom();
+        }
+        else
+        {
+            requestQueue.add(jor);
+        }
     }
 
     public void updateWbsBudgetFrom()
@@ -344,7 +507,7 @@ public class AllBudgetTransferCreate extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(AllBudgetTransferCreate.this);
 
-        String url = AllBudgetTransferCreate.this.getResources().getString(R.string.server_url) + "/putWbsTotalBudget?wbsId=\"" + currentWbsFromId + "\"";
+        String url = AllBudgetTransferCreate.this.pm.getString("SERVER_URL") + "/putWbsTotalBudget?wbsId=\"" + currentWbsFromId + "\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.PUT, url, object,
                 new Response.Listener<JSONObject>() {
@@ -359,7 +522,8 @@ public class AllBudgetTransferCreate extends AppCompatActivity {
 
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            pDialog.dismiss();
+                            if(pDialog!=null)
+                                pDialog.dismiss();
                         }
                         //response success message display
                     }
@@ -368,11 +532,39 @@ public class AllBudgetTransferCreate extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.e("Volley", "Error");
-                        pDialog.dismiss();
+                        if(pDialog!=null)
+                            pDialog.dismiss();
                     }
                 }
         );
-        requestQueue.add(jor);
+        if (!isInternetPresent)
+        {
+            // Internet connection is not present
+
+            Communicator communicator = new Communicator();
+            Log.d("object", object.toString());
+
+            Boolean updateWbsBudgetFromPending = pm.getBoolean("updateWbsBudgetFromPending");
+
+            if(!updateWbsBudgetFromPending)
+            {
+                pm.putString("objectWbsBudgetFrom", object.toString());
+                pm.putString("urlWbsBudgetFrom", url);
+                pm.putString("toastMessageWbsBudgetFrom", "WBS Budget Updated");
+                pm.putBoolean("updateWbsBudgetFromPending", true);
+            }
+
+
+            if(pDialog!=null)
+                pDialog.dismiss();
+
+            updateWbsBudgetTo();
+        }
+        else
+        {
+            requestQueue.add(jor);
+        }
+
     }
 
     public void updateWbsBudgetTo()
@@ -390,7 +582,7 @@ public class AllBudgetTransferCreate extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(AllBudgetTransferCreate.this);
 
-        String url = AllBudgetTransferCreate.this.getResources().getString(R.string.server_url) + "/putWbsTotalBudget?wbsId=\"" + currentWbsToId + "\"";
+        String url = AllBudgetTransferCreate.this.pm.getString("SERVER_URL") + "/putWbsTotalBudget?wbsId=\"" + currentWbsToId + "\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.PUT, url, object,
                 new Response.Listener<JSONObject>() {
@@ -400,14 +592,16 @@ public class AllBudgetTransferCreate extends AppCompatActivity {
 
                             if(response.getString("msg").equals("success"))
                             {
-                                pDialog.dismiss();
+                                if(pDialog!=null)
+                                    pDialog.dismiss();
                                 Intent intent = new Intent(AllBudgetTransferCreate.this, AllBudgetTransfer.class);
                                 startActivity(intent);
                             }
 
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            pDialog.dismiss();
+                            if(pDialog!=null)
+                                pDialog.dismiss();
                         }
                         //response success message display
                     }
@@ -416,11 +610,41 @@ public class AllBudgetTransferCreate extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.e("Volley", "Error");
-                        pDialog.dismiss();
+                        if(pDialog!=null)
+                            pDialog.dismiss();
                     }
                 }
         );
-        requestQueue.add(jor);
+
+        if (!isInternetPresent)
+        {
+            // Internet connection is not present
+
+            Communicator communicator = new Communicator();
+            Log.d("object", object.toString());
+
+            Boolean updateWbsBudgetToPending = pm.getBoolean("updateWbsBudgetToPending");
+
+            if(!updateWbsBudgetToPending)
+            {
+                pm.putString("objectWbsBudgetTo", object.toString());
+                pm.putString("urlWbsBudgetTo", url);
+                pm.putString("toastMessageWbsBudgetTo", "WBS Budget Updated");
+                pm.putBoolean("updateWbsBudgetToPending", true);
+            }
+
+
+            if(pDialog!=null)
+                pDialog.dismiss();
+
+            Intent intent = new Intent(AllBudgetTransferCreate.this, AllBudgetTransfer.class);
+            startActivity(intent);
+        }
+        else
+        {
+            requestQueue.add(jor);
+        }
+
     }
 
 
@@ -428,9 +652,7 @@ public class AllBudgetTransferCreate extends AppCompatActivity {
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getWbs?projectId=\""+currentProjectNo+"\"";
-
-        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
+        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, wbs_url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -441,7 +663,9 @@ public class AllBudgetTransferCreate extends AppCompatActivity {
                             if(type.equals("ERROR"))
                             {
                                 Toast.makeText(AllBudgetTransferCreate.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
-                                pDialog.dismiss();
+
+                                if(pDialog!=null)
+                                    pDialog.dismiss();
                             }
 
                             if(type.equals("INFO"))
@@ -474,7 +698,8 @@ public class AllBudgetTransferCreate extends AppCompatActivity {
                             ArrayAdapter<String> adapter = new ArrayAdapter<String>(AllBudgetTransferCreate.this,
                                     R.layout.spinner_small_text,wbsNameArray);
                             spinner.setAdapter(adapter);
-                            pDialog.dismiss();
+                            if(pDialog!=null)
+                                pDialog.dismiss();
 
                         }
                         catch(JSONException e){

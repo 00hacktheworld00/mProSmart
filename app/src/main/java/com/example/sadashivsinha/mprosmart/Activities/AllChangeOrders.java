@@ -1,47 +1,87 @@
 package com.example.sadashivsinha.mprosmart.Activities;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Cache;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.Adapters.AllChangeOrdersAdapter;
+import com.example.sadashivsinha.mprosmart.ModelLists.AllBoqList;
 import com.example.sadashivsinha.mprosmart.ModelLists.AllChangeOrdersList;
+import com.example.sadashivsinha.mprosmart.ModelLists.MomList;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
+import com.example.sadashivsinha.mprosmart.Utils.AppController;
+import com.example.sadashivsinha.mprosmart.Utils.ConnectionDetector;
+import com.example.sadashivsinha.mprosmart.Utils.CsvCreateUtility;
 import com.github.clans.fab.FloatingActionButton;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 
 public class AllChangeOrders extends AppCompatActivity implements View.OnClickListener, DatePickerDialog.OnDateSetListener {
 
     private List<AllChangeOrdersList> list = new ArrayList<>();
     private RecyclerView recyclerView;
     private AllChangeOrdersAdapter ordersAdapter;
-    String currentProjectNo, currentProjectName, currentDate, currentUser;
+    String currentProjectNo, currentProjectName, currentDate, currentUser, orderName;
     View dialogView;
     AlertDialog show;
     EditText order_name;
     TextView due_date;
     ProgressDialog pDialog;
 
+    PreferenceManager pm;
+
+    Boolean isInternetPresent = false;
+    ConnectionDetector cd;
+
     AllChangeOrdersList items;
+    String url;
+    JSONArray dataArray;
+    JSONObject dataObject;
+
+    String changeOrdersId, dueDate, createdDate, searchText;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,11 +90,19 @@ public class AllChangeOrders extends AppCompatActivity implements View.OnClickLi
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        if (getIntent().hasExtra("search")) {
+            if (getIntent().getStringExtra("search").equals("yes")) {
+
+                searchText = getIntent().getStringExtra("searchText");
+
+                getSupportActionBar().setTitle("Change Order Search Results : " + searchText);
+            }
+        }
+
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
         currentProjectName = pm.getString("projectName");
         currentUser = pm.getString("userId");
-
 
         Calendar c = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -67,16 +115,91 @@ public class AllChangeOrders extends AppCompatActivity implements View.OnClickLi
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(ordersAdapter);
 
-        class MyTask extends AsyncTask<Void, Void, Void> {
+        cd = new ConnectionDetector(getApplicationContext());
+        isInternetPresent = cd.isConnectingToInternet();
 
-            @Override
-            protected Void doInBackground(Void... params) {
-                prepareItems();
-                return null;
+        url = pm.getString("SERVER_URL") + "/getChangeOrders?projectId=\""+currentProjectNo+"\"";
+
+        if (!isInternetPresent) {
+            // Internet connection is not present
+            // Ask user to connect to Internet
+            RelativeLayout main_layout = (RelativeLayout) findViewById(R.id.main_content);
+            Crouton.cancelAllCroutons();
+            Crouton.makeText(AllChangeOrders.this, R.string.no_internet_error, Style.ALERT, main_layout).show();
+
+            pDialog = new ProgressDialog(AllChangeOrders.this);
+            pDialog.setMessage("Getting cache data");
+            pDialog.show();
+
+            Cache cache = AppController.getInstance().getRequestQueue().getCache();
+            Cache.Entry entry = cache.get(url);
+            if (entry != null) {
+                //Cache data available.
+                try {
+                    String data = new String(entry.data, "UTF-8");
+                    Log.d("CACHE DATA", data);
+                    JSONObject jsonObject = new JSONObject(data);
+                    try {
+                        dataArray = jsonObject.getJSONArray("data");
+
+                        for(int i=0; i<dataArray.length();i++)
+                        {
+                            dataObject = dataArray.getJSONObject(i);
+                            changeOrdersId = dataObject.getString("changeOrdersId");
+                            dueDate = dataObject.getString("dueDate");
+                            createdDate = dataObject.getString("createdDate");
+                            orderName = dataObject.getString("orderName");
+
+                            if (getIntent().hasExtra("search"))
+                            {
+                                if (getIntent().getStringExtra("search").equals("yes")) {
+
+                                    if (changeOrdersId.toLowerCase().contains(searchText.toLowerCase()) || orderName.toLowerCase().contains(searchText.toLowerCase())) {
+
+
+                                        items = new AllChangeOrdersList(String.valueOf(i), changeOrdersId, orderName, currentProjectNo,
+                                                currentProjectName,  createdDate, dueDate);
+
+                                        list.add(items);
+                                        ordersAdapter.notifyDataSetChanged();
+                                    }
+                                }
+                            }
+                            else
+                            {
+
+                                items = new AllChangeOrdersList(String.valueOf(i), changeOrdersId, orderName, currentProjectNo,
+                                        currentProjectName,  createdDate, dueDate);
+
+                                list.add(items);
+                                ordersAdapter.notifyDataSetChanged();
+                            }
+                        }
+
+                        pDialog.dismiss();
+
+                    }catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
+                } catch (UnsupportedEncodingException | JSONException e) {
+                    e.printStackTrace();
+                }
+                if (pDialog != null)
+                    pDialog.dismiss();
             }
 
+            else
+            {
+                Toast.makeText(AllChangeOrders.this, "Offline Data Not available for Changed Orders", Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
         }
-        new MyTask().execute();
+        else
+        {
+            // Cache data not exist.
+            prepareItems();
+        }
 
 
         FloatingActionButton fab_add, fab_search, exportBtn;
@@ -138,22 +261,7 @@ public class AllChangeOrders extends AppCompatActivity implements View.OnClickLi
                         }
                         else
                         {
-//                            pDialog = new ProgressDialog(AllChangeOrders.this);
-//                            pDialog.setMessage("Sending Data ...");
-//                            pDialog.setIndeterminate(false);
-//                            pDialog.setCancelable(true);
-//                            pDialog.show();
-
-                            class MyTask extends AsyncTask<Void, Void, Void> {
-
-                                @Override
-                                protected Void doInBackground(Void... params) {
-                                    saveChangeOrders();
-                                    return null;
-                                }
-                            }
-
-                            new MyTask().execute();
+                            saveChangeOrders();
                         }
                     }
                 });
@@ -162,13 +270,26 @@ public class AllChangeOrders extends AppCompatActivity implements View.OnClickLi
             case R.id.fab_search:
             {
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setTitle("Search Orders !");
+                alert.setTitle("Search Change Orders by Title or ID !");
                 // Set an EditText view to get user input
                 final EditText input = new EditText(this);
+                input.setMaxLines(1);
+                input.setImeOptions(EditorInfo.IME_ACTION_DONE);
                 alert.setView(input);
                 alert.setPositiveButton("Search", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        Toast.makeText(AllChangeOrders.this, "Search for it .", Toast.LENGTH_SHORT).show();
+
+                        if (input.getText().toString().isEmpty()) {
+                            input.setError("Enter Search Field");
+                        } else {
+                            Intent intent = new Intent(AllChangeOrders.this, AllChangeOrders.class);
+                            intent.putExtra("search", "yes");
+                            intent.putExtra("searchText", input.getText().toString());
+
+                            Log.d("SEARCH TEXT", input.getText().toString());
+
+                            startActivity(intent);
+                        }
                     }
                 });
                 alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -181,7 +302,59 @@ public class AllChangeOrders extends AppCompatActivity implements View.OnClickLi
             break;
             case R.id.exportBtn:
             {
-                // to do export
+                //csv export
+                int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+                if (currentapiVersion > android.os.Build.VERSION_CODES.LOLLIPOP) {
+                    if (ContextCompat.checkSelfPermission(AllChangeOrders.this,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                            != PackageManager.PERMISSION_GRANTED) {
+
+                        ActivityCompat.requestPermissions(AllChangeOrders.this,
+                                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+
+                    }
+                    Environment.getExternalStorageState();
+
+                    String changeOrdersId = null, dueDate = null, createdDate = null, orderName = null;
+                    int listSize = list.size();
+                    String cvsValues = "Change Order ID" + ","+ "Due Date" + ","+ "Created Date"  + ","+ "Order Name" + "\n";
+
+                    for(int i=0; i<listSize;i++)
+                    {
+                        AllChangeOrdersList items = list.get(i);
+                        changeOrdersId = items.getText_orders_no();
+                        dueDate = items.getText_due_date();
+                        createdDate = items.getText_date_created();
+                        orderName = items.getText_title();
+                        cvsValues = cvsValues +  changeOrdersId + ","+ dueDate + ","+ createdDate +","+ orderName + "\n";
+                    }
+
+                    CsvCreateUtility.generateNoteOnSD(getApplicationContext(), "ChangeOrders-data.csv", cvsValues);
+                }
+
+                else
+
+                {
+                    Environment.getExternalStorageState();
+
+
+                    String changeOrdersId = null, dueDate = null, createdDate = null, orderName = null;
+                    int listSize = list.size();
+                    String cvsValues = "Change Order ID" + ","+ "Due Date" + ","+ "Created Date"  + ","+ "Order Name" + "\n";
+
+                    for(int i=0; i<listSize;i++)
+                    {
+                        AllChangeOrdersList items = list.get(i);
+                        changeOrdersId = items.getText_orders_no();
+                        dueDate = items.getText_due_date();
+                        createdDate = items.getText_date_created();
+                        orderName = items.getText_title();
+                        cvsValues = cvsValues +  changeOrdersId + ","+ dueDate + ","+ createdDate +","+ orderName + "\n";
+                    }
+
+                    CsvCreateUtility.generateNoteOnSD(getApplicationContext(), "ChangeOrders-data.csv", cvsValues);
+                }
+
             }
             break;
         }
@@ -190,91 +363,136 @@ public class AllChangeOrders extends AppCompatActivity implements View.OnClickLi
 
     public void saveChangeOrders()
     {
-//        JSONObject object = new JSONObject();
-//
-//        try {
-//            object.put("projectId",currentProjectNo);
-//            object.put("createdBy", currentUser);
-//            object.put("dueDate", currentProjectDesc);
-//            object.put("statusId",spinner_boq_item.getSelectedItem().toString());
-//            object.put("createdDate", currentDate);
-//
-//            Log.d("REQUEST SENT OF JSON :" , object.toString());
-//
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
-//
-//        RequestQueue requestQueue = Volley.newRequestQueue(AllChangeOrders.this);
-//
-//        String url = AllChangeOrders.this.getResources().getString(R.string.server_url) + "/postChangeOrder";
-//
-//        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
-//                new Response.Listener<JSONObject>() {
-//                    @Override
-//                    public void onResponse(JSONObject response) {
-//                        try {
-//
-//                            Log.d("SERVER RESPONSE :", response.toString());
-//
-//                            if(response.getString("msg").equals("success"))
-//                            {
-//                                Toast.makeText(AllChangeOrders.this, "Change Orders Created. ID - "+ response.getString("data"), Toast.LENGTH_SHORT).show();
-//                                pDialog.dismiss();
-//                                Intent intent = new Intent(AllChangeOrders.this, AllChangeOrders.class);
-//                                startActivity(intent);
-//                            }
-//
-//                        } catch (JSONException e) {
-//                            e.printStackTrace();
-//                            pDialog.dismiss();
-//                        }
-//                        //response success message display
-//                    }
-//                },
-//                new Response.ErrorListener() {
-//                    @Override
-//                    public void onErrorResponse(VolleyError error) {
-//                        Log.e("Volley", "Error");
-//                        pDialog.dismiss();
-//                    }
-//                }
-//        );
-//        requestQueue.add(jor);
+        JSONObject object = new JSONObject();
+
+        try {
+            object.put("projectId",currentProjectNo);
+            object.put("createdBy", currentUser);
+            object.put("dueDate", due_date.getText().toString());
+            object.put("statusId","1");
+            object.put("createdDate", currentDate);
+            object.put("orderName", order_name.getText().toString());
+
+            Log.d("REQUEST SENT OF JSON :" , object.toString());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        RequestQueue requestQueue = Volley.newRequestQueue(AllChangeOrders.this);
+
+        String url = pm.getString("SERVER_URL") + "/postChangeOrder";
+
+        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+
+                            Log.d("SERVER RESPONSE :", response.toString());
+
+                            if(response.getString("msg").equals("success"))
+                            {
+                                Toast.makeText(AllChangeOrders.this, "Change Orders Created. ID - "+ response.getString("data"), Toast.LENGTH_SHORT).show();
+                                pDialog.dismiss();
+                                Intent intent = new Intent(AllChangeOrders.this, AllChangeOrders.class);
+                                startActivity(intent);
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            pDialog.dismiss();
+                        }
+                        //response success message display
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("Volley", "Error");
+                        pDialog.dismiss();
+                    }
+                }
+        );
+        requestQueue.add(jor);
     }
 
     public void prepareItems()
     {
-//        items = new AllChangeOrdersList("1", "O10014", "Order A", currentProjectNo, currentProjectName, "20/07/2016", "25/07/2016");
-//        list.add(items);
-//
-//
-//        items = new AllChangeOrdersList("2", "O10015", "Order B", currentProjectNo, currentProjectName, "01/07/2016", "18/07/2016");
-//        list.add(items);
-//
-//
-//        items = new AllChangeOrdersList("3", "O10016", "Order C", currentProjectNo, currentProjectName, "14/06/2016", "19/07/2016");
-//        list.add(items);
-//
-//
-//        if(getIntent().hasExtra("orderDate"))
-//        {
-//            String orderTitle = getIntent().getStringExtra("orderTitle");
-//            String orderDate = getIntent().getStringExtra("orderDate");
-//            String createdDate = getIntent().getStringExtra("createdDate");
-//
-//            items = new AllChangeOrdersList("4", "O10017", orderTitle, currentProjectNo, currentProjectName,  createdDate, orderDate);
-//            list.add(items);
-//
-//        }
-//
-//        ordersAdapter.notifyDataSetChanged();
+        pDialog = new ProgressDialog(AllChangeOrders.this);
+        pDialog.setMessage("Getting server data");
+        pDialog.show();
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try
+                        {
+//                            dataObject = response.getJSONObject(0);
+                            Log.d("RESPONSE JSON", response.toString());
+                            dataArray = response.getJSONArray("data");
+
+                            for(int i=0; i<dataArray.length();i++)
+                            {
+                                dataObject = dataArray.getJSONObject(i);
+                                changeOrdersId = dataObject.getString("changeOrdersId");
+                                dueDate = dataObject.getString("dueDate");
+                                createdDate = dataObject.getString("createdDate");
+                                orderName = dataObject.getString("orderName");
+                                if (getIntent().hasExtra("search"))
+                                {
+                                    if (getIntent().getStringExtra("search").equals("yes")) {
+
+                                        if (changeOrdersId.toLowerCase().contains(searchText.toLowerCase()) || orderName.toLowerCase().contains(searchText.toLowerCase())) {
+
+
+                                            items = new AllChangeOrdersList(String.valueOf(i), changeOrdersId, orderName, currentProjectNo,
+                                                    currentProjectName,  createdDate, dueDate);
+
+                                            list.add(items);
+                                            ordersAdapter.notifyDataSetChanged();
+                                        }
+                                    }
+                                }
+                                else
+                                {
+
+                                    items = new AllChangeOrdersList(String.valueOf(i), changeOrdersId, orderName, currentProjectNo,
+                                            currentProjectName,  createdDate, dueDate);
+
+                                    list.add(items);
+                                    ordersAdapter.notifyDataSetChanged();
+                                }
+                            }
+
+                            pDialog.dismiss();
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+//                        setData(response,false);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d("", "Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        });
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(jsonObjectRequest);
+
+        if(pDialog!=null)
+            pDialog.dismiss();
 
     }
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(AllChangeOrders.this, ViewPurchaseOrders.class);
+        Intent intent = new Intent(AllChangeOrders.this, SiteProjectDelivery.class);
         startActivity(intent);
     }
 

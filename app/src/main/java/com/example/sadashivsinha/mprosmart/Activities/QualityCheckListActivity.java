@@ -4,13 +4,13 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,6 +44,7 @@ public class QualityCheckListActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private QualityChecklistAdapter qualityAdapter;
     QualityChecklistList qualityItem;
+    PreferenceManager pm;
 
     JSONArray dataArray;
     JSONObject dataObject;
@@ -67,7 +68,7 @@ public class QualityCheckListActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
         currentProjectName = pm.getString("projectName");
         currentQualityChecklist = pm.getString("currentQualityChecklist");
@@ -79,7 +80,7 @@ public class QualityCheckListActivity extends AppCompatActivity {
         if (!isInternetPresent) {
             // Internet connection is not present
             // Ask user to connect to Internet
-            CoordinatorLayout main_content = (CoordinatorLayout) findViewById(R.id.main_content);
+            RelativeLayout main_content = (RelativeLayout) findViewById(R.id.main_content);
             Snackbar snackbar = Snackbar.make(main_content, getResources().getString(R.string.no_internet_error), Snackbar.LENGTH_LONG);
             snackbar.show();
         }
@@ -133,7 +134,7 @@ public class QualityCheckListActivity extends AppCompatActivity {
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getQualityChecklistStatus?qualityChecklistStatus='"+currentQualityChecklist+"'";
+        String url = pm.getString("SERVER_URL") + "/getQualityChecklistStatus?qualityChecklistStatus='"+currentQualityChecklist+"'";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -185,10 +186,9 @@ public class QualityCheckListActivity extends AppCompatActivity {
 
     public void prepareHeader()
     {
-
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getQualityCheckList?projectId='"+currentProjectNo+"'";
+        String url = pm.getString("SERVER_URL") + "/getQualityCheckList?projectId='"+currentProjectNo+"'";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {

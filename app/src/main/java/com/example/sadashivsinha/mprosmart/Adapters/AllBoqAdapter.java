@@ -47,6 +47,13 @@ public class MyViewHolder extends RecyclerView.ViewHolder {
                 Intent intent = new Intent(view.getContext(), BoqActivity.class);
 
                 pm.putString("currentBoq", text_boq_no.getText().toString());
+                pm.putString("currentBoqName", text_boq_name.getText().toString());
+                pm.putString("currentBoqProjectId", text_project_id.getText().toString());
+                pm.putString("currentBoqProjectName", text_project_name.getText().toString());
+                pm.putString("currentBoqUnit", text_unit.getText().toString());
+                pm.putString("currentBoqUom", text_uom.getText().toString());
+                pm.putString("currentBoqCreatedBy", text_created_by.getText().toString());
+                pm.putString("currentBoqDate", text_date_created.getText().toString());
 
                 view.getContext().startActivity(intent);
             }

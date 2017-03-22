@@ -35,14 +35,19 @@ import com.example.sadashivsinha.mprosmart.Adapters.ApproveRejectAdapter;
 import com.example.sadashivsinha.mprosmart.Adapters.MyAdapter;
 import com.example.sadashivsinha.mprosmart.ModelLists.ApproveRejectList;
 import com.example.sadashivsinha.mprosmart.R;
+import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
 import com.example.sadashivsinha.mprosmart.font.HelveticaRegular;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class ApproveRejectActivity extends NewActivity{
 
@@ -58,11 +63,14 @@ public class ApproveRejectActivity extends NewActivity{
     JSONObject dataObject;
     String id, entityId, entityName, entityTName, message, createdBy, createdDate, approved;
     HelveticaRegular no_notification;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_approve_reject);
+
+        pm = new PreferenceManager(getApplicationContext());
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -88,10 +96,6 @@ public class ApproveRejectActivity extends NewActivity{
         }; // Drawer Toggle Object Made
         Drawer.setDrawerListener(mDrawerToggle); // Drawer Listener set to the Drawer toggle
         mDrawerToggle.syncState();               // Finally we set the drawer toggle sync State
-
-
-
-
     }
 
     private void initViews(){
@@ -214,7 +218,7 @@ public class ApproveRejectActivity extends NewActivity{
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getNotifications";
+        String url = pm.getString("SERVER_URL") + "/getNotifications";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -247,6 +251,9 @@ public class ApproveRejectActivity extends NewActivity{
                                     createdDate = dataObject.getString("createdDate");
                                     approved = dataObject.getString("approved");
 
+                                    Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(createdDate);
+                                    createdDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+
                                     if(!approved.equals("1") || !approved.equals("2"))
                                     {
                                         items = new ApproveRejectList(message, entityId, createdBy, createdDate, entityName,
@@ -265,7 +272,9 @@ public class ApproveRejectActivity extends NewActivity{
                             }
                             pDialog.dismiss();
                         }catch(JSONException e){e.printStackTrace();
-                            pDialog.dismiss();}
+                            pDialog.dismiss();} catch (ParseException e) {
+                            e.printStackTrace();
+                        }
                     }
                 },
                 new Response.ErrorListener() {
@@ -312,7 +321,7 @@ public class ApproveRejectActivity extends NewActivity{
 
         RequestQueue requestQueue = Volley.newRequestQueue(context);
 
-        String url = context.getResources().getString(R.string.server_url) + "/approveReject";
+        String url = pm.getString("SERVER_URL") + "/approveReject";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.PUT, url, object,
                 new Response.Listener<JSONObject>() {

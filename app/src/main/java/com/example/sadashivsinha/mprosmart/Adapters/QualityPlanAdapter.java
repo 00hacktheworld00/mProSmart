@@ -1,13 +1,18 @@
 package com.example.sadashivsinha.mprosmart.Adapters;
 
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.example.sadashivsinha.mprosmart.Activities.AttachmentActivity;
 import com.example.sadashivsinha.mprosmart.ModelLists.QualityPlanList;
 import com.example.sadashivsinha.mprosmart.R;
+import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
 
 import java.util.List;
 
@@ -23,8 +28,14 @@ public class QualityPlanAdapter extends RecyclerView.Adapter<QualityPlanAdapter.
         public TextView sl_no, process_desc, activity, procedure, accept_criteria, supplier, subcontractor, third_party,
                 customer_client, id;
 
+        public ImageButton attachBtn;
+        public TextView no_of_attachments;
+        PreferenceManager pm;
+
         public MyViewHolder(final View view) {
             super(view);
+            pm = new PreferenceManager(view.getContext());
+
             sl_no = (TextView) view.findViewById(R.id.sl_no);
             process_desc = (TextView) view.findViewById(R.id.process_desc);
             activity = (TextView) view.findViewById(R.id.activity);
@@ -35,7 +46,21 @@ public class QualityPlanAdapter extends RecyclerView.Adapter<QualityPlanAdapter.
             third_party = (TextView) view.findViewById(R.id.third_party);
             customer_client = (TextView) view.findViewById(R.id.customer_client);
             id = (TextView) view.findViewById(R.id.id);
+            no_of_attachments = (TextView) view.findViewById(R.id.no_of_attachments);
 
+            attachBtn = (ImageButton) view.findViewById(R.id.attachBtn);
+            attachBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(itemView.getContext(), AttachmentActivity.class);
+                    String url = pm.getString("SERVER_URL") + "/getQualityPlanStatusFiles?qualityPlanStatusId=\"" + id.getText().toString() + "\"";
+                    Log.d("VIEW IMG URL : ", url);
+                    intent.putExtra("viewURL", url);
+                    intent.putExtra("viewOnly", true);
+                    itemView.getContext().startActivity(intent);
+
+                }
+            });
            }
     }
 
@@ -63,6 +88,7 @@ public class QualityPlanAdapter extends RecyclerView.Adapter<QualityPlanAdapter.
         holder.third_party.setText(items.getThird_party());
         holder.customer_client.setText(items.getCustomer_client());
         holder.id.setText(items.getId());
+        holder.no_of_attachments.setText(items.getNo_of_attachments());
     }
 
     @Override

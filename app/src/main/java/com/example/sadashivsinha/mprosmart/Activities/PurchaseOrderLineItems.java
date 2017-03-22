@@ -53,6 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -67,13 +68,14 @@ import de.keyboardsurfer.android.widget.crouton.Style;
 public class PurchaseOrderLineItems extends NewActivity implements DatePickerDialog.OnDateSetListener {
 
     String vendorId, date;
-    int sumOfTotal=0;
+    float sumOfTotal=0;
     private List<PurchaseOrderLineItemList> PurchaseOrderLineItemList = new ArrayList<>();
     RecyclerView recyclerView;
     PurchaseOrderLineItemList items;
     PurchaseOrderLineItemsAdapter purchaseOrderLineItemsAdapter;
     JSONArray dataArray;
     JSONObject dataObject;
+    String dateToSendToServer;
     TextView po_number, project_no, vendor_code, item_date, total_quantity;
     ConnectionDetector cd;
     public static final String TAG = PurchaseOrderLineItems.class.getSimpleName();
@@ -82,7 +84,7 @@ public class PurchaseOrderLineItems extends NewActivity implements DatePickerDia
     String poId, vendorCode, createdOn, createdBy;
     EditText text_item_name;
     String currentPurchaseOrderNo, currentProjectNo, currentUser;
-    String itemId, itemName, itemDescription ,createdDate, uomId, quantity, unitCost, totalAmount, needByDate, poTotal;
+    String itemId, itemName, itemDescription ,createdDate, uomId, quantity, unitCost, totalAmount, needByDate, poTotal, currency;
     String itemNames, itemDesc, itemUom, itemsId, item_url;
     PreferenceManager pm;
     Button saveBtn;
@@ -93,13 +95,13 @@ public class PurchaseOrderLineItems extends NewActivity implements DatePickerDia
     Spinner spinnerItems, spinnerUom;
     LinearLayout hiddenLayout;
     Boolean oldItem = false;
-    Spinner spinner_currency;
     Spinner spinner_item;
     String[] uomArray, uomNameArray;
     String url, purchaseOrderId, poQuantity, uom_url, currentSelectedVendor;
 
-    EditText text_item_desc, text_quantity, text_unit_cost, text_uom;
+    EditText text_item_desc, text_quantity, text_unit_cost, text_uom, text_currency;
     TextView text_need_by_date, text_total_amount;
+    String currentDateServer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,13 +118,15 @@ public class PurchaseOrderLineItems extends NewActivity implements DatePickerDia
         currentPurchaseOrderNo=pm.getString("poNumber");
         currentProjectNo = pm.getString("projectId");
         currentUser = pm.getString("currentUser");
-        sumOfTotal = Integer.parseInt(pm.getString("totalAmount"));
 
-        url = getResources().getString(R.string.server_url) + "/getPurchaseLineItems?purchaseOrderId=\""+currentPurchaseOrderNo+"\"";
+        if(pm.getString("totalAmount")!="")
+        sumOfTotal = Float.parseFloat(pm.getString("totalAmount"));
 
-        item_url = getResources().getString(R.string.server_url) + "/getItems?projectId='"+currentProjectNo+"'";
+        url = pm.getString("SERVER_URL") + "/getPurchaseLineItems?purchaseOrderId=\""+currentPurchaseOrderNo+"\"";
 
-        uom_url = getResources().getString(R.string.server_url) + "/getUom";
+        item_url = pm.getString("SERVER_URL") + "/getItems?projectId='"+currentProjectNo+"'";
+
+        uom_url = pm.getString("SERVER_URL") + "/getUom";
 
         fab_add = (FloatingActionButton) findViewById(R.id.fab_add);
         exportBtn = (FloatingActionButton) findViewById(R.id.exportBtn);
@@ -150,8 +154,7 @@ public class PurchaseOrderLineItems extends NewActivity implements DatePickerDia
                 spinner_item = (Spinner) dialogView.findViewById(R.id.spinner_item);
 
                 text_uom = (EditText) dialogView.findViewById(R.id.text_uom);
-
-                spinner_currency = (Spinner) dialogView.findViewById(R.id.spinner_currency);
+                text_currency = (EditText) dialogView.findViewById(R.id.text_currency);
 
 
                 Button addBtn = (Button) dialogView.findViewById(R.id.addBtn);
@@ -177,11 +180,7 @@ public class PurchaseOrderLineItems extends NewActivity implements DatePickerDia
                     }
                 });
 
-                ArrayAdapter<String> adapterCurrency = new ArrayAdapter<String>(dialogView.getContext(),
-                        android.R.layout.simple_dropdown_item_1line,
-                        new String[] {"$", "INR"});
-
-                spinner_currency.setAdapter(adapterCurrency);
+                text_currency.setText(pm.getString("currency"));
 
                 if (!isInternetPresent)
                 {
@@ -350,9 +349,9 @@ public class PurchaseOrderLineItems extends NewActivity implements DatePickerDia
                 show = alert.show();
 
                 spinner_item = (Spinner) dialogView.findViewById(R.id.spinner_item);
+                text_currency = (EditText) dialogView.findViewById(R.id.text_currency);
 
-                spinner_currency = (Spinner) dialogView.findViewById(R.id.spinner_currency);
-
+                text_currency.setEnabled(false);
 
                 Button addBtn = (Button) dialogView.findViewById(R.id.addBtn);
 
@@ -380,12 +379,7 @@ public class PurchaseOrderLineItems extends NewActivity implements DatePickerDia
                     }
                 });
 
-
-                ArrayAdapter<String> adapterCurrency = new ArrayAdapter<String>(dialogView.getContext(),
-                        android.R.layout.simple_dropdown_item_1line,
-                        new String[] {"$", "INR"});
-
-                spinner_currency.setAdapter(adapterCurrency);
+                text_currency.setText(pm.getString("currency"));
 
                 if (!isInternetPresent)
                 {
@@ -436,10 +430,22 @@ public class PurchaseOrderLineItems extends NewActivity implements DatePickerDia
                                 }
 
 
-                                ArrayAdapter<String> adapterItemList = new ArrayAdapter<String>(dialogView.getContext(),
-                                        android.R.layout.simple_dropdown_item_1line,itemIdArray);
+                                if(dataArray==null)
+                                {
+                                    itemIdArray = new String[1];
+                                    itemIdArray[0]="No Items";
+                                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(PurchaseOrderLineItems.this,
+                                            android.R.layout.simple_dropdown_item_1line,itemIdArray);
+                                    spinner_item.setAdapter(adapter);
+                                    Log.d("Punch List", "ARRAY EMPTY");
+                                }
+                                else
+                                {
+                                    ArrayAdapter<String> adapterItemList = new ArrayAdapter<String>(dialogView.getContext(),
+                                            android.R.layout.simple_dropdown_item_1line,itemIdArray);
 
-                                spinner_item.setAdapter(adapterItemList);
+                                    spinner_item.setAdapter(adapterItemList);
+                                }
 
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -515,18 +521,21 @@ public class PurchaseOrderLineItems extends NewActivity implements DatePickerDia
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-                        text_item_name.setText(itemsNameArray[position]);
-                        text_item_desc.setText(itemsDescArray[position]);
-
-                        if(uomArray!=null)
+                        if(itemIdArray.length!=1)
                         {
+                            text_item_name.setText(itemsNameArray[position]);
+                            text_item_desc.setText(itemsDescArray[position]);
 
-                            for(int j=0; j<uomArray.length; j++)
+                            if(uomArray!=null)
                             {
-                                if(itemsUomArray[position].equals(uomArray[j]))
+
+                                for(int j=0; j<uomArray.length; j++)
                                 {
-                                    text_uom.setText(uomNameArray[j]);
-                                    currentSelectedVendor = uomArray[j];
+                                    if(itemsUomArray[position].equals(uomArray[j]))
+                                    {
+                                        text_uom.setText(uomNameArray[j]);
+                                        currentSelectedVendor = uomArray[j];
+                                    }
                                 }
                             }
                         }
@@ -581,6 +590,10 @@ public class PurchaseOrderLineItems extends NewActivity implements DatePickerDia
                         if(spinner_item.getSelectedItem().equals("Select Item"))
                         {
                             Toast.makeText(PurchaseOrderLineItems.this, "Select Item First", Toast.LENGTH_SHORT).show();
+                        }
+                        else if(spinner_item.getSelectedItem().equals("No Items"))
+                        {
+                            Toast.makeText(PurchaseOrderLineItems.this, "No Items in this project", Toast.LENGTH_SHORT).show();
                         }
                         else if(spinner_item.getSelectedItem().equals("No Data"))
                         {
@@ -1053,12 +1066,13 @@ public class PurchaseOrderLineItems extends NewActivity implements DatePickerDia
         poTotal =  pm.getString("totalAmount");
         createdBy = pm.getString("createdBy");
         poId = pm.getString("poNumber");
+        currency = pm.getString("currency");
 
         po_number.setText(poId);
         project_no.setText(currentProjectNo);
         vendor_code.setText(vendorCode);
         item_date.setText(createdOn);
-        total_quantity.setText(poTotal);
+        total_quantity.setText(currency + " " + poTotal);
     }
     private void callVendorRequest() {
         // TODO Auto-generated method stub
@@ -1079,6 +1093,16 @@ public class PurchaseOrderLineItems extends NewActivity implements DatePickerDia
                             if(type.equals("ERROR"))
                             {
                                 Toast.makeText(PurchaseOrderLineItems.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
+                            }
+
+                            if(type.equals("WARN"))
+                            {
+                                itemIdArray = new String[1];
+                                itemIdArray[0]="No Items";
+                                ArrayAdapter<String> adapter = new ArrayAdapter<String>(PurchaseOrderLineItems.this,
+                                        android.R.layout.simple_dropdown_item_1line,itemIdArray);
+                                spinner_item.setAdapter(adapter);
+                                Log.d("Punch List", "ARRAY EMPTY");
                             }
 
                             if(type.equals("INFO"))
@@ -1141,24 +1165,13 @@ public class PurchaseOrderLineItems extends NewActivity implements DatePickerDia
         JSONObject object = new JSONObject();
 
         try {
-
-            Date tradeDate = null;
-            try
-            {
-                tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(text_need_by_date.getText().toString());
-            }
-            catch (ParseException e)
-            {
-                e.printStackTrace();
-            }
-
             object.put("itemName", spinner_item.getSelectedItem().toString());
             object.put("itemDescription", text_item_desc.getText().toString());
             object.put("uomId", currentSelectedVendor);
             object.put("poQuantity", text_quantity.getText().toString());
             object.put("purchaseOrderId", currentPurchaseOrderNo);
             object.put("totalAmount", totalAmountOfItem);
-            object.put("needByDate", new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).format(tradeDate));
+            object.put("needByDate", dateToSendToServer);
             object.put("unitCost", text_unit_cost.getText().toString());
 
 
@@ -1172,7 +1185,7 @@ public class PurchaseOrderLineItems extends NewActivity implements DatePickerDia
 
         RequestQueue requestQueue = Volley.newRequestQueue(PurchaseOrderLineItems.this);
 
-        String url = PurchaseOrderLineItems.this.getResources().getString(R.string.server_url) + "/postPurchaseLineItems";
+        String url = PurchaseOrderLineItems.this.pm.getString("SERVER_URL") + "/postPurchaseLineItems";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -1185,6 +1198,8 @@ public class PurchaseOrderLineItems extends NewActivity implements DatePickerDia
                             {
                                 String successMsg = "Purchase Order Line Item Created. ID - "+ response.getString("data");
                                 Toast.makeText(PurchaseOrderLineItems.this, successMsg, Toast.LENGTH_SHORT).show();
+
+                                updateItemInventory(totalAmountOfItem);
                             }
 
                         } catch (JSONException e) {
@@ -1230,9 +1245,7 @@ public class PurchaseOrderLineItems extends NewActivity implements DatePickerDia
                     pm.putString("toastMessagePOLineItemForNewPo", "Purchase Order Line Item Created");
                     pm.putBoolean("createPoPendingLineItemForNewPo", true);
 
-                    sumOfTotal = sumOfTotal+ Integer.parseInt(totalAmountOfItem);
-
-                    updateTotalQuantityOfPo(String.valueOf(sumOfTotal), currentPurchaseOrderNo);
+                    updateItemInventory(totalAmountOfItem);
                 }
             }
             else
@@ -1252,9 +1265,7 @@ public class PurchaseOrderLineItems extends NewActivity implements DatePickerDia
                     pm.putString("toastMessagePOLineItem", "Purchase Order Line Item Created");
                     pm.putBoolean("createPoPendingLineItem", true);
 
-                    sumOfTotal = sumOfTotal+ Integer.parseInt(totalAmountOfItem);
-
-                    updateTotalQuantityOfPo(String.valueOf(sumOfTotal), currentPurchaseOrderNo);
+                    updateItemInventory(totalAmountOfItem);
                 }
             }
 
@@ -1262,10 +1273,96 @@ public class PurchaseOrderLineItems extends NewActivity implements DatePickerDia
         else
         {
             requestQueue.add(jor);
+        }
+    }
 
-            sumOfTotal = sumOfTotal+ Integer.parseInt(totalAmountOfItem);
+    public void updateItemInventory(final String totalAmountOfItem)
+    {
+        JSONObject object = new JSONObject();
 
-            updateTotalQuantityOfPo(String.valueOf(sumOfTotal), currentPurchaseOrderNo);
+        try {
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Date date = new Date();
+            currentDateServer = dateFormat.format(date);
+
+            object.put("projectId", currentProjectNo);
+            object.put("itemId", spinner_item.getSelectedItem().toString());
+            object.put("quantity", text_quantity.getText().toString());
+            object.put("type", "0");
+            object.put("date", currentDateServer);
+
+
+            Log.d("tag", String.valueOf(object));
+
+        }
+        catch (JSONException e)
+        {
+            e.printStackTrace();
+        }
+
+        RequestQueue requestQueue = Volley.newRequestQueue(PurchaseOrderLineItems.this);
+
+        String url = PurchaseOrderLineItems.this.pm.getString("SERVER_URL") + "/postInventoryManagement";
+
+        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+//                            Toast.makeText(PurchaseOrderLineItems.this, response.getString("msg").toString(), Toast.LENGTH_SHORT).show();
+
+                            if(response.getString("msg").equals("success"))
+                            {
+                                String successMsg = "Inventory Updated";
+                                Toast.makeText(PurchaseOrderLineItems.this, successMsg, Toast.LENGTH_SHORT).show();
+
+                                sumOfTotal = sumOfTotal+ Integer.parseInt(totalAmountOfItem);
+
+                                updateTotalQuantityOfPo(String.valueOf(sumOfTotal), currentPurchaseOrderNo);
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        //response success message display
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("Volley", "Error");
+                        Toast.makeText(PurchaseOrderLineItems.this, error.toString(), Toast.LENGTH_SHORT).show();
+
+                    }
+                }
+        );
+        cd = new ConnectionDetector(getApplicationContext());
+        isInternetPresent = cd.isConnectingToInternet();
+
+        if (!isInternetPresent)
+        {
+            // Internet connection is not present
+
+            Communicator communicator = new Communicator();
+            Log.d("object", object.toString());
+
+            Boolean createInventoryPoItem = pm.getBoolean("createInventoryPoItem");
+
+                if(!createInventoryPoItem)
+                {
+                    pm.putString("objectInventoryPoItem", object.toString());
+                    pm.putString("urlInventoryPoItem", url);
+                    pm.putString("toastMessageInventoryPoItem", "Inventory Updated");
+                    pm.putBoolean("createInventoryPoItem", true);
+
+                    sumOfTotal = sumOfTotal+ Integer.parseInt(totalAmountOfItem);
+
+                    updateTotalQuantityOfPo(String.valueOf(sumOfTotal), currentPurchaseOrderNo);
+                }
+        }
+        else
+        {
+            requestQueue.add(jor);
         }
     }
 
@@ -1286,7 +1383,7 @@ public class PurchaseOrderLineItems extends NewActivity implements DatePickerDia
 
         RequestQueue requestQueue = Volley.newRequestQueue(PurchaseOrderLineItems.this);
 
-        String url = PurchaseOrderLineItems.this.getResources().getString(R.string.server_url) + "/putPurchaseOrderTotal?purchaseOrderId=\""+ poNo + "\"";
+        String url = PurchaseOrderLineItems.this.pm.getString("SERVER_URL") + "/putPurchaseOrderTotal?purchaseOrderId=\""+ poNo + "\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.PUT, url, object,
                 new Response.Listener<JSONObject>() {
@@ -1296,6 +1393,9 @@ public class PurchaseOrderLineItems extends NewActivity implements DatePickerDia
                             if(response.getString("msg").equals("success"))
                             {
                                 pDialog2.dismiss();
+
+                                Intent intent = new Intent(PurchaseOrderLineItems.this, PurchaseOrderLineItems.class);
+                                startActivity(intent);
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -1332,6 +1432,9 @@ public class PurchaseOrderLineItems extends NewActivity implements DatePickerDia
                 pm.putString("urlPOUpdateBudget", url);
                 pm.putString("toastMessageUpdateBudget", "PO Budget Updated on PO Line Item creation");
                 pm.putBoolean("createPoPendingUpdateBudget", true);
+
+                Intent intent = new Intent(PurchaseOrderLineItems.this, PurchaseOrderLineItems.class);
+                startActivity(intent);
             }
         }
         else
@@ -1340,16 +1443,12 @@ public class PurchaseOrderLineItems extends NewActivity implements DatePickerDia
         }
         if(pDialog2!=null)
             pDialog2.dismiss();
-
-        Intent intent = new Intent(PurchaseOrderLineItems.this, PurchaseOrderLineItems.class);
-        startActivity(intent);
     }
 
 //    public void getAllUom()
 //    {
 //        RequestQueue requestQueue = Volley.newRequestQueue(this);
 //
-//        String url = getResources().getString(R.string.server_url) + "/getUom";
 //
 //        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
 //                new Response.Listener<JSONObject>() {
@@ -1425,8 +1524,11 @@ public class PurchaseOrderLineItems extends NewActivity implements DatePickerDia
     public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
 
         String[] MONTHS = {"01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"};
-        String date = year+"-"+(MONTHS[monthOfYear])+"-"+dayOfMonth;
+        String date = dayOfMonth+"-"+(MONTHS[monthOfYear])+"-"+year;
+
         text_need_by_date.setText(date);
+
+        dateToSendToServer = year+"-"+(MONTHS[monthOfYear])+"-"+dayOfMonth;
     }
 
     @Override

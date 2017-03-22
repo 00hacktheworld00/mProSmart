@@ -65,12 +65,12 @@
                         android:padding="10dp"
                         android:hint="Address Line #1"
                         android:background="@drawable/edittext_states_red"
-                        android:inputType="number"
+                        android:inputType="textCapSentences"
                         android:maxLines="1"
                         android:imeOptions="actionNext"
                         android:textColorHint="#000000"
                         android:textColor="#000000"
-                        android:textSize="@dimen/_10sdp"
+                        android:textSize="@dimen/_12sdp"
                         android:id="@+id/address_one"
                         android:layout_marginBottom="@dimen/activity_vertical_margin" />
 
@@ -89,7 +89,7 @@
                     android:layout_weight="1"
                     android:textColorHint="#000000"
                     android:textColor="#000000"
-                    android:textSize="@dimen/_10sdp"
+                    android:textSize="@dimen/_12sdp"
                     android:id="@+id/address_two"
                     android:layout_marginBottom="@dimen/activity_vertical_margin" />
             </LinearLayout>
@@ -117,7 +117,7 @@
                         android:imeOptions="actionNext"
                         android:textColorHint="#000000"
                         android:textColor="#000000"
-                        android:textSize="@dimen/_10sdp"
+                        android:textSize="@dimen/_12sdp"
                         android:id="@+id/city"
                         android:layout_marginRight="@dimen/_2sdp"
                         android:layout_marginBottom="@dimen/_3sdp" />
@@ -138,7 +138,7 @@
                     android:textColorHint="#000000"
                     android:layout_marginLeft="@dimen/_2sdp"
                     android:textColor="#000000"
-                    android:textSize="@dimen/_10sdp"
+                    android:textSize="@dimen/_12sdp"
                     android:id="@+id/state"
                     android:layout_marginBottom="@dimen/_3sdp" />
             </LinearLayout>
@@ -168,7 +168,7 @@
                         android:textColorHint="#000000"
                         android:textColor="#000000"
                         android:layout_marginRight="@dimen/_2sdp"
-                        android:textSize="@dimen/_10sdp"
+                        android:textSize="@dimen/_12sdp"
                         android:id="@+id/country"
                         android:layout_marginBottom="@dimen/_3sdp" />
 
@@ -188,7 +188,7 @@
                     android:layout_marginLeft="@dimen/_2sdp"
                     android:textColorHint="#000000"
                     android:textColor="#000000"
-                    android:textSize="@dimen/_10sdp"
+                    android:textSize="@dimen/_12sdp"
                     android:id="@+id/pincode"
                     android:layout_marginBottom="@dimen/_3sdp" />
             </LinearLayout>

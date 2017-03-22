@@ -705,6 +705,7 @@
                     android:textColor="#ffffff"
                     android:backgroundTint="@color/colorPrimary"
                     android:text="SUBMIT"
+                    android:id="@+id/btn_submit"
                     android:layout_marginTop="@dimen/_15sdp"/>
             </LinearLayout>
         </ScrollView>

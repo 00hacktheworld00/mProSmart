@@ -7,7 +7,6 @@
     android:layout_marginTop="@dimen/small_margin"
     android:layout_marginLeft="@dimen/activity_horizontal_margin"
     android:layout_marginRight="@dimen/activity_horizontal_margin"
-    app:cardCornerRadius="20dp"
     xmlns:fancy="http://schemas.android.com/apk/res-auto">
 
         <LinearLayout
@@ -30,49 +29,72 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="vertical" >
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/activity_horizontal_margin"
+                        android:weightSum="2"
                         android:orientation="horizontal">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:text="# "
-                            android:textColor="@color/fbColor"
-                            android:gravity="center_vertical"
-                            android:typeface="normal"/>
 
-                        <TextView
+                        <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="Timesheet"
+                            android:layout_weight="1"
+                            android:textColor="@color/fbColor"
+                            />
+
+
+                        <com.example.sadashivsinha.mprosmart.font.HelveticaBold
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:text="1"
+                            android:text=" : "
                             android:textColor="@color/fbColor"
-                            android:gravity="center_vertical"
-                            android:typeface="normal"
-                            android:id="@+id/text_line_no" />
+                            />
+
+
+                        <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="RT001"
+                            android:layout_weight="1"
+                            android:gravity="right"
+                            android:id="@+id/text_res_timesheet_id" />
 
                     </LinearLayout>
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/activity_horizontal_margin"
+                        android:weightSum="2"
                         android:orientation="horizontal">
 
 
-                        <TextView
+                        <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="WBS"
+                            android:layout_weight="1"
+                            android:textColor="@color/fbColor"
+                            />
+
+
+                        <com.example.sadashivsinha.mprosmart.font.HelveticaBold
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:text="WBS : "
+                            android:text=" : "
                             android:textColor="@color/fbColor"
-                            android:textSize="@dimen/subheading_main" />
+                            />
 
 
-                        <TextView
-                            android:layout_width="wrap_content"
+                        <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                            android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:text="Abcdef"
-                            android:textSize="@dimen/subheading_main"
+                            android:layout_weight="1"
+                            android:gravity="right"
                             android:id="@+id/text_wbs" />
 
                     </LinearLayout>
@@ -81,22 +103,33 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/activity_horizontal_margin"
+                        android:weightSum="2"
                         android:orientation="horizontal">
 
 
-                        <TextView
+                        <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="Activities"
+                            android:layout_weight="1"
+                            android:textColor="@color/fbColor"
+                            />
+
+
+                        <com.example.sadashivsinha.mprosmart.font.HelveticaBold
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:text="Activities : "
+                            android:text=" : "
                             android:textColor="@color/fbColor"
-                            android:textSize="@dimen/subheading_main" />
+                            />
 
 
-                        <TextView
-                            android:layout_width="wrap_content"
+                        <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                            android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:text="Abcdef"
-                            android:textSize="@dimen/subheading_main"
+                            android:gravity="right"
+                            android:layout_weight="1"
                             android:id="@+id/text_activities" />
 
                     </LinearLayout>
@@ -105,139 +138,64 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/activity_horizontal_margin"
+                        android:weightSum="2"
                         android:orientation="horizontal">
 
-                        <TextView
+                        <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="Resource Name"
+                            android:layout_weight="1"
+                            android:textColor="@color/fbColor" />
+
+
+                        <com.example.sadashivsinha.mprosmart.font.HelveticaBold
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:text="Resource Name  : "
-                            android:textSize="@dimen/subheading_main"
+                            android:text=" : "
                             android:textColor="@color/fbColor"
-                            android:gravity="center" />
+                            />
 
-                        <TextView
-                            android:layout_width="wrap_content"
+                        <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                            android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:text="Abcdef"
-                            android:layout_marginRight="@dimen/activity_vertical_margin"
-                            android:textSize="@dimen/subheading_main"
-                            android:gravity="center"
+                            android:layout_weight="1"
+                            android:gravity="right"
                             android:id="@+id/text_res_name" />
                     </LinearLayout>
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/activity_horizontal_margin"
+                        android:weightSum="2"
                         android:orientation="horizontal">
 
-                        <TextView
+                        <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="Total Hours"
+                            android:layout_weight="1"
+                            android:textColor="@color/fbColor" />
+
+
+                        <com.example.sadashivsinha.mprosmart.font.HelveticaBold
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:text="Total Hours : "
-                            android:textSize="@dimen/subheading_main"
+                            android:text=" : "
                             android:textColor="@color/fbColor"
-                            android:gravity="center" />
+                            />
 
-                        <TextView
-                            android:layout_width="wrap_content"
+                        <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                            android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:text="Abcdef"
-                            android:layout_marginRight="@dimen/activity_vertical_margin"
-                            android:textSize="@dimen/subheading_main"
-                            android:gravity="center"
+                            android:layout_weight="1"
+                            android:gravity="right"
                             android:id="@+id/text_total_hours" />
                     </LinearLayout>
 
-                    <mehdi.sakout.fancybuttons.FancyButton
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="end"
-                        android:paddingBottom="@dimen/very_very_small_margin"
-                        android:paddingLeft="@dimen/activity_vertical_margin"
-                        android:paddingRight="@dimen/activity_vertical_margin"
-                        android:paddingTop="@dimen/very_very_small_margin"
-                        fancy:fb_borderColor="@color/colorPrimary"
-                        fancy:fb_borderWidth="1dp"
-                        fancy:fb_radius="@dimen/_10sdp"
-                        fancy:fb_defaultColor="@color/white"
-                        fancy:fb_focusColor="@color/fbColor"
-                        fancy:fb_text="EDIT"
-                        fancy:fb_textSize="@dimen/subheading_main"
-                        fancy:fb_textColor="@color/text_color"
-                        android:id="@+id/editBtn" />
-
                 </LinearLayout>
             </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                android:id="@+id/hiddenTextboxLayout"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/activity_horizontal_margin">
-
-                        <ImageView
-                            android:layout_width="match_parent"
-                            android:layout_height="@dimen/half_textbox_width"
-                            android:src="@drawable/custom_rect"
-                            android:id="@+id/imageView" />
-
-                        <EditText
-                            android:layout_width="match_parent"
-                            android:layout_height="@dimen/half_textbox_width"
-                            android:padding="@dimen/very_small_margin"
-                            android:hint="Edit resource name."
-                            android:imeOptions="actionNext"
-                            android:textSize="@dimen/subheading_main"
-                            android:background="@android:color/transparent"
-                            android:gravity="top"
-                            android:id="@+id/desc_of_noncomformance" />
-                    </RelativeLayout>
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="end"
-                        android:layout_marginTop="@dimen/activity_horizontal_margin">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:weightSum="2">
-
-
-                            <RelativeLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:padding="@dimen/small_margin"
-                                android:background="@color/material_purple_400">
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="@dimen/image_main"
-                                    android:text="SAVE"
-                                    android:id="@+id/saveBtn"
-                                    android:textColor="@color/white"
-                                    android:gravity="center"
-                                    android:typeface="normal"
-                                    android:layout_alignParentTop="true"/>
-                            </RelativeLayout>
-                        </LinearLayout>
-                    </RelativeLayout>
-
-                </LinearLayout>
-            </LinearLayout>
-            </LinearLayout>
+        </LinearLayout>
     </android.support.v7.widget.CardView>

@@ -15,6 +15,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -27,6 +28,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.sadashivsinha.mprosmart.Adapters.SubcontractorAdapter;
+import com.example.sadashivsinha.mprosmart.ModelLists.MomList;
 import com.example.sadashivsinha.mprosmart.ModelLists.SubcontractorList;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
@@ -69,7 +71,7 @@ public class SubcontractorActivity extends NewActivity implements View.OnClickLi
 
     PreferenceManager pm;
     ProgressDialog pDialog;
-    String url;
+    String url, searchText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +79,15 @@ public class SubcontractorActivity extends NewActivity implements View.OnClickLi
         setContentView(R.layout.activity_new_subcontractor);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        if (getIntent().hasExtra("search")) {
+            if (getIntent().getStringExtra("search").equals("yes")) {
+
+                searchText = getIntent().getStringExtra("searchText");
+
+                getSupportActionBar().setTitle("Subcontractor Search Results : " + searchText);
+            }
+        }
 
         pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
@@ -93,7 +104,7 @@ public class SubcontractorActivity extends NewActivity implements View.OnClickLi
 
         prepareHeader();
 
-        url = getResources().getString(R.string.server_url) + "/subContractorLineItems?subContractor='"+currentSubId+"'";
+        url = pm.getString("SERVER_URL") + "/subContractorLineItems?subContractor='"+currentSubId+"'";
 
         subcontractorAdapter = new SubcontractorAdapter(subcontractorList);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
@@ -135,23 +146,63 @@ public class SubcontractorActivity extends NewActivity implements View.OnClickLi
                             Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(date);
                             date = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
 
-                            items = new SubcontractorList(subContractorLineItems, wbs, activities, resourceName, date
+                            if (getIntent().hasExtra("search"))
+                            {
+                                if (getIntent().getStringExtra("search").equals("yes")) {
+
+                                    if (subContractorLineItems.toLowerCase().contains(searchText.toLowerCase()) || resourceName.toLowerCase().contains(searchText.toLowerCase())) {
+                                        items = new SubcontractorList(String.valueOf(i + 1), wbs, activities, resourceName, date
+                                                , totalHours);
+                                        subcontractorList.add(items);
+
+                                        subcontractorAdapter.notifyDataSetChanged();
+
+
+                                    }
+                                }
+                            }
+                            else
+                            {items = new SubcontractorList(String.valueOf(i + 1), wbs, activities, resourceName, date
+                                    , totalHours);
+                                subcontractorList.add(items);
+
+                                subcontractorAdapter.notifyDataSetChanged();
+
+
+                            }
+                            pDialog.dismiss();
+                        }
+
+                        Boolean createSubcontractorLineItem = pm.getBoolean("createSubcontractorLineItem");
+
+                        if (createSubcontractorLineItem) {
+
+                            String jsonObjectVal = pm.getString("objectSubcontractorLineItem");
+                            Log.d("JSON Subc PENDING :", jsonObjectVal);
+
+                            JSONObject jsonObjectPending = new JSONObject(jsonObjectVal);
+                            Log.d("JSONObj Subc PENDING :", jsonObjectPending.toString());
+
+                            wbs = jsonObjectPending.getString("wbs");
+                            activities = jsonObjectPending.getString("activities");
+                            resourceName = jsonObjectPending.getString("resourceName");
+                            date = jsonObjectPending.getString("date");
+                            totalHours = jsonObjectPending.getString("totalHours");
+
+                            Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(date);
+                            date = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+
+                            items = new SubcontractorList(String.valueOf(dataArray.length()+1), wbs, activities, resourceName, date
                                     ,totalHours);
                             subcontractorList.add(items);
 
                             subcontractorAdapter.notifyDataSetChanged();
-                            pDialog.dismiss();
                         }
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    } catch (JSONException e) {
+                    }catch (ParseException | JSONException e) {
                         e.printStackTrace();
                     }
 //                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    // TODO Auto-generated catch block
+                } catch (UnsupportedEncodingException | JSONException e) {
                     e.printStackTrace();
                 }
                 if (pDialog != null)
@@ -256,13 +307,26 @@ public class SubcontractorActivity extends NewActivity implements View.OnClickLi
             case R.id.fab_search:
             {
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setTitle("Search Subcontractor Timesheet !");
+                alert.setTitle("Search Subcontractors by Name or ID !");
                 // Set an EditText view to get user input
                 final EditText input = new EditText(this);
+                input.setMaxLines(1);
+                input.setImeOptions(EditorInfo.IME_ACTION_DONE);
                 alert.setView(input);
                 alert.setPositiveButton("Search", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        Toast.makeText(SubcontractorActivity.this, "Search for it .", Toast.LENGTH_SHORT).show();
+
+                        if (input.getText().toString().isEmpty()) {
+                            input.setError("Enter Search Field");
+                        } else {
+                            Intent intent = new Intent(SubcontractorActivity.this, SubcontractorActivity.class);
+                            intent.putExtra("search", "yes");
+                            intent.putExtra("searchText", input.getText().toString());
+
+                            Log.d("SEARCH TEXT", input.getText().toString());
+
+                            startActivity(intent);
+                        }
                     }
                 });
                 alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -290,6 +354,7 @@ public class SubcontractorActivity extends NewActivity implements View.OnClickLi
                         try
                         {
 //                            dataObject = response.getJSONObject(0);
+                            Log.d("RESPONSE JSON", response.toString());
                             dataArray = response.getJSONArray("data");
                             for(int i=0; i<dataArray.length();i++)
                             {
@@ -305,15 +370,32 @@ public class SubcontractorActivity extends NewActivity implements View.OnClickLi
                                 Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(date);
                                 date = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
 
-                                items = new SubcontractorList(subContractorLineItems, wbs, activities, resourceName, date
-                                        ,totalHours);
-                                subcontractorList.add(items);
+                                if (getIntent().hasExtra("search"))
+                                {
+                                    if (getIntent().getStringExtra("search").equals("yes")) {
 
-                                subcontractorAdapter.notifyDataSetChanged();
+                                        if (subContractorLineItems.toLowerCase().contains(searchText.toLowerCase()) || resourceName.toLowerCase().contains(searchText.toLowerCase())) {
+                                            items = new SubcontractorList(String.valueOf(i + 1), wbs, activities, resourceName, date
+                                                    , totalHours);
+                                            subcontractorList.add(items);
+
+                                            subcontractorAdapter.notifyDataSetChanged();
+
+
+                                        }
+                                    }
+                                }
+                                else
+                                {items = new SubcontractorList(String.valueOf(i + 1), wbs, activities, resourceName, date
+                                        , totalHours);
+                                    subcontractorList.add(items);
+
+                                    subcontractorAdapter.notifyDataSetChanged();
+
+
+                                }
                             }
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        } catch (JSONException e) {
+                        } catch (ParseException | JSONException e) {
                             e.printStackTrace();
                         }
 //                        setData(response,false);

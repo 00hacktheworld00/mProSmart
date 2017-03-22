@@ -33,6 +33,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+import java.util.List;
 
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
@@ -53,12 +55,17 @@ public class SubRegisterItemCreate extends AppCompatActivity {
     PreferenceManager pm;
     String url;
 
+    Button attachBtn;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sub_register_item_create);
 
-        Button createBtn, attachBtn;
+        Button createBtn;
+
+        attachBtn = (Button) findViewById(R.id.attachBtn);
 
         pm = new PreferenceManager(this);
         currentSubRegId =pm.getString("submittalRegistersId");
@@ -73,10 +80,18 @@ public class SubRegisterItemCreate extends AppCompatActivity {
 
         ArrayAdapter<String> adapterUom = new ArrayAdapter<String>(this,
                 android.R.layout.simple_dropdown_item_1line,
-                new String[] {"Active", "Inactive"});
+                new String[] {"Active", "Inactive", "Pending"});
 
         spinner_status.setAdapter(adapterUom);
 
+        attachBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(SubRegisterItemCreate.this, AttachmentActivity.class);
+                intent.putExtra("class", "SubmittalRegLine");
+                startActivity(intent);
+            }
+        });
 
         ArrayAdapter<String> adapterContractId = new ArrayAdapter<String>(this,
                 android.R.layout.simple_dropdown_item_1line,
@@ -86,15 +101,10 @@ public class SubRegisterItemCreate extends AppCompatActivity {
 
         createBtn = (Button) findViewById(R.id.createBtn);
 
-        attachBtn = (Button) findViewById(R.id.attachBtn);
 
-        attachBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(SubRegisterItemCreate.this, AttachmentActivity.class);
-                startActivity(intent);
-            }
-        });
+        cd = new ConnectionDetector(getApplicationContext());
+        isInternetPresent = cd.isConnectingToInternet();
+
 
         spinner_type.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -103,10 +113,7 @@ public class SubRegisterItemCreate extends AppCompatActivity {
             }
         });
 
-        cd = new ConnectionDetector(getApplicationContext());
-        isInternetPresent = cd.isConnectingToInternet();
-
-        url = getResources().getString(R.string.server_url) + "/getSubmittalType";
+        url = pm.getString("SERVER_URL") + "/getSubmittalType";
 
 
         if (!isInternetPresent) {
@@ -150,10 +157,7 @@ public class SubRegisterItemCreate extends AppCompatActivity {
                         e.printStackTrace();
                     }
 //                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    // TODO Auto-generated catch block
+                } catch (UnsupportedEncodingException | JSONException e) {
                     e.printStackTrace();
                 }
                 if (pDialog != null)
@@ -178,11 +182,11 @@ public class SubRegisterItemCreate extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                prepareItems();
+                saveItem();
             }
         });
     }
-    public void prepareItems()
+    public void saveItem()
     {
         JSONObject object = new JSONObject();
 
@@ -200,7 +204,22 @@ public class SubRegisterItemCreate extends AppCompatActivity {
             {
                 object.put("submittalStatusId","2");
             }
-            object.put("contractId",spinner_contract.getText().toString());
+            object.put("contractId","CON001");
+
+            if(pm.getString("className").equals("SubmittalRegister"))
+            {
+                object.put("lineNo", pm.getString("totalImageUrlSize"));
+            }
+            else
+            {
+                object.put("lineNo", "0");
+            }
+
+            if(pm.getString("className").equals("SubmittalRegLine"))
+            {
+                object.put("totalAttachments", pm.getString("totalImageUrlSize"));
+            }
+
         }
         catch (JSONException e)
         {
@@ -209,16 +228,33 @@ public class SubRegisterItemCreate extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(SubRegisterItemCreate.this);
 
-        String url = SubRegisterItemCreate.this.getResources().getString(R.string.server_url) + "/postSubmittalregisterLineItems";
+        String url = SubRegisterItemCreate.this.pm.getString("SERVER_URL") + "/postSubmittalregisterLineItems";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
+                            Log.d("SubReg create", response.toString());
+
                             if(response.getString("msg").equals("success"))
                             {
-                                Toast.makeText(SubRegisterItemCreate.this, "Submittal Resgiter Line Item Created. ID - " + response.getString("data"), Toast.LENGTH_SHORT).show();
+                                String totalImageUrls = pm.getString("totalImageUrls");
+                                if(pm.getString("className").equals("SubmittalRegLine") && isInternetPresent
+                                        && !totalImageUrls.isEmpty())
+                                {
+                                    uploadImage(response.getString("data"), totalImageUrls);
+                                }
+
+                                else
+                                {
+                                    if (pDialog != null)
+                                        pDialog.dismiss();
+
+                                    Toast.makeText(SubRegisterItemCreate.this, "Submittal Register Line Item Created. ID - " + response.getString("data"), Toast.LENGTH_SHORT).show();
+                                    Intent intent = new Intent(SubRegisterItemCreate.this, SubmittalRegisterActivity.class);
+                                    startActivity(intent);
+                                }
                             }
                             else
                             {
@@ -262,15 +298,15 @@ public class SubRegisterItemCreate extends AppCompatActivity {
                 pm.putString("urlSubmittalRegItem", url);
                 pm.putString("toastMessageSubmittalRegItem", "Submittal Register Line Item Created");
                 pm.putBoolean("createSubmittalRegItemPending", true);
+
+                Intent intent = new Intent(SubRegisterItemCreate.this, SubmittalRegisterActivity.class);
+                startActivity(intent);
             }
         }
         else
         {
             requestQueue.add(jor);
         }
-
-        Intent intent = new Intent(SubRegisterItemCreate.this, SubmittalRegisterActivity.class);
-        startActivity(intent);
     }
 
     private void callJsonArrayRequest() {
@@ -321,5 +357,72 @@ public class SubRegisterItemCreate extends AppCompatActivity {
         AppController.getInstance().addToRequestQueue(jsonObjectRequest);
         if(pDialog!=null)
             pDialog.dismiss();
+    }
+
+    public void uploadImage(final String id, String totalUrls) {
+
+        final List<String> imageList = Arrays.asList(totalUrls.split(","));
+        String seperateImageUrl;
+
+
+        for (int i = 0; i < imageList.size(); i++) {
+
+            final int count = i;
+            JSONObject object = new JSONObject();
+
+            try {
+                seperateImageUrl = imageList.get(i);
+
+                object.put("submittalregisterLineItemsId", id);
+                object.put("url", seperateImageUrl);
+
+                Log.d("JSON OBJ SENT", object.toString());
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+
+            RequestQueue requestQueue = Volley.newRequestQueue(SubRegisterItemCreate.this);
+
+            String url = SubRegisterItemCreate.this.pm.getString("SERVER_URL") + "/postSubmittalregisterLineItemFiles";
+
+            JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            try {
+
+                                Log.d("RESPONSE SERVER : ", response.toString());
+
+                                if (response.getString("msg").equals("success")) {
+
+                                    if (count == imageList.size() - 1) {
+                                        Toast.makeText(SubRegisterItemCreate.this, "Submittal Register Line created ID - " + id, Toast.LENGTH_SHORT).show();
+
+                                        if (pDialog != null)
+                                            pDialog.dismiss();
+                                        Intent intent = new Intent(SubRegisterItemCreate.this, SubmittalRegisterActivity.class);
+                                        startActivity(intent);
+                                    }
+                                }
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            //response success message display
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.e("Volley", "Error");
+                            Toast.makeText(SubRegisterItemCreate.this, error.toString(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+            );
+
+            requestQueue.add(jor);
+        }
     }
 }

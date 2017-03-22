@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.sadashivsinha.mprosmart.Activities.BudgetChanges;
@@ -22,8 +23,10 @@ public class AllBudgetChangeAdapter extends RecyclerView.Adapter<AllBudgetChange
     private List<AllBudgetChangeList> budget_list;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        private TextView sl_no, change_no, project_id, project_name, created_by, created_on, original_amount, current_budget,
-                total_budget, text_desc, contract_ref;
+        private TextView sl_no, change_no, project_id, project_name, created_by, created_on, original_amount,
+                total_budget, text_desc, contract_ref, current_budget_title, current_budget;
+
+        private RelativeLayout current_budget_layout;
 
 
         public MyViewHolder(final View view) {
@@ -35,10 +38,13 @@ public class AllBudgetChangeAdapter extends RecyclerView.Adapter<AllBudgetChange
             project_id = (TextView) view.findViewById(R.id.project_id);
             project_name = (TextView) view.findViewById(R.id.project_name);
             original_amount = (TextView) view.findViewById(R.id.original_amount);
-            current_budget = (TextView) view.findViewById(R.id.current_budget);
             total_budget = (TextView) view.findViewById(R.id.total_budget);
             text_desc = (TextView) view.findViewById(R.id.text_desc);
             contract_ref = (TextView) view.findViewById(R.id.contract_ref);
+            current_budget = (TextView) view.findViewById(R.id.current_budget);
+            current_budget_title = (TextView) view.findViewById(R.id.current_budget_title);
+
+            current_budget_layout = (RelativeLayout) view.findViewById(R.id.current_budget_layout);
 
 
             final PreferenceManager pm = new PreferenceManager(view.getContext());
@@ -88,6 +94,17 @@ public class AllBudgetChangeAdapter extends RecyclerView.Adapter<AllBudgetChange
         holder.total_budget.setText(String.valueOf(items.getTotal_budget()));
         holder.text_desc.setText(items.getDescription());
         holder.contract_ref.setText(items.getContractRefNo());
+
+        if(items.getDescription().equals("BUDGET DEDUCTED"))
+        {
+            holder.current_budget_layout.setBackgroundColor(holder.itemView.getResources().getColor(R.color.fancy_red));
+            holder.current_budget_title.setText("Budget Deducted = ");
+        }
+        else
+        {
+            holder.current_budget_layout.setBackgroundColor(holder.itemView.getResources().getColor(R.color.success_green));
+            holder.current_budget_title.setText("Budget Added = ");
+        }
 
     }
 

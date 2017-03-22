@@ -22,12 +22,13 @@ public class PunchItemsAdapter extends RecyclerView.Adapter<PunchItemsAdapter.My
     private List<MomList> momList;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView text_line_no, text_description;
+        public TextView text_line_no, text_description, original_line_no;
 
         public MyViewHolder(final View view) {
             super(view);
             text_line_no = (TextView) view.findViewById(R.id.text_line_no);
             text_description = (TextView) view.findViewById(R.id.text_description);
+            original_line_no = (TextView) view.findViewById(R.id.original_line_no);
 
             final PreferenceManager pm = new PreferenceManager(view.getContext());
 
@@ -35,7 +36,9 @@ public class PunchItemsAdapter extends RecyclerView.Adapter<PunchItemsAdapter.My
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(view.getContext(), PunchListItems.class);
+                    String originalLineNo = original_line_no.getText().toString();
                     String lineNo = text_line_no.getText().toString();
+                    pm.putString("originalLineNo",originalLineNo);
                     pm.putString("lineNo",lineNo);
                     view.getContext().startActivity(intent);
                 }
@@ -59,6 +62,7 @@ public class PunchItemsAdapter extends RecyclerView.Adapter<PunchItemsAdapter.My
         MomList items = momList.get(position);
         holder.text_line_no.setText(items.getText_line_no());
         holder.text_description.setText(items.getDescription());
+        holder.original_line_no.setText(String.valueOf(items.getOriginal_line_no()));
     }
 
     @Override

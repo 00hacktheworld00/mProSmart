@@ -46,131 +46,100 @@
                         android:paddingLeft="@dimen/_5sdp"
                         android:paddingRight="@dimen/_5sdp"
                         android:paddingTop="@dimen/_5sdp">
-
-                        <LinearLayout
+                        <ScrollView
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:id="@+id/main_layout">
+                            android:layout_height="match_parent">
 
-                            <com.example.sadashivsinha.mprosmart.font.HelveticaBold
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Line No. # "
-                                android:textColor="@color/colorPrimary"/>
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:padding="10dp"
-                                android:maxLines="1"
-                                android:inputType="textCapSentences"
-                                android:imeOptions="actionNext"
-                                android:textColorHint="#000000"
-                                android:textColor="#000000"
-                                android:background="@drawable/edittext_states_red"
-                                android:layout_marginBottom="@dimen/activity_vertical_margin"
-                                android:textSize="15sp"
-                                android:id="@+id/text_line_no"
-                                android:enabled="false" />
-
-                            <com.example.sadashivsinha.mprosmart.font.HelveticaBold
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Document Type"
-                                android:textColor="@color/colorPrimary"/>
-
-                            <EditText
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:padding="10dp"
-                                android:layout_marginBottom="@dimen/activity_vertical_margin"
-                                android:textColorHint="#000000"
-                                android:textColor="#000000"
-                                android:inputType="textCapSentences"
-                                android:imeOptions="actionDone"
-                                android:background="@drawable/edittext_states_red"
-                                android:textSize="15sp"
-                                android:id="@+id/text_doc_type"
-                                android:enabled="false"
-                                android:gravity="top" />
-
-                            <com.example.sadashivsinha.mprosmart.font.HelveticaBold
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Short Description"
-                                android:textColor="@color/colorPrimary"/>
-
-                            <EditText
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:padding="10dp"
-                                android:layout_marginBottom="@dimen/activity_vertical_margin"
-                                android:textColorHint="#000000"
-                                android:textColor="#000000"
-                                android:maxLines="1"
-                                android:inputType="textCapSentences"
-                                android:imeOptions="actionDone"
-                                android:background="@drawable/edittext_states_red"
-                                android:textSize="15sp"
-                                android:id="@+id/text_short_desc"
-                                android:enabled="false" />
 
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:orientation="vertical"
-                                android:weightSum="2">
+                                android:id="@+id/main_layout">
+
+                                <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Line No. # "
+                                    android:textColor="@color/colorPrimary"/>
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:padding="10dp"
+                                    android:maxLines="1"
+                                    android:inputType="textCapSentences"
+                                    android:imeOptions="actionNext"
+                                    android:textColorHint="#000000"
+                                    android:textColor="#000000"
+                                    android:background="@drawable/edittext_states_red"
+                                    android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                    android:textSize="15sp"
+                                    android:id="@+id/text_line_no"
+                                    android:enabled="false" />
+
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="0dp"
+                                    android:padding="10dp"
+                                    android:maxLines="1"
+                                    android:inputType="textCapSentences"
+                                    android:imeOptions="actionNext"
+                                    android:textColorHint="#000000"
+                                    android:textColor="#000000"
+                                    android:background="@drawable/edittext_states_red"
+                                    android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                    android:textSize="15sp"
+                                    android:id="@+id/original_line_no"
+                                    android:enabled="false" />
+
+                                <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Document Type"
+                                    android:textColor="@color/colorPrimary"/>
+
+                                <EditText
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:padding="10dp"
+                                    android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                    android:textColorHint="#000000"
+                                    android:textColor="#000000"
+                                    android:inputType="textCapSentences"
+                                    android:imeOptions="actionDone"
+                                    android:background="@drawable/edittext_states_red"
+                                    android:textSize="15sp"
+                                    android:id="@+id/text_doc_type"
+                                    android:enabled="false"
+                                    android:gravity="top" />
+
+                                <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Short Description"
+                                    android:textColor="@color/colorPrimary"/>
+
+                                <EditText
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:padding="10dp"
+                                    android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                    android:textColorHint="#000000"
+                                    android:textColor="#000000"
+                                    android:maxLines="1"
+                                    android:inputType="textCapSentences"
+                                    android:imeOptions="actionDone"
+                                    android:background="@drawable/edittext_states_red"
+                                    android:textSize="15sp"
+                                    android:id="@+id/text_short_desc"
+                                    android:enabled="false" />
 
                                 <LinearLayout
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:orientation="vertical"
-                                    android:layout_weight="1">
-
-
-                                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="Variation from contract"
-                                        android:textColor="@color/colorPrimary"/>
-
-                                    <EditText
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:padding="10dp"
-                                        android:layout_marginBottom="@dimen/activity_vertical_margin"
-                                        android:textColorHint="#000000"
-                                        android:textColor="#000000"
-                                        android:maxLines="1"
-                                        android:inputType="textCapSentences"
-                                        android:imeOptions="actionDone"
-                                        android:background="@drawable/edittext_states_red"
-                                        android:textSize="15sp"
-                                        android:id="@+id/text_variation"
-                                        android:enabled="false" />
-
-
-                                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="Variation from Contract Document Description  "
-                                        android:textColor="@color/colorPrimary"/>
-
-                                    <EditText
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:padding="10dp"
-                                        android:layout_marginBottom="@dimen/activity_vertical_margin"
-                                        android:textColorHint="#000000"
-                                        android:textColor="#000000"
-                                        android:maxLines="1"
-                                        android:inputType="textCapSentences"
-                                        android:imeOptions="actionDone"
-                                        android:background="@drawable/edittext_states_red"
-                                        android:textSize="15sp"
-                                        android:enabled="false"
-                                        android:id="@+id/text_variation_desc" />
+                                    android:weightSum="2">
 
                                     <LinearLayout
                                         android:layout_width="match_parent"
@@ -178,13 +147,14 @@
                                         android:orientation="vertical"
                                         android:layout_weight="1">
 
+
                                         <com.example.sadashivsinha.mprosmart.font.HelveticaBold
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Line Item Status"
+                                            android:text="Variation from contract"
                                             android:textColor="@color/colorPrimary"/>
 
-                                        <com.weiwangcn.betterspinner.library.BetterSpinner
+                                        <EditText
                                             android:layout_width="match_parent"
                                             android:layout_height="wrap_content"
                                             android:padding="10dp"
@@ -196,38 +166,102 @@
                                             android:imeOptions="actionDone"
                                             android:background="@drawable/edittext_states_red"
                                             android:textSize="15sp"
-                                            android:id="@+id/spinner_status"
+                                            android:id="@+id/text_variation"
                                             android:enabled="false" />
+
+
+                                        <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="Variation from Contract Document Description  "
+                                            android:textColor="@color/colorPrimary"/>
+
+                                        <EditText
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:padding="10dp"
+                                            android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                            android:textColorHint="#000000"
+                                            android:textColor="#000000"
+                                            android:maxLines="1"
+                                            android:inputType="textCapSentences"
+                                            android:imeOptions="actionDone"
+                                            android:background="@drawable/edittext_states_red"
+                                            android:textSize="15sp"
+                                            android:enabled="false"
+                                            android:id="@+id/text_variation_desc" />
+
+                                        <LinearLayout
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:orientation="vertical"
+                                            android:layout_weight="1">
+
+                                            <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                                                android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content"
+                                                android:text="Line Item Status"
+                                                android:textColor="@color/colorPrimary"/>
+
+                                            <com.weiwangcn.betterspinner.library.BetterSpinner
+                                                android:layout_width="match_parent"
+                                                android:layout_height="wrap_content"
+                                                android:padding="10dp"
+                                                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                                android:textColorHint="#000000"
+                                                android:textColor="#000000"
+                                                android:maxLines="1"
+                                                android:inputType="textCapSentences"
+                                                android:imeOptions="actionDone"
+                                                android:background="@drawable/edittext_states_red"
+                                                android:textSize="15sp"
+                                                android:id="@+id/spinner_status"
+                                                android:enabled="false" />
+                                        </LinearLayout>
+
+                                        <LinearLayout
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:orientation="vertical"
+                                            android:visibility="gone"
+                                            android:layout_weight="1">
+
+                                            <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                                                android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content"
+                                                android:text="Submittal Register Type"
+                                                android:textColor="@color/colorPrimary"/>
+
+                                            <com.weiwangcn.betterspinner.library.BetterSpinner
+                                                android:layout_width="match_parent"
+                                                android:layout_height="wrap_content"
+                                                android:padding="10dp"
+                                                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                                android:textColorHint="#000000"
+                                                android:textColor="#000000"
+                                                android:maxLines="1"
+                                                android:inputType="textCapSentences"
+                                                android:imeOptions="actionDone"
+                                                android:background="@drawable/edittext_states_red"
+                                                android:textSize="15sp"
+                                                android:id="@+id/spinner_type"
+                                                android:enabled="false" />
+                                        </LinearLayout>
                                     </LinearLayout>
+
                                 </LinearLayout>
-                            </LinearLayout>
 
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="@dimen/activity_vertical_margin"
-                                android:orientation="horizontal"
-                                android:weightSum="2">
-
-                                <LinearLayout
-                                    android:layout_width="match_parent"
+                                <Button
+                                    android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_weight="1">
-                                    <Button
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="EDIT"
-                                        android:id="@+id/editBtn"
-                                        android:backgroundTint="@color/colorPrimary"
-                                        style="@style/Widget.AppCompat.Button.Colored"/>
-                                </LinearLayout>
+                                    android:text="EDIT"
+                                    android:id="@+id/editBtn"
+                                    android:backgroundTint="@color/colorPrimary"
+                                    style="@style/Widget.AppCompat.Button.Colored"/>
 
                                 <LinearLayout
                                     android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="1"
-                                    android:gravity="end">
+                                    android:layout_height="wrap_content">
 
                                     <TextView
                                         android:layout_width="wrap_content"
@@ -239,7 +273,7 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="match_parent"
-                                        android:text="2"
+                                        android:text="0"
                                         android:id="@+id/no_of_attachments"
                                         android:gravity="center" />
 
@@ -252,9 +286,9 @@
                                         android:id="@+id/attachBtn" />
                                 </LinearLayout>
 
-                            </LinearLayout>
 
-                        </LinearLayout>
+                            </LinearLayout>
+                        </ScrollView>
                     </RelativeLayout>
                 </RelativeLayout>
             </RelativeLayout>

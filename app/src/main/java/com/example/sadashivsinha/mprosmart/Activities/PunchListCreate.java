@@ -43,13 +43,14 @@ public class PunchListCreate extends AppCompatActivity implements DatePickerDial
     JSONArray dataArray;
     JSONObject dataObject;
     String[] vendorIdArray;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_punch_list_create);
 
-        PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
         currentUserName = pm.getString("name");
         currentUserId = pm.getString("userId");
@@ -142,7 +143,7 @@ public class PunchListCreate extends AppCompatActivity implements DatePickerDial
 
         RequestQueue requestQueue = Volley.newRequestQueue(PunchListCreate.this);
 
-        String url = PunchListCreate.this.getResources().getString(R.string.server_url) + "/postPunchLists";
+        String url = PunchListCreate.this.pm.getString("SERVER_URL") + "/postPunchLists";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -175,7 +176,7 @@ public class PunchListCreate extends AppCompatActivity implements DatePickerDial
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getVendors";
+        String url = pm.getString("SERVER_URL") + "/getVendors";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {

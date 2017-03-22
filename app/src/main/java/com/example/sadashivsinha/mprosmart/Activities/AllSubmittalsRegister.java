@@ -17,6 +17,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -29,6 +30,7 @@ import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.sadashivsinha.mprosmart.Adapters.AllSubmittalRegisterAdapter;
 import com.example.sadashivsinha.mprosmart.Adapters.MyAdapter;
+import com.example.sadashivsinha.mprosmart.ModelLists.AllBoqList;
 import com.example.sadashivsinha.mprosmart.ModelLists.MomList;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
@@ -61,13 +63,14 @@ public class AllSubmittalsRegister extends NewActivity implements View.OnClickLi
     MomList items;
     JSONArray dataArray;
     JSONObject dataObject;
-    String submittalRegistersId, projectId, Description, startDate, EndDate, Status, createdDate, createdBy, priority;
+    String submittalRegistersId, approved,  projectId, Description, startDate, EndDate, Status, createdDate, createdBy, priority;
     ConnectionDetector cd;
     public static final String TAG = NewAllProjects.class.getSimpleName();
     Boolean isInternetPresent = false;
     private ProgressDialog pDialog;
     String currentProjectNo, currentProjectName;
-    String url;
+    String url, searchText;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +79,16 @@ public class AllSubmittalsRegister extends NewActivity implements View.OnClickLi
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        if (getIntent().hasExtra("search")) {
+            if (getIntent().getStringExtra("search").equals("yes")) {
+
+                searchText = getIntent().getStringExtra("searchText");
+
+                getSupportActionBar().setTitle("Submittal Register Search Results : " + searchText);
+            }
+        }
+
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
         currentProjectName = pm.getString("projectName");
 
@@ -89,7 +101,8 @@ public class AllSubmittalsRegister extends NewActivity implements View.OnClickLi
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(allSubmittalRegisterAdapter);
 
-        url = getResources().getString(R.string.server_url) + "/getSubmittialRegister?projectId='"+currentProjectNo+"'";
+        url = pm.getString("SERVER_URL") + "/getSubmittialRegister?projectId=\""+currentProjectNo+"\"";
+        Log.d("URL ", url);
 
 
         if (!isInternetPresent) {
@@ -124,6 +137,7 @@ public class AllSubmittalsRegister extends NewActivity implements View.OnClickLi
                             createdDate = dataObject.getString("createdDate");
                             createdBy = dataObject.getString("createdBy");
                             priority = dataObject.getString("priority");
+                            approved = dataObject.getString("approved");
 
 
                             Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(startDate);
@@ -135,22 +149,75 @@ public class AllSubmittalsRegister extends NewActivity implements View.OnClickLi
                             tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(createdDate);
                             createdDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
 
-                            items = new MomList(submittalRegistersId, String.valueOf(i+1), projectId, currentProjectName, createdDate, createdBy, Status, priority, startDate, EndDate);
+                            if (getIntent().hasExtra("search"))
+                            {
+                                if (getIntent().getStringExtra("search").equals("yes")) {
+
+                                    if (submittalRegistersId.toLowerCase().contains(searchText.toLowerCase())) {
+
+                                        items = new MomList(submittalRegistersId, String.valueOf(i+1), projectId, currentProjectName, createdDate, createdBy, Status, priority, startDate, EndDate,
+                                                Integer.parseInt(approved));
+                                        momList.add(items);
+
+                                        allSubmittalRegisterAdapter.notifyDataSetChanged();
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                items = new MomList(submittalRegistersId, String.valueOf(i+1), projectId, currentProjectName, createdDate, createdBy, Status, priority, startDate, EndDate,
+                                        Integer.parseInt(approved));
+                                momList.add(items);
+
+                                allSubmittalRegisterAdapter.notifyDataSetChanged();
+                            }
+
+                            pDialog.dismiss();
+                        }
+
+                        Boolean createSubmittalRegisterPending = pm.getBoolean("createSubmittalRegisterPending");
+
+                        if(createSubmittalRegisterPending)
+                        {
+
+                            String jsonObjectVal = pm.getString("objectSubmittalRegister");
+                            Log.d("JSON SubR PENDING :", jsonObjectVal);
+
+                            JSONObject jsonObjectPending = new JSONObject(jsonObjectVal);
+                            Log.d("JSONObj SubR PENDING :", jsonObjectPending.toString());
+
+                            projectId = dataObject.getString("projectId");
+                            Description = dataObject.getString("Description");
+                            startDate = dataObject.getString("startDate");
+                            EndDate = dataObject.getString("EndDate");
+                            Status = dataObject.getString("Status");
+                            createdDate = dataObject.getString("createdDate");
+                            createdBy = dataObject.getString("createdBy");
+                            priority = dataObject.getString("priority");
+                            approved = dataObject.getString("approved");
+
+
+                            Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(startDate);
+                            startDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+
+                            tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(EndDate);
+                            EndDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+
+                            tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(createdDate);
+                            createdDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+
+                            items = new MomList(getResources().getString(R.string.waiting_to_connect), String.valueOf(dataArray.length()+1), projectId, currentProjectName, createdDate, createdBy, Status, priority, startDate, EndDate,
+                                    Integer.parseInt(approved));
                             momList.add(items);
 
                             allSubmittalRegisterAdapter.notifyDataSetChanged();
-                            pDialog.dismiss();
-                        }
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    } catch (JSONException e) {
+                    }
+
+                    }catch (ParseException | JSONException e) {
                         e.printStackTrace();
                     }
 //                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    // TODO Auto-generated catch block
+                } catch (UnsupportedEncodingException | JSONException e) {
                     e.printStackTrace();
                 }
                 if (pDialog != null)
@@ -288,13 +355,26 @@ public class AllSubmittalsRegister extends NewActivity implements View.OnClickLi
             case R.id.fab_search:
             {
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setTitle("Search Submittal Register !");
+                alert.setTitle("Search Submittal Register by ID !");
                 // Set an EditText view to get user input
                 final EditText input = new EditText(this);
+                input.setMaxLines(1);
+                input.setImeOptions(EditorInfo.IME_ACTION_DONE);
                 alert.setView(input);
                 alert.setPositiveButton("Search", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        Toast.makeText(AllSubmittalsRegister.this, "Search for it .", Toast.LENGTH_SHORT).show();
+
+                        if (input.getText().toString().isEmpty()) {
+                            input.setError("Enter Search Field");
+                        } else {
+                            Intent intent = new Intent(AllSubmittalsRegister.this, AllSubmittalsRegister.class);
+                            intent.putExtra("search", "yes");
+                            intent.putExtra("searchText", input.getText().toString());
+
+                            Log.d("SEARCH TEXT", input.getText().toString());
+
+                            startActivity(intent);
+                        }
                     }
                 });
                 alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -336,6 +416,7 @@ public class AllSubmittalsRegister extends NewActivity implements View.OnClickLi
                                 createdDate = dataObject.getString("createdDate");
                                 createdBy = dataObject.getString("createdBy");
                                 priority = dataObject.getString("priority");
+                                approved = dataObject.getString("approved");
 
 
                                 Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(startDate);
@@ -347,10 +428,29 @@ public class AllSubmittalsRegister extends NewActivity implements View.OnClickLi
                                 tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(createdDate);
                                 createdDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
 
-                                items = new MomList(submittalRegistersId, String.valueOf(i+1), projectId, currentProjectName, createdDate, createdBy, Status, priority, startDate, EndDate);
-                                momList.add(items);
+                                if (getIntent().hasExtra("search"))
+                                {
+                                    if (getIntent().getStringExtra("search").equals("yes")) {
 
-                                allSubmittalRegisterAdapter.notifyDataSetChanged();
+                                        if (submittalRegistersId.toLowerCase().contains(searchText.toLowerCase())) {
+
+                                            items = new MomList(submittalRegistersId, String.valueOf(i+1), projectId, currentProjectName, createdDate, createdBy, Status, priority, startDate, EndDate,
+                                                    Integer.parseInt(approved));
+                                            momList.add(items);
+
+                                            allSubmittalRegisterAdapter.notifyDataSetChanged();
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    items = new MomList(submittalRegistersId, String.valueOf(i+1), projectId, currentProjectName, createdDate, createdBy, Status, priority, startDate, EndDate,
+                                            Integer.parseInt(approved));
+                                    momList.add(items);
+
+                                    allSubmittalRegisterAdapter.notifyDataSetChanged();
+                                }
+
                             }
                         } catch (ParseException e) {
                             e.printStackTrace();
@@ -376,7 +476,7 @@ public class AllSubmittalsRegister extends NewActivity implements View.OnClickLi
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(AllSubmittalsRegister.this, ViewPurchaseOrders.class);
+        Intent intent = new Intent(AllSubmittalsRegister.this, SiteProjectDelivery.class);
         startActivity(intent);
     }
 

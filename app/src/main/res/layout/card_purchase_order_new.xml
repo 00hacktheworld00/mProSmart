@@ -56,6 +56,16 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
+
+                <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="NOT APPROVED"
+                    android:id="@+id/text_not_approved"
+                    android:layout_marginLeft="@dimen/activity_vertical_margin"
+                    android:layout_marginBottom="@dimen/very_small_margin"
+                    android:textColor="@color/fancy_red"/>
+
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

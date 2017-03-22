@@ -197,7 +197,8 @@
                                             android:text="Item Quantity"
                                             android:layout_marginTop="@dimen/activity_vertical_margin"
                                             android:layout_marginBottom="@dimen/very_very_small_margin"
-                                            android:textColor="@color/colorPrimary"/>
+                                            android:textColor="@color/colorPrimary"
+                                            android:id="@+id/label_quantity" />
 
                                         <EditText
                                             android:layout_width="match_parent"

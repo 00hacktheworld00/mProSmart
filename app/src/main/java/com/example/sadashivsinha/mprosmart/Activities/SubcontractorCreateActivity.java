@@ -30,13 +30,14 @@ public class SubcontractorCreateActivity extends AppCompatActivity {
     EditText text_subcontractor_name, text_created_by, text_date_created;
     ProgressDialog pDialog;
     String currentProjectNo, currentUserName;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_subcontractor_create);
 
-        PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
         currentUserName = pm.getString("name");
 
@@ -96,7 +97,7 @@ public class SubcontractorCreateActivity extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(SubcontractorCreateActivity.this);
 
-        String url = SubcontractorCreateActivity.this.getResources().getString(R.string.server_url) + "/postSubContractor";
+        String url = SubcontractorCreateActivity.this.pm.getString("SERVER_URL") + "/postSubContractor";
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
                     @Override

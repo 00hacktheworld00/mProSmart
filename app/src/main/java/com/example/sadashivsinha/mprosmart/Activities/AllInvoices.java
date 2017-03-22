@@ -5,10 +5,8 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -19,21 +17,24 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.android.volley.Cache;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.Adapters.InvoiceListAdapter;
 import com.example.sadashivsinha.mprosmart.Adapters.MyAdapter;
 import com.example.sadashivsinha.mprosmart.ModelLists.MomList;
+import com.example.sadashivsinha.mprosmart.ModelLists.PurchaseOrdersList;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
+import com.example.sadashivsinha.mprosmart.Utils.AppController;
 import com.example.sadashivsinha.mprosmart.Utils.ConnectionDetector;
 import com.example.sadashivsinha.mprosmart.Utils.CsvCreateUtility;
 import com.github.clans.fab.FloatingActionButton;
@@ -42,8 +43,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 
 public class AllInvoices extends NewActivity implements View.OnClickListener  {
     private List<MomList> momList = new ArrayList<>();
@@ -53,12 +58,14 @@ public class AllInvoices extends NewActivity implements View.OnClickListener  {
     JSONArray dataArray;
     JSONObject dataObject;
     String invoiceId, vendorInvoiceNo, purchaseOrderNumber, projectId, createdBy, createdDate, vendorId;
+    Boolean isInternetPresent = false;
     ConnectionDetector cd;
     public static final String TAG = AllInvoices.class.getSimpleName();
     MomList items;
     private ProgressDialog pDialog;
     String currentProjectNo;
-    Boolean isInternetPresent = false;
+    String url, searchText;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,52 +73,134 @@ public class AllInvoices extends NewActivity implements View.OnClickListener  {
         setContentView(R.layout.activity_all_inovices);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        final PreferenceManager pm = new PreferenceManager(getApplicationContext());
+
+        if (getIntent().hasExtra("search")) {
+            if (getIntent().getStringExtra("search").equals("yes")) {
+
+                searchText = getIntent().getStringExtra("searchText");
+
+                getSupportActionBar().setTitle("Invoice Search Results : " + searchText);
+            }
+        }
+
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
 
         cd = new ConnectionDetector(getApplicationContext());
         isInternetPresent = cd.isConnectingToInternet();
 
+        url = pm.getString("SERVER_URL") + "/getAllInvoice?projectId=\""+currentProjectNo+"\"";
+
+        invoiceListAdapter = new InvoiceListAdapter(momList);
+        recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(AllInvoices.this));
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setAdapter(invoiceListAdapter);
+
         // check for Internet status
         if (!isInternetPresent) {
             // Internet connection is not present
             // Ask user to connect to Internet
-            RelativeLayout main_content = (RelativeLayout) findViewById(R.id.main_content);
-            Snackbar snackbar = Snackbar.make(main_content,getResources().getString(R.string.no_internet_error), Snackbar.LENGTH_LONG);
-            snackbar.show();
-        }
-        pDialog = new ProgressDialog(AllInvoices.this);
-        pDialog.setMessage("Getting Data ...");
-        pDialog.setIndeterminate(false);
-        pDialog.setCancelable(true);
-        pDialog.show();
+            RelativeLayout main_layout = (RelativeLayout) findViewById(R.id.main_layout);
+            Crouton.cancelAllCroutons();
+            Crouton.makeText(AllInvoices.this, R.string.no_internet_error, Style.ALERT, main_layout).show();
 
-        class MyTask extends AsyncTask<Void, Void, Void>
+            pDialog = new ProgressDialog(AllInvoices.this);
+            pDialog.setMessage("Getting cache data");
+            pDialog.show();
+
+
+            Cache cache = AppController.getInstance().getRequestQueue().getCache();
+            Cache.Entry entry = cache.get(url);
+            if (entry != null) {
+                //Cache data available.
+                try {
+                    String data = new String(entry.data, "UTF-8");
+                    Log.d("CACHE DATA", data);
+                    JSONObject jsonObject = new JSONObject(data);
+                    try {
+                        dataArray = jsonObject.getJSONArray("data");
+                        for (int i = 0; i < dataArray.length(); i++) {
+                            dataObject = dataArray.getJSONObject(i);
+                            projectId = dataObject.getString("projectId");
+
+                            if (projectId.equals(currentProjectNo)) {
+                                invoiceId = dataObject.getString("invoiceId");
+                                vendorInvoiceNo = dataObject.getString("vendorInvoiceNo");
+                                vendorId = dataObject.getString("vendorId");
+                                purchaseOrderNumber = dataObject.getString("purchaseOrderNumber");
+                                createdBy = dataObject.getString("createdBy");
+                                createdDate = dataObject.getString("createdDate");
+
+                                if (getIntent().hasExtra("search"))
+                                {
+                                    if (getIntent().getStringExtra("search").equals("yes")) {
+
+                                        if (invoiceId.toLowerCase().contains(searchText.toLowerCase()) ||
+                                                vendorInvoiceNo.toLowerCase().contains(searchText.toLowerCase())){
+
+                                            items = new MomList(String.valueOf(i + 1), invoiceId, vendorInvoiceNo, vendorId, purchaseOrderNumber, createdDate, createdBy);
+                                            momList.add(items);
+                                            invoiceListAdapter.notifyDataSetChanged();
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    items = new MomList(String.valueOf(i + 1), invoiceId, vendorInvoiceNo, vendorId, purchaseOrderNumber, createdDate, createdBy);
+                                    momList.add(items);
+                                    invoiceListAdapter.notifyDataSetChanged();
+                                }
+
+
+                                pDialog.dismiss();
+                            }
+                        }
+
+                        Boolean createInvoicePending = pm.getBoolean("createInvoicePending");
+
+                        if (createInvoicePending) {
+
+                            String jsonObjectVal = pm.getString("objectInvoice");
+                            Log.d("JSON QIR PENDING :", jsonObjectVal);
+
+                            JSONObject jsonObjectPending = new JSONObject(jsonObjectVal);
+                            Log.d("JSONObj QIR PENDING :", jsonObjectPending.toString());
+
+                            vendorInvoiceNo = dataObject.getString("vendorInvoiceNo");
+                            vendorId = dataObject.getString("vendorId");
+                            purchaseOrderNumber = dataObject.getString("purchaseOrderNumber");
+                            createdBy = dataObject.getString("createdBy");
+                            createdDate = dataObject.getString("createdDate");
+
+                            items = new MomList(String.valueOf(dataArray.length()+1),  getResources().getString(R.string.waiting_to_connect) , vendorInvoiceNo, vendorId, purchaseOrderNumber, createdDate, createdBy);
+                            momList.add(items);
+                            invoiceListAdapter.notifyDataSetChanged();
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
+                } catch (UnsupportedEncodingException | JSONException e) {
+                    e.printStackTrace();
+                }
+                if (pDialog != null)
+                    pDialog.dismiss();
+            }
+            else
+            {
+                Toast.makeText(AllInvoices.this, "Offline Data Not available for this Invoice", Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        }
+
+        else
         {
-            @Override protected void onPreExecute()
-            {
-                invoiceListAdapter = new InvoiceListAdapter(momList);
-                recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
-                recyclerView.setLayoutManager(new LinearLayoutManager(AllInvoices.this));
-                recyclerView.setHasFixedSize(true);
-                recyclerView.setAdapter(invoiceListAdapter);
-
-            }
-
-            @Override
-            protected Void doInBackground(Void... params)
-            {
-                prepareItems();
-                return null;
-            }
-
-            @Override protected void onPostExecute(Void result)
-            {
-                invoiceListAdapter.notifyDataSetChanged();
-            }
+            // Cache data not exist.
+            callJsonArrayRequest();
         }
 
-        new MyTask().execute();
 
         mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView); // Assigning the RecyclerView Object to the xml View
         mRecyclerView.setHasFixedSize(true);                            // Letting the system know that the list objects are of fixed size
@@ -219,6 +308,8 @@ public class AllInvoices extends NewActivity implements View.OnClickListener  {
                 }
 
             }
+            break;
+
             case R.id.fab_add:
             {
                 Intent intent = new Intent(AllInvoices.this, InvoiceCreate.class);
@@ -228,13 +319,26 @@ public class AllInvoices extends NewActivity implements View.OnClickListener  {
             case R.id.fab_search:
             {
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setTitle("Search invoice !");
+                alert.setTitle("Search Invoices by ID or Vendor Invoice ID !");
                 // Set an EditText view to get user input
                 final EditText input = new EditText(this);
+                input.setMaxLines(1);
+                input.setImeOptions(EditorInfo.IME_ACTION_DONE);
                 alert.setView(input);
                 alert.setPositiveButton("Search", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        Toast.makeText(AllInvoices.this, "Search for it .", Toast.LENGTH_SHORT).show();
+
+                        if (input.getText().toString().isEmpty()) {
+                            input.setError("Enter Search Field");
+                        } else {
+                            Intent intent = new Intent(AllInvoices.this, AllInvoices.class);
+                            intent.putExtra("search", "yes");
+                            intent.putExtra("searchText", input.getText().toString());
+
+                            Log.d("SEARCH TEXT", input.getText().toString());
+
+                            startActivity(intent);
+                        }
                     }
                 });
                 alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -247,69 +351,78 @@ public class AllInvoices extends NewActivity implements View.OnClickListener  {
             break;
         }
     }
+    private void callJsonArrayRequest() {
+        // TODO Auto-generated method stub
 
-    public void prepareItems()
-    {
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        pDialog = new ProgressDialog(AllInvoices.this);
+        pDialog.setMessage("Getting server data");
+        pDialog.show();
 
-        String url = getResources().getString(R.string.server_url) + "/getAllInvoice?projectId='"+currentProjectNo+"'";
-
-        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-
-                        try{
-
-                            String type = response.getString("type");
-
-                            if(type.equals("ERROR"))
+                        try
+                        {
+//                            dataObject = response.getJSONObject(0);
+                            dataArray = response.getJSONArray("data");
+                            for(int i=0; i<dataArray.length();i++)
                             {
-                                Toast.makeText(AllInvoices.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
-                            }
+                                dataObject = dataArray.getJSONObject(i);
+                                projectId = dataObject.getString("projectId");
 
-                            if(type.equals("INFO"))
-                            {
-                                dataArray = response.getJSONArray("data");
-                                for(int i=0; i<dataArray.length();i++)
+                                if(projectId.equals(currentProjectNo))
                                 {
-                                    dataObject = dataArray.getJSONObject(i);
-                                    projectId = dataObject.getString("projectId");
+                                    invoiceId = dataObject.getString("invoiceId");
+                                    vendorInvoiceNo = dataObject.getString("vendorInvoiceNo");
+                                    vendorId = dataObject.getString("vendorId");
+                                    purchaseOrderNumber = dataObject.getString("purchaseOrderNumber");
+                                    createdBy = dataObject.getString("createdBy");
+                                    createdDate = dataObject.getString("createdDate");
 
-                                    if(projectId.equals(currentProjectNo))
+                                    if (getIntent().hasExtra("search"))
                                     {
-                                        invoiceId = dataObject.getString("invoiceId");
-                                        vendorInvoiceNo = dataObject.getString("vendorInvoiceNo");
-                                        vendorId = dataObject.getString("vendorId");
-                                        purchaseOrderNumber = dataObject.getString("purchaseOrderNumber");
-                                        createdBy = dataObject.getString("createdBy");
-                                        createdDate = dataObject.getString("createdDate");
+                                        if (getIntent().getStringExtra("search").equals("yes")) {
 
-                                        items = new MomList(String.valueOf(i+1), invoiceId, vendorInvoiceNo, vendorId, purchaseOrderNumber, createdDate, createdBy);
+                                            if (invoiceId.toLowerCase().contains(searchText.toLowerCase()) ||
+                                                    vendorInvoiceNo.toLowerCase().contains(searchText.toLowerCase())){
+
+                                                items = new MomList(String.valueOf(i + 1), invoiceId, vendorInvoiceNo, vendorId, purchaseOrderNumber, createdDate, createdBy);
+                                                momList.add(items);
+                                                invoiceListAdapter.notifyDataSetChanged();
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        items = new MomList(String.valueOf(i + 1), invoiceId, vendorInvoiceNo, vendorId, purchaseOrderNumber, createdDate, createdBy);
                                         momList.add(items);
                                         invoiceListAdapter.notifyDataSetChanged();
                                     }
                                 }
                             }
-                            pDialog.dismiss();
-                        }catch(JSONException e){e.printStackTrace();}
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+//                        setData(response,false);
                     }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("Volley","Error");
-
-                    }
-                }
-        );
-        requestQueue.add(jor);
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        });
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(jsonObjectRequest);
+        if(pDialog!=null)
+            pDialog.dismiss();
     }
-
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(AllInvoices.this, ViewPurchaseOrders.class);
-        intent.putExtra("projectNo","1");
+        Intent intent = new Intent(AllInvoices.this, SiteProcurementActivity.class);
         startActivity(intent);
     }
 

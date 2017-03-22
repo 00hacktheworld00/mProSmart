@@ -6,10 +6,10 @@ package com.example.sadashivsinha.mprosmart.ModelLists;
 public class PurchaseOrdersList{
 
     private String project_number, date, receipt_no,created_by, created_on, total_amount;
-    private String  po_index, po_number, vendor_code, no_of_items, percent_received, last_updated, receipt_index;
+    private String  po_index, po_number, vendor_code, no_of_items, percent_received, last_updated, receipt_index, approved;
 
     public PurchaseOrdersList(String po_index, String po_number, String vendor_code, String created_on,
-                              String created_by, String total_amount)
+                              String created_by, String total_amount, String approved)
     {
         this.po_index = po_index;
         this.po_number = po_number;
@@ -17,6 +17,7 @@ public class PurchaseOrdersList{
         this.created_on = created_on;
         this.created_by = created_by;
         this.total_amount = total_amount;
+        this.approved = approved;
     }
 
 
@@ -30,6 +31,10 @@ public class PurchaseOrdersList{
         this.date = date;
         this.receipt_no = receipt_no;
         this.receipt_index = receipt_index;
+    }
+
+    public String getApproved() {
+        return approved;
     }
 
     public String getTotal_amount() {

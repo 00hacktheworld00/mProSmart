@@ -6,11 +6,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.TextView;
+import android.widget.LinearLayout;
 
 import com.example.sadashivsinha.mprosmart.Activities.AddResourceActivity;
 import com.example.sadashivsinha.mprosmart.ModelLists.AllAddResourcesList;
 import com.example.sadashivsinha.mprosmart.R;
+import com.example.sadashivsinha.mprosmart.font.HelveticaBold;
+import com.example.sadashivsinha.mprosmart.font.HelveticaRegular;
 
 import java.util.List;
 
@@ -22,21 +24,26 @@ public class AllAddResourcesAdapter extends RecyclerView.Adapter<AllAddResources
     private List<AllAddResourcesList> resources_list;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        private TextView sl_no, res_id, res_name, res_type, designation, email, phone, rate_per_hour, currency;
+        private HelveticaRegular sl_no,res_type, designation, email, phone, rate_per_hour, currency, res_subcontractor;
+        private HelveticaBold  res_id, res_name;
         private ImageButton editBtn;
+        LinearLayout sub_layout;
 
 
         public MyViewHolder(final View view) {
             super(view);
-            sl_no = (TextView) view.findViewById(R.id.sl_no);
-            res_id = (TextView) view.findViewById(R.id.res_id);
-            res_name = (TextView) view.findViewById(R.id.res_name);
-            res_type = (TextView) view.findViewById(R.id.res_type);
-            designation = (TextView) view.findViewById(R.id.designation);
-            email = (TextView) view.findViewById(R.id.email);
-            phone = (TextView) view.findViewById(R.id.phone);
-            rate_per_hour = (TextView) view.findViewById(R.id.rate_per_hour);
-            currency = (TextView) view.findViewById(R.id.currency);
+            sl_no = (HelveticaRegular) view.findViewById(R.id.sl_no);
+            res_id = (HelveticaBold) view.findViewById(R.id.res_id);
+            res_name = (HelveticaBold) view.findViewById(R.id.res_name);
+            res_type = (HelveticaRegular) view.findViewById(R.id.res_type);
+            designation = (HelveticaRegular) view.findViewById(R.id.designation);
+            email = (HelveticaRegular) view.findViewById(R.id.email);
+            phone = (HelveticaRegular) view.findViewById(R.id.phone);
+            rate_per_hour = (HelveticaRegular) view.findViewById(R.id.rate_per_hour);
+            currency = (HelveticaRegular) view.findViewById(R.id.currency);
+            res_subcontractor = (HelveticaRegular) view.findViewById(R.id.res_subcontractor);
+
+            sub_layout = (LinearLayout) view.findViewById(R.id.sub_layout);
 
             editBtn = (ImageButton) view.findViewById(R.id.editBtn);
 
@@ -70,19 +77,34 @@ public class AllAddResourcesAdapter extends RecyclerView.Adapter<AllAddResources
         holder.sl_no.setText(String.valueOf(items.getSl_no()));
         holder.res_id.setText(String.valueOf(items.getRes_id()));
         holder.res_name.setText(String.valueOf(items.getRes_name()));
-        holder.designation.setText(String.valueOf(items.getDesignation()));
         holder.email.setText(String.valueOf(items.getEmail()));
         holder.phone.setText(String.valueOf(items.getPhone()));
         holder.rate_per_hour.setText(String.valueOf(items.getRate_per_hour()));
         holder.currency.setText(String.valueOf(items.getCurrency()));
 
+        if(items.getDesignation().equals("1"))
+        {
+            holder.designation.setText("Design Consultant");
+        }
+        else if(items.getDesignation().equals("2"))
+        {
+            holder.designation.setText("Engineer");
+        }
+        else
+        {
+            holder.designation.setText("Architect");
+        }
+
         if(items.getRes_type().equals("1"))
         {
             holder.res_type.setText("EMPLOYEE");
+            holder.sub_layout.setVisibility(View.GONE);
         }
         else
         {
             holder.res_type.setText("CONTRACT");
+            holder.res_subcontractor.setText(items.getSubContractor());
+            holder.sub_layout.setVisibility(View.VISIBLE);
         }
 
     }

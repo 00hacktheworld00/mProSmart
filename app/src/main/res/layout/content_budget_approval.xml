@@ -53,7 +53,6 @@
                     android:text="Budget Approval No : "
                     android:textSize="@dimen/heading_main"
                     android:textColor="@color/fbColor"
-                    android:layout_below="@+id/product_category"
                     android:layout_alignParentStart="true"
                     android:gravity="center_vertical"
                     android:typeface="normal"

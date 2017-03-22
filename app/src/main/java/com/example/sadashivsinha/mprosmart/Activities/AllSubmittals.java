@@ -17,6 +17,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -29,6 +30,7 @@ import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.sadashivsinha.mprosmart.Adapters.AllSubmittalAdapter;
 import com.example.sadashivsinha.mprosmart.Adapters.MyAdapter;
+import com.example.sadashivsinha.mprosmart.ModelLists.AllBoqList;
 import com.example.sadashivsinha.mprosmart.ModelLists.MomList;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
@@ -66,7 +68,8 @@ public class AllSubmittals extends NewActivity implements View.OnClickListener  
     Boolean isInternetPresent = false;
     private ProgressDialog pDialog;
     String currentProjectNo;
-    String url;
+    String url, searchText;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,13 +78,22 @@ public class AllSubmittals extends NewActivity implements View.OnClickListener  
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        if (getIntent().hasExtra("search")) {
+            if (getIntent().getStringExtra("search").equals("yes")) {
+
+                searchText = getIntent().getStringExtra("searchText");
+
+                getSupportActionBar().setTitle("Submittal Search Results : " + searchText);
+            }
+        }
+
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
 
         cd = new ConnectionDetector(getApplicationContext());
         isInternetPresent = cd.isConnectingToInternet();
 
-        url = getResources().getString(R.string.server_url) + "/getSubmittals?projectId='"+currentProjectNo+"'";
+        url = pm.getString("SERVER_URL") + "/getSubmittals?projectId='"+currentProjectNo+"'";
 
 
         allSubmittalAdapter = new AllSubmittalAdapter(momList);
@@ -126,25 +138,77 @@ public class AllSubmittals extends NewActivity implements View.OnClickListener  
                             Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(dueDate);
                             dueDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
 
-                            items = new MomList(String.valueOf(i+1), submittalId, currentProjectNo, projectName, createdDate, createdBy, submittalRegisterId, submittalsType, dueDate,
-                                    status, description);
-                            momList.add(items);
+                            if (getIntent().hasExtra("search"))
+                            {
+                                if (getIntent().getStringExtra("search").equals("yes")) {
 
-                            allSubmittalAdapter.notifyDataSetChanged();
+                                    if (submittalId.toLowerCase().contains(searchText.toLowerCase())){
+
+                                        items = new MomList(String.valueOf(i+1), submittalId, currentProjectNo, projectName, createdDate, createdBy, submittalRegisterId, submittalsType, dueDate,
+                                                status, description);
+                                        momList.add(items);
+
+                                        allSubmittalAdapter.notifyDataSetChanged();
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                items = new MomList(String.valueOf(i+1), submittalId, currentProjectNo, projectName, createdDate, createdBy, submittalRegisterId, submittalsType, dueDate,
+                                        status, description);
+                                momList.add(items);
+
+                                allSubmittalAdapter.notifyDataSetChanged();
+                            }
+
                             pDialog.dismiss();
                         }
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    } catch (JSONException e) {
+                    } catch (ParseException | JSONException e) {
                         e.printStackTrace();
                     }
 //                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    // TODO Auto-generated catch block
+                } catch (UnsupportedEncodingException | JSONException e) {
                     e.printStackTrace();
                 }
+
+                Boolean createSubmittalPending = pm.getBoolean("createSubmittalPending");
+
+                try {
+                if(createSubmittalPending)
+                {
+
+                    String jsonObjectVal = pm.getString("objectSubmittal");
+                    Log.d("JSON Sub PENDING :", jsonObjectVal);
+
+                    JSONObject jsonObjectPending = null;
+                        jsonObjectPending = new JSONObject(jsonObjectVal);
+
+                    Log.d("JSONObj Sub PENDING :", jsonObjectPending.toString());
+
+                    submittalRegisterId = dataObject.getString("submittalRegisterId");
+                    submittalsType = dataObject.getString("submittalsType");
+                    createdDate = dataObject.getString("createdDate");
+                    dueDate = dataObject.getString("dueDate");
+                    status = dataObject.getString("status");
+                    createdBy = dataObject.getString("createdBy");
+                    description = dataObject.getString("description");
+                    projectName = dataObject.getString("projectName");
+
+                    Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(dueDate);
+                    dueDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+
+                    items = new MomList(String.valueOf(dataArray.length()+1), getResources().getString(R.string.waiting_to_connect), currentProjectNo, projectName, createdDate, createdBy, submittalRegisterId, submittalsType, dueDate,
+                            status, description);
+                    momList.add(items);
+
+                    allSubmittalAdapter.notifyDataSetChanged();
+
+                }
+
+                } catch (JSONException | ParseException e) {
+                    e.printStackTrace();
+                }
+
                 if (pDialog != null)
                     pDialog.dismiss();
             }
@@ -279,13 +343,26 @@ public class AllSubmittals extends NewActivity implements View.OnClickListener  
             case R.id.fab_search:
             {
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setTitle("Search Submittal !");
+                alert.setTitle("Search Submittals by ID !");
                 // Set an EditText view to get user input
                 final EditText input = new EditText(this);
+                input.setMaxLines(1);
+                input.setImeOptions(EditorInfo.IME_ACTION_DONE);
                 alert.setView(input);
                 alert.setPositiveButton("Search", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        Toast.makeText(AllSubmittals.this, "Search for it .", Toast.LENGTH_SHORT).show();
+
+                        if (input.getText().toString().isEmpty()) {
+                            input.setError("Enter Search Field");
+                        } else {
+                            Intent intent = new Intent(AllSubmittals.this, AllSubmittals.class);
+                            intent.putExtra("search", "yes");
+                            intent.putExtra("searchText", input.getText().toString());
+
+                            Log.d("SEARCH TEXT", input.getText().toString());
+
+                            startActivity(intent);
+                        }
                     }
                 });
                 alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -334,15 +411,30 @@ public class AllSubmittals extends NewActivity implements View.OnClickListener  
                                 tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(createdDate);
                                 createdDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
 
-                                items = new MomList(String.valueOf(i+1), submittalId, currentProjectNo, projectName, createdDate, createdBy, submittalRegisterId, submittalsType, dueDate,
-                                        status, description);
-                                momList.add(items);
+                                if (getIntent().hasExtra("search"))
+                                {
+                                    if (getIntent().getStringExtra("search").equals("yes")) {
 
-                                allSubmittalAdapter.notifyDataSetChanged();
+                                        if (submittalId.toLowerCase().contains(searchText.toLowerCase())){
+
+                                            items = new MomList(String.valueOf(i+1), submittalId, currentProjectNo, projectName, createdDate, createdBy, submittalRegisterId, submittalsType, dueDate,
+                                                    status, description);
+                                            momList.add(items);
+
+                                            allSubmittalAdapter.notifyDataSetChanged();
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    items = new MomList(String.valueOf(i+1), submittalId, currentProjectNo, projectName, createdDate, createdBy, submittalRegisterId, submittalsType, dueDate,
+                                            status, description);
+                                    momList.add(items);
+
+                                    allSubmittalAdapter.notifyDataSetChanged();
+                                }
                             }
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        } catch (JSONException e) {
+                        } catch (ParseException | JSONException e) {
                             e.printStackTrace();
                         }
 //                        setData(response,false);
@@ -364,7 +456,7 @@ public class AllSubmittals extends NewActivity implements View.OnClickListener  
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(AllSubmittals.this, ViewPurchaseOrders.class);
+        Intent intent = new Intent(AllSubmittals.this, SiteProjectDelivery.class);
         startActivity(intent);
     }
 

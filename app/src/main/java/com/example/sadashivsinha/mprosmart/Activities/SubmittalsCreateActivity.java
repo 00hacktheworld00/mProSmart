@@ -107,7 +107,7 @@ public class SubmittalsCreateActivity extends AppCompatActivity implements DateP
 
         spinnerSubReg = (Spinner) findViewById(R.id.spinnerSubReg);
 
-        url = getResources().getString(R.string.server_url) + "/getSubmittialRegister?projectId='"+currentProjectNo+"'";
+        url = pm.getString("SERVER_URL") + "/getSubmittialRegister?projectId='"+currentProjectNo+"'";
 
         cd = new ConnectionDetector(getApplicationContext());
         isInternetPresent = cd.isConnectingToInternet();
@@ -132,31 +132,39 @@ public class SubmittalsCreateActivity extends AppCompatActivity implements DateP
                     Log.d("CACHE DATA", data);
                     JSONObject jsonObject = new JSONObject(data);
                     try {
-                        dataArray = jsonObject.getJSONArray("data");
 
-                        submittalRegArray = new String[dataArray.length()+1];
+                        String type = jsonObject.getString("type");
 
-                        submittalRegArray[0] = "Select Submittal Register";
+                        if(type.equals("INFO")) {
+                            dataArray = jsonObject.getJSONArray("data");
 
-                        for (int i = 0; i < dataArray.length(); i++)
+                            submittalRegArray = new String[dataArray.length() + 1];
+
+                            submittalRegArray[0] = "Select Submittal Register";
+
+                            for (int i = 0; i < dataArray.length(); i++) {
+                                dataObject = dataArray.getJSONObject(i);
+                                submittalRegistersId = dataObject.getString("submittalRegistersId");
+
+                                submittalRegArray[i + 1] = submittalRegistersId;
+
+                                adapter = new ArrayAdapter<String>(SubmittalsCreateActivity.this,
+                                        android.R.layout.simple_dropdown_item_1line, submittalRegArray);
+                                spinnerSubReg.setAdapter(adapter);
+                            }
+                        }
+
+                        else
                         {
-                            dataObject = dataArray.getJSONObject(i);
-                            submittalRegistersId = dataObject.getString("submittalRegistersId");
-
-                            submittalRegArray[i+1]=submittalRegistersId;
-
                             adapter = new ArrayAdapter<String>(SubmittalsCreateActivity.this,
-                                    android.R.layout.simple_dropdown_item_1line,submittalRegArray);
+                                    android.R.layout.simple_dropdown_item_1line,new String[] {"No Submittal Register"});
                             spinnerSubReg.setAdapter(adapter);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
 //                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    // TODO Auto-generated catch block
+                } catch (UnsupportedEncodingException | JSONException e) {
                     e.printStackTrace();
                 }
                 if (pDialog != null)
@@ -183,6 +191,10 @@ public class SubmittalsCreateActivity extends AppCompatActivity implements DateP
                 if(spinnerSubReg.getSelectedItem().toString().equals("Select Submittal Register"))
                 {
                     Toast.makeText(SubmittalsCreateActivity.this, "Select Submittal Register", Toast.LENGTH_SHORT).show();
+                }
+                else if(spinnerSubReg.getSelectedItem().toString().equals("No Submittal Register"))
+                {
+                    Toast.makeText(SubmittalsCreateActivity.this, "No Submittal Registers in this project", Toast.LENGTH_SHORT).show();
                 }
                 else if(spinner_status.getText().toString().isEmpty())
                 {
@@ -265,7 +277,7 @@ public class SubmittalsCreateActivity extends AppCompatActivity implements DateP
 
         RequestQueue requestQueue = Volley.newRequestQueue(SubmittalsCreateActivity.this);
 
-        String url = SubmittalsCreateActivity.this.getResources().getString(R.string.server_url) + "/postSubmittals";
+        String url = SubmittalsCreateActivity.this.pm.getString("SERVER_URL") + "/postSubmittals";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -278,6 +290,9 @@ public class SubmittalsCreateActivity extends AppCompatActivity implements DateP
                             if(response.getString("msg").equals("success"))
                             {
                                 Toast.makeText(SubmittalsCreateActivity.this, "Submittals created ID - " + response.getString("data"), Toast.LENGTH_SHORT).show();
+
+                                Intent intent = new Intent(SubmittalsCreateActivity.this, AllSubmittals.class);
+                                startActivity(intent);
                             }
 
                         }
@@ -321,6 +336,9 @@ public class SubmittalsCreateActivity extends AppCompatActivity implements DateP
                 pm.putString("urlSubmittal", url);
                 pm.putString("toastMessageSubmittal", "Submittal Created");
                 pm.putBoolean("createSubmittalPending", true);
+
+                Intent intent = new Intent(SubmittalsCreateActivity.this, AllSubmittals.class);
+                startActivity(intent);
             }
         }
         else
@@ -329,9 +347,6 @@ public class SubmittalsCreateActivity extends AppCompatActivity implements DateP
         }
         if(pDialog!=null)
             pDialog.dismiss();
-
-        Intent intent = new Intent(SubmittalsCreateActivity.this, AllSubmittals.class);
-        startActivity(intent);
     }
 
 
@@ -347,23 +362,37 @@ public class SubmittalsCreateActivity extends AppCompatActivity implements DateP
                     public void onResponse(JSONObject response) {
                         try
                         {
-//                            dataObject = response.getJSONObject(0);
-                            dataArray = response.getJSONArray("data");
-                            submittalRegArray = new String[dataArray.length()+1];
+                            String type = response.getString("type");
 
-                            submittalRegArray[0] = "Select Submittal Register";
-
-                            for(int i=0; i<dataArray.length();i++)
+                            if(type.equals("INFO"))
                             {
-                                dataObject = dataArray.getJSONObject(i);
-                                submittalRegistersId = dataObject.getString("submittalRegistersId");
+                                dataArray = response.getJSONArray("data");
+                                submittalRegArray = new String[dataArray.length()+1];
 
-                                submittalRegArray[i+1]=submittalRegistersId;
+                                submittalRegArray[0] = "Select Submittal Register";
+
+                                for(int i=0; i<dataArray.length();i++)
+                                {
+                                    dataObject = dataArray.getJSONObject(i);
+                                    submittalRegistersId = dataObject.getString("submittalRegistersId");
+
+                                    submittalRegArray[i+1]=submittalRegistersId;
+                                }
+
+                                ArrayAdapter<String> adapter = new ArrayAdapter<String>(SubmittalsCreateActivity.this,
+                                        android.R.layout.simple_dropdown_item_1line,submittalRegArray);
+                                spinnerSubReg.setAdapter(adapter);
                             }
+//                            dataObject = response.getJSONObject(0);
 
-                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(SubmittalsCreateActivity.this,
-                                    android.R.layout.simple_dropdown_item_1line,submittalRegArray);
-                            spinnerSubReg.setAdapter(adapter);
+                            else
+                            {
+
+                                ArrayAdapter<String> adapter = new ArrayAdapter<String>(SubmittalsCreateActivity.this,
+                                        android.R.layout.simple_dropdown_item_1line,new String[] {"No Submittal Register"});
+                                spinnerSubReg.setAdapter(adapter);
+
+                            }
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }

@@ -41,6 +41,7 @@ public class BudgetChangeCreate extends AppCompatActivity {
     String currentProjectNo, item, itemDesc, currentBudgetChange, currentDate, currentUserId, selectedUom;
     JSONArray dataArray;
     JSONObject dataObject;
+    PreferenceManager pm;
     String[] itemArray, itemDescArray, uomArray, uomNameArray;
 
     @Override
@@ -48,7 +49,7 @@ public class BudgetChangeCreate extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_budget_change_create);
 
-        PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
         currentBudgetChange = pm.getString("currentChange");
         currentUserId = pm.getString("userId");
@@ -160,7 +161,7 @@ public class BudgetChangeCreate extends AppCompatActivity {
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getUom";
+        String url = pm.getString("SERVER_URL") + "/getUom";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -242,7 +243,7 @@ public class BudgetChangeCreate extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(BudgetChangeCreate.this);
 
-        String url = BudgetChangeCreate.this.getResources().getString(R.string.server_url) + "/postBudgetChangesLine";
+        String url = BudgetChangeCreate.this.pm.getString("SERVER_URL") + "/postBudgetChangesLine";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -280,7 +281,7 @@ public class BudgetChangeCreate extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getItems?projectId='"+currentProjectNo+"'";
+        String url = pm.getString("SERVER_URL") + "/getItems?projectId='"+currentProjectNo+"'";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {

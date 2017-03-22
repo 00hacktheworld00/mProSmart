@@ -35,6 +35,7 @@ import org.json.JSONObject;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -46,6 +47,8 @@ public class MaterialIssueActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private MaterialIssueAdapter materialIssueAdapter;
     FloatingActionButton fab_add;
+
+    float currentMaterialQuantityIssued, currentBoqQuantity;
 
     MaterialIssueList qualityItem;
     String itemId, itemDesc, cost, uom;
@@ -59,7 +62,7 @@ public class MaterialIssueActivity extends AppCompatActivity {
     PreferenceManager pm;
     FloatingActionMenu menu;
     String id, issueAsPerBoq, issuedTo, issuesdOn, issuedBy, boqItem, quantityOfItem;
-    String itemDescription, quantityIssued, uomId;
+    String itemDescription, quantityIssued, uomId, quantity;
     String text_id, text_item, text_quantity, text_uom;
 
     @Override
@@ -164,7 +167,7 @@ public class MaterialIssueActivity extends AppCompatActivity {
         Log.d("CURRENT BOQ ID", boqId);
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getBoqItems?projectId='"+currentProjectNo+"'";
+        String url = pm.getString("SERVER_URL") + "/getBoqItems?projectId='"+currentProjectNo+"'";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -180,6 +183,8 @@ public class MaterialIssueActivity extends AppCompatActivity {
                             {
                                 Toast.makeText(MaterialIssueActivity.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
                             }
+
+                            float issuedQuantity;
 
                             if(type.equals("INFO"))
                             {
@@ -199,12 +204,25 @@ public class MaterialIssueActivity extends AppCompatActivity {
 //                                        text_currency = dataObject.getString("currency");
 //                                        text_totalCost = dataObject.getString("totalCost");
 
+
+                                        Log.d("CURRENT ISSUE LINE", text_quantity);
+
+                                        issuedQuantity = (currentMaterialQuantityIssued /currentBoqQuantity) * Float.parseFloat(text_quantity) ;
+
+                                        Log.d("CURRENT ISSUED QUAN", String.valueOf(issuedQuantity));
+
+                                        text_quantity = String.valueOf(issuedQuantity);
+
+                                        Log.d("MIA OLD UOM", text_uom);
+
                                         for(int j=0; j<uomArray.length; j++)
                                         {
-                                            if(text_uom.equals(uomArray[j]));
+                                            if(text_uom.equals(uomArray[j]))
                                             text_uom = uomNameArray[j];
+
+                                            Log.d("MIA UOM", text_uom);
                                         }
-                                        qualityItem = new MaterialIssueList(id, text_item, "", text_quantity, text_uom);
+                                        qualityItem = new MaterialIssueList(String.valueOf(i+1), text_item, "", text_quantity, text_uom);
                                         materialList.add(qualityItem);
 
                                         materialIssueAdapter.notifyDataSetChanged();
@@ -232,7 +250,7 @@ public class MaterialIssueActivity extends AppCompatActivity {
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getUom";
+        String url = pm.getString("SERVER_URL") + "/getUom";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -265,7 +283,8 @@ public class MaterialIssueActivity extends AppCompatActivity {
                                     uomNameArray[i+1] = dataObject.getString("uomName");
                                 }
 
-                                prepareBoqItems(boqId, uomArray, uomNameArray);
+                                Log.d("MIA ALL UOM", Arrays.toString(uomArray));
+                                getCurrentBoqQuantity(boqId, uomArray, uomNameArray);
                             }
 
                         }
@@ -285,12 +304,67 @@ public class MaterialIssueActivity extends AppCompatActivity {
 
     }
 
+
+    public void getCurrentBoqQuantity(final String boqId, final String[] uomArray, final String[] uomNameArray)
+    {
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+
+        String url = pm.getString("SERVER_URL") + "/getBoq?projectId='"+currentProjectNo+"'";
+
+        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        try{
+
+                            String type = response.getString("type");
+
+                            if(type.equals("ERROR"))
+                            {
+                                Toast.makeText(MaterialIssueActivity.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
+                            }
+
+                            if(type.equals("INFO"))
+                            {
+                                dataArray = response.getJSONArray("data");
+                                for(int i=0; i<dataArray.length();i++)
+                                {
+                                    dataObject = dataArray.getJSONObject(i);
+
+                                    id = dataObject.getString("id");
+                                    quantity = dataObject.getString("unit");
+
+                                    if(id.equals(boqId))
+                                    {
+                                        currentBoqQuantity = Float.parseFloat(quantity);
+                                        Log.d("CURRENT BOQ QUAN", String.valueOf(currentBoqQuantity));
+                                    }
+
+                                }
+
+                                prepareBoqItems(boqId, uomArray, uomNameArray);
+                            }
+                        }catch(JSONException e){
+                            e.printStackTrace();}
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("Volley","Error");
+                    }
+                }
+        );
+        requestQueue.add(jor);
+    }
+
     public void prepareItems()
     {
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getMaterialIssueLine?materialIssueId=\""+currentMaterialIssueId+"\"";
+        String url = pm.getString("SERVER_URL") + "/getMaterialIssueLine?materialIssueId=\""+currentMaterialIssueId+"\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -375,6 +449,8 @@ public class MaterialIssueActivity extends AppCompatActivity {
 //            materialIssueAdapter.notifyDataSetChanged();
 //
 //        }
+
+        //
     }
 
     public void prepareHeader()
@@ -382,7 +458,7 @@ public class MaterialIssueActivity extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getMaterialIssue?projectId='"+currentProjectNo+"'";
+        String url = pm.getString("SERVER_URL") + "/getMaterialIssue?projectId='"+currentProjectNo+"'";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -424,6 +500,16 @@ public class MaterialIssueActivity extends AppCompatActivity {
                                         issue_to.setText(issuedTo);
                                         issue_on.setText(issuesdOn);
                                         issue_by.setText(issuedBy);
+
+                                        if(quantityOfItem.isEmpty())
+                                        {
+                                            currentMaterialQuantityIssued = 0;
+                                        }
+                                        else
+                                        {
+                                            currentMaterialQuantityIssued = Float.parseFloat(quantityOfItem);
+                                        }
+                                        Log.d("CURRENT MATERIAL QUAN", String.valueOf(currentMaterialQuantityIssued));
                                     }
                                 }
                                 pDialog1.dismiss();

@@ -26,8 +26,9 @@
     <string name="openDrawer">Open</string>
     <string name="closeDrawer">Close</string>
 
-    <string name="server_url">http://52.76.152.185/unifier</string>
-    <string name="server_upload_url">http://52.76.152.185/</string>
+    <string name="server_url">52.76.152.185:3000</string>
+    <string name="server_upload_url">52.76.152.185</string>
+    <string name="server_port">3000</string>
 
  <string name="gcm_send_message">Token retrieved and sent to server! You can now use gcmsender to
         send downstream messages to this app.</string>

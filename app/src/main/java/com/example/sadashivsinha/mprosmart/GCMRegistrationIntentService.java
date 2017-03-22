@@ -31,6 +31,7 @@ public class GCMRegistrationIntentService extends IntentService {
     //Constants for success and errors
     public static final String REGISTRATION_SUCCESS = "RegistrationSuccess";
     public static final String REGISTRATION_ERROR = "RegistrationError";
+    PreferenceManager pm;
 
     String currentUserId;
 
@@ -49,7 +50,7 @@ public class GCMRegistrationIntentService extends IntentService {
     private void registerGCM() {
 
 
-        PreferenceManager pm = new PreferenceManager(this);
+        pm = new PreferenceManager(this);
         currentUserId = pm.getString("userId");
 
         //Registration complete intent initially null
@@ -104,7 +105,7 @@ public class GCMRegistrationIntentService extends IntentService {
 
         RequestQueue requestQueue = Volley.newRequestQueue(context);
 
-        String url = getResources().getString(R.string.server_url) + "/putRegistrationId?userId=\"" + currentUserId +"\"";
+        String url =  pm.getString("SERVER_URL") + "/putRegistrationId?userId=\"" + currentUserId +"\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.PUT, url, object,
                 new Response.Listener<JSONObject>() {

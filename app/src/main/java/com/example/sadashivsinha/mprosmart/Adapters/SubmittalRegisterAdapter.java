@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 import com.example.sadashivsinha.mprosmart.Activities.AttachmentActivity;
 import com.example.sadashivsinha.mprosmart.ModelLists.SubmittalList;
 import com.example.sadashivsinha.mprosmart.R;
+import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
 import com.weiwangcn.betterspinner.library.BetterSpinner;
 
 import java.util.List;
@@ -26,9 +28,10 @@ import java.util.List;
 public class SubmittalRegisterAdapter extends RecyclerView.Adapter<SubmittalRegisterAdapter.MyViewHolder> {
 
     public List<SubmittalList> submittalList;
+    PreferenceManager pm;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView line_no;
+        public TextView line_no, original_line_no, no_of_attachments;
         public EditText text_sub_title, text_sub_type, text_contract_id;
         public Button editBtn;
         public ImageButton attachBtn;
@@ -36,25 +39,34 @@ public class SubmittalRegisterAdapter extends RecyclerView.Adapter<SubmittalRegi
 
         public MyViewHolder(final View view) {
             super(view);
+
+            pm = new PreferenceManager(view.getContext());
+
             line_no = (TextView) view.findViewById(R.id.text_line_no);
             text_sub_title = (EditText) view.findViewById(R.id.text_sub_title);;
             text_sub_type = (EditText) view.findViewById(R.id.text_sub_type);
             text_contract_id = (EditText) view.findViewById(R.id.text_contract_id);
             editBtn = (Button) view.findViewById(R.id.editBtn);
             attachBtn = (ImageButton) view.findViewById(R.id.attachBtn);
+            original_line_no = (TextView) view.findViewById(R.id.original_line_no);
+            no_of_attachments = (TextView) view.findViewById(R.id.no_of_attachments);
 
             spinner_status = (BetterSpinner) view.findViewById(R.id.spinner_status);
 
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(view.getContext(),
-                    android.R.layout.simple_dropdown_item_1line,new String[] {"PENDING", "COMPLETED"});
+                    android.R.layout.simple_dropdown_item_1line,new String[] {"ACTIVE", "INACTIVE", "PENDING"});
             spinner_status.setAdapter(adapter);
 
 
             attachBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(view.getContext(), AttachmentActivity.class);
-                    view.getContext().startActivity(intent);
+                    Intent intent = new Intent(itemView.getContext(), AttachmentActivity.class);
+                    String url = pm.getString("SERVER_URL") + "/getSubmittalregisterLineItemsFiles?submittalregisterLineItemsId=\"" + original_line_no.getText().toString() + "\"";
+                    Log.d("VIEW IMG URL : ", url);
+                    intent.putExtra("viewURL", url);
+                    intent.putExtra("viewOnly", true);
+                    itemView.getContext().startActivity(intent);
 
                     }
                 });
@@ -117,6 +129,9 @@ public class SubmittalRegisterAdapter extends RecyclerView.Adapter<SubmittalRegi
         holder.text_sub_type.setText(items.getText_sub_type());
         holder.spinner_status.setText(String.valueOf(items.getText_status()));
         holder.text_contract_id.setText(items.getText_contract_id());
+        holder.original_line_no.setText(items.getOriginal_line_no());
+        holder.no_of_attachments.setText(String.valueOf(items.getNoOfAttachments()));
+
     }
 
     @Override

@@ -4,11 +4,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/mainLayout"
+    android:background="@color/back_light"
     tools:context=".Activities.AttachmentActivity">
+
+    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/_20sdp"
+        android:gravity="center"
+        android:text="Attachments"
+        android:padding="@dimen/small_margin"
+        android:textColor="@color/white"
+        android:background="@color/colorPrimary"
+        android:id="@+id/text_title"
+        android:layout_alignParentTop="true"/>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/attachmentRecycler"
             android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:layout_below="@+id/text_title"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_above="@+id/frameLayout2"
@@ -24,6 +38,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
+                android:id="@+id/hideOnViewLayout"
                 android:weightSum="2">
 
                 <RelativeLayout
@@ -78,4 +93,10 @@
             </LinearLayout>
             </FrameLayout>
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/full_screen_image"
+        android:background="#000000"
+        android:visibility="gone"/>
 </RelativeLayout>

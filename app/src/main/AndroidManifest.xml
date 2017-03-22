@@ -75,10 +75,6 @@
             android:label="@string/title_activity_main"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".Activities.Example"
-            android:label="@string/title_activity_main"
-            android:windowSoftInputMode="adjustPan" />
-        <activity
             android:name=".Activities.NewPurchase"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustPan" />
@@ -270,7 +266,7 @@
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".Activities.AllQualityControl"
-            android:label="All Quality Controls"
+            android:label="Incoming Inspection Report"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".Activities.QualityControlItemCreate"
@@ -283,13 +279,6 @@
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".Activities.PunchListCreate"
-            android:windowSoftInputMode="adjustPan" />
-        <activity
-            android:name=".Activities.TestQualityControl"
-            android:windowSoftInputMode="adjustPan" />
-        <activity
-            android:name=".Activities.TestAttachmentActivity"
-            android:theme="@style/AppDialogTheme"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".Activities.BarChartActivity"
@@ -554,7 +543,17 @@
             android:name=".Activities.LockScreen"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_lock_screen" />
-        <activity android:name=".Activities.AllPurchaseReceipts"></activity>
+        <activity android:name=".Activities.AllPurchaseReceipts" />
+        <activity android:name=".Activities.MainCategories" />
+        <activity android:name=".Activities.ProjectPlanningSchedulingActivity" />
+        <activity android:name=".Activities.SiteProjectDelivery" />
+        <activity android:name=".Activities.QualityControlMain" />
+        <activity android:name=".Activities.SiteProcurementActivity" />
+        <activity android:name=".Activities.InventoryMainActivity" />
+        <activity android:name=".Activities.BudgetMainActivity" />
+        <activity android:name=".TestActivity" />
+        <activity android:name=".Activities.EnterIPActivity"></activity>
+        <activity android:name=".Activities.ResourcesViewAddRemoveActivity"></activity>
     </application>
 
 </manifest>

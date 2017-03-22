@@ -51,9 +51,13 @@ public class AllProjectsAdapter extends RecyclerView.Adapter<AllProjectsAdapter.
         FancyButton btn_update_progress;
         Button saveBtn;
         ProgressDialog pDialog;
+        PreferenceManager pm;
 
         public MyViewHolder(final View view) {
             super(view);
+
+            pm = new PreferenceManager(view.getContext());
+
             startedDate = (TextView) view.findViewById(R.id.startedDate);
             finishByDate = (TextView) view.findViewById(R.id.finishByDate);
             purchaseReceipts = (TextView) view.findViewById(R.id.purchaseReceipts);
@@ -130,7 +134,7 @@ public class AllProjectsAdapter extends RecyclerView.Adapter<AllProjectsAdapter.
 
                                         RequestQueue requestQueue = Volley.newRequestQueue(context);
 
-                                        String url = context.getResources().getString(R.string.server_url) + "/putWbs?wbsId=\""+current_wbs_id+"\"";
+                                        String url = pm.getString("SERVER_URL")  + "/putWbs?wbsId=\""+current_wbs_id+"\"";
 
                                         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.PUT, url, object,
                                                 new Response.Listener<JSONObject>() {
@@ -192,7 +196,7 @@ public class AllProjectsAdapter extends RecyclerView.Adapter<AllProjectsAdapter.
 
                         RequestQueue requestQueue = Volley.newRequestQueue(view.getContext());
 
-                        String url = view.getContext().getResources().getString(R.string.server_url) + "/postWbsNotes";
+                        String url = pm.getString("SERVER_URL")  + "/postWbsNotes";
 
                         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                                 new Response.Listener<JSONObject>() {

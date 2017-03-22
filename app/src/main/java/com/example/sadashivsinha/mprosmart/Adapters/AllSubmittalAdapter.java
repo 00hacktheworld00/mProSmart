@@ -84,6 +84,25 @@ public class AllSubmittalAdapter extends RecyclerView.Adapter<AllSubmittalAdapte
         holder.due_date.setText(items.getDueDate());
         holder.status.setText(items.getStatus());
         holder.description.setText(items.getDescription());
+
+        if(items.getSubmittalsType().equals("1"))
+        {
+            holder.submittals_type.setText("INCOMING");
+        }
+        else
+        {
+            holder.submittals_type.setText("OUTGOING");
+        }
+
+
+        if(items.getStatus().equals("1"))
+        {
+            holder.status.setText("ACTIVE");
+        }
+        else
+        {
+            holder.status.setText("INACTIVE");
+        }
     }
 
     @Override

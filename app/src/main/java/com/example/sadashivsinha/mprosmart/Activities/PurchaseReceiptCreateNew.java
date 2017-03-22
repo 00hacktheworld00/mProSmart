@@ -39,7 +39,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import de.keyboardsurfer.android.widget.crouton.Crouton;
@@ -63,6 +66,7 @@ public class PurchaseReceiptCreateNew extends AppCompatActivity {
     PreferenceManager pm;
     ConnectionDetector cd;
     String url;
+    String currentDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +84,10 @@ public class PurchaseReceiptCreateNew extends AppCompatActivity {
         currentPoNo = pm.getString("poNumber");
         currentProjectId = pm.getString("projectId");
 
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Calendar cal = Calendar.getInstance();
+        currentDate = dateFormat.format(cal.getTime());
+
         cd = new ConnectionDetector(getApplicationContext());
         isInternetPresent = cd.isConnectingToInternet();
 
@@ -91,7 +99,7 @@ public class PurchaseReceiptCreateNew extends AppCompatActivity {
         recyclerView.setAdapter(purchaseAdapter);
 
 
-        url = getResources().getString(R.string.server_url) + "/getPurchaseLineItems?purchaseOrderId='"+currentPoNo+"'";
+        url = pm.getString("SERVER_URL") + "/getPurchaseLineItems?purchaseOrderId='"+currentPoNo+"'";
 
         // check for Internet status
         if (!isInternetPresent) {
@@ -170,6 +178,7 @@ public class PurchaseReceiptCreateNew extends AppCompatActivity {
                 {
                     try {
                         jSONObjectToBeSent.put("purchaseOrderId", currentPoNo);
+                        jSONObjectToBeSent.put("date", currentDate);
                         jSONObjectToBeSent.put("projectId", currentProjectId);
                         jSONObjectToBeSent.put("items", jsonArray);
 
@@ -409,7 +418,7 @@ public class PurchaseReceiptCreateNew extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(PurchaseReceiptCreateNew.this);
 
-        String url = PurchaseReceiptCreateNew.this.getResources().getString(R.string.server_url) + "/reciept";
+        String url = PurchaseReceiptCreateNew.this.pm.getString("SERVER_URL") + "/reciept";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, jSONObject,
                 new Response.Listener<JSONObject>() {
@@ -420,6 +429,11 @@ public class PurchaseReceiptCreateNew extends AppCompatActivity {
                             if(response.getString("msg").equals("success"))
                             {
                                 Toast.makeText(PurchaseReceiptCreateNew.this, "Purchase Receipt Created. ID - "+ response.getString("data"), Toast.LENGTH_SHORT).show();
+
+                                if(pDialog!=null)
+                                     pDialog.dismiss();
+                                Intent intent = new Intent(PurchaseReceiptCreateNew.this, PurchaseReceiptsNew.class);
+                                startActivity(intent);
                             }
                             else
                             {
@@ -463,6 +477,12 @@ public class PurchaseReceiptCreateNew extends AppCompatActivity {
                 pm.putString("urlPR", url);
                 pm.putString("toastMessagePR", "Purchase Receipt Created");
                 pm.putBoolean("createPrPending", true);
+
+                if(pDialog!=null)
+                    pDialog.dismiss();
+
+                Intent intent = new Intent(PurchaseReceiptCreateNew.this, PurchaseReceiptsNew.class);
+                startActivity(intent);
             }
         }
         else
@@ -471,8 +491,5 @@ public class PurchaseReceiptCreateNew extends AppCompatActivity {
         }
         if(pDialog!=null)
             pDialog.dismiss();
-
-        Intent intent = new Intent(PurchaseReceiptCreateNew.this, PurchaseReceiptsNew.class);
-        startActivity(intent);
     }
 }

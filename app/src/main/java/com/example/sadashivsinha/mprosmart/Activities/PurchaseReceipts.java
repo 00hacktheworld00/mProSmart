@@ -51,6 +51,7 @@ public class PurchaseReceipts extends NewActivity {
     Boolean isInternetPresent = false;
     PurchaseReceiptList items;
     ProgressDialog pDialog, pDialog1;
+    PreferenceManager pm;
     String currentProjectNo, currentReceiptNo, purchaseReceiptId, purchaseOrderId, projectId, vendorId;
 
     @Override
@@ -60,7 +61,7 @@ public class PurchaseReceipts extends NewActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
         currentReceiptNo = pm.getString("receiptNo");
 
@@ -160,7 +161,7 @@ public class PurchaseReceipts extends NewActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getPurchaseReceiptItems?purchaseReceiptId=\""+currentReceiptNo+"\"";
+        String url = pm.getString("SERVER_URL") + "/getPurchaseReceiptItems?purchaseReceiptId=\""+currentReceiptNo+"\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -218,7 +219,7 @@ public class PurchaseReceipts extends NewActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getPurchaseReceipts?projectId=\""+currentProjectNo+"\"";
+        String url = pm.getString("SERVER_URL") + "/getPurchaseReceipts?projectId=\""+currentProjectNo+"\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {

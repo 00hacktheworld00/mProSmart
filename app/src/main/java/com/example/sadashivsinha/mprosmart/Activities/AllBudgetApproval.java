@@ -50,6 +50,7 @@ public class AllBudgetApproval extends AppCompatActivity implements View.OnClick
     JSONObject dataObject;
 
     AllBudgetApprovalList budgetItems;
+    PreferenceManager pm;
 
     String budgetApprovalId, contractRefNo, amount, currencyCode, createdBy, dateCreated;
 
@@ -60,7 +61,7 @@ public class AllBudgetApproval extends AppCompatActivity implements View.OnClick
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
         pm.putString("currentBudget", "approval");
         currentProjectNo = pm.getString("projectId");
         currentProjectName = pm.getString("projectName");
@@ -129,7 +130,7 @@ public class AllBudgetApproval extends AppCompatActivity implements View.OnClick
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getBudgetApproval?projectId='"+currentProjectNo+"'";
+        String url = pm.getString("SERVER_URL") + "/getBudgetApproval?projectId='"+currentProjectNo+"'";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {

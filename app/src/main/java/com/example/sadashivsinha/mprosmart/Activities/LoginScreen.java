@@ -59,9 +59,13 @@ public class LoginScreen extends Activity implements View.OnClickListener {
     Boolean isInternetPresent = false;
     EditText user, pass;
     private BroadcastReceiver mRegistrationBroadcastReceiver;
+    RobotoTextView btn_config_server;
+    EditText text_port, text_ip;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        pm = new PreferenceManager(this);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
         {
@@ -76,11 +80,27 @@ public class LoginScreen extends Activity implements View.OnClickListener {
         }
 
 
-        pm = new PreferenceManager(this);
 
         getWindow().requestFeature(Window.FEATURE_NO_TITLE); // Removing
         // ActionBar
         setContentView(R.layout.activity_login_screen);
+
+//        if(getIntent().hasExtra("IPADDRESS")){
+//            if(getIntent().getStringExtra("NEWADDRESS").equals("YES"))
+//            {
+//                pm.putString("SERVER_URL", "http://" + getIntent().getStringExtra("IPADDRESS")+":" + getIntent().getStringExtra("PORTNO"));
+//                pm.putString("SERVER_UPLOAD_URL","http://" +  getIntent().getStringExtra("IPADDRESS"));
+//            }
+//            else
+//            {
+//                pm.putString("SERVER_URL", "http://" + getIntent().getStringExtra("IPADDRESS") + ":" + getIntent().getStringExtra("PORTNO") );
+//                pm.putString("SERVER_UPLOAD_URL","http://" +  getIntent().getStringExtra("IPADDRESS"));
+//            }
+//        }
+//        else {
+//            pm.putString("SERVER_URL", "http://" + getResources().getString(R.string.server_url));
+//            pm.putString("SERVER_UPLOAD_URL","http://" +  getResources().getString(R.string.server_upload_url) );
+//        }
 
         if(pm.getBoolean("lockScreenEnable"))
         {
@@ -125,17 +145,24 @@ public class LoginScreen extends Activity implements View.OnClickListener {
                         new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 5);
             }
         }
-//        Context context = this.getApplicationContext();
-//        //GCM
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            if (!Settings.canDrawOverlays(context)) {
-//                /** if not construct intent to request permission */
-//                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-//                        Uri.parse("package:" + getPackageName()));
-//                /** request permission via start activity for result */
-//                startActivityForResult(intent, 1);
-//            }
-//        }
+
+        final LinearLayout layout_ip_address = (LinearLayout) findViewById(R.id.layout_ip_address);
+
+        btn_config_server = (RobotoTextView) findViewById(R.id.btn_config_server);
+        btn_config_server.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                Intent intent = new Intent(LoginScreen.this, EnterIPActivity.class);
+//                startActivity(intent);
+//                overridePendingTransition(0,0);
+
+                btn_config_server.setVisibility(View.GONE);
+                layout_ip_address.setVisibility(View.VISIBLE);
+            }
+        });
+
+        text_ip = (EditText) findViewById(R.id.text_ip);
+        text_port = (EditText) findViewById(R.id.text_port);
 
 
         //Initializing our broadcast receiver
@@ -221,60 +248,81 @@ public class LoginScreen extends Activity implements View.OnClickListener {
             @Override
             public void onClick(View v) {
 
-                cd = new ConnectionDetector(getApplicationContext());
-                isInternetPresent = cd.isConnectingToInternet();
-
-                // check for Internet status
-                if (!isInternetPresent) {
-                    // Internet connection is not present
-                    // Ask user to connect to Internet
-                    LinearLayout main_content = (LinearLayout) findViewById(R.id.main_content);
-                    Snackbar snackbar = Snackbar.make(main_content, getResources().getString(R.string.no_internet_error), Snackbar.LENGTH_LONG);
-                    snackbar.show();
-
+                if(!text_ip.getText().toString().isEmpty() && text_port.getText().toString().isEmpty()) {
+                    text_port.setError("Enter Port No.");
                 }
-                else
-                {
-                    //validation for user and pass:
-                    username = user.getText().toString();
-                    password = pass.getText().toString();
-
-                    if(username.isEmpty())
-                    {
-                        user.setError("Username field cannot be blank");
-                    }
-
-                    if(password.isEmpty())
-                    {
-                        pass.setError("Password field cannot be blank");
-                    }
-
-                    if(!username.isEmpty() && !password.isEmpty())
-                    {
-                        pDialog = new ProgressDialog(LoginScreen.this);
-                        pDialog.setMessage("Checking Login ...");
-                        pDialog.setIndeterminate(false);
-                        pDialog.setCancelable(true);
-                        pDialog.show();
-                        class MyTask extends AsyncTask<Void, Void, Void> {
-
-                            @Override
-                            protected Void doInBackground(Void... params) {
-                                checkLogin();
-                                return null;
-                            }
-                        }
-                        new MyTask().execute();
-                    }
+                else if(!text_port.getText().toString().isEmpty() && text_ip.getText().toString().isEmpty()) {
+                    text_ip.setError("Enter IP Address");
                 }
+                else if(!text_port.getText().toString().isEmpty() && !text_ip.getText().toString().isEmpty()) {
+                    pm.putString("SERVER_URL", "http://" + text_ip.getText().toString() +":" + text_port.getText().toString());
+                    pm.putString("SERVER_UPLOAD_URL","http://" + text_ip.getText().toString());
+                    proceedLogin();
+                }
+                else {
+                    pm.putString("SERVER_URL", "http://" + getResources().getString(R.string.server_url));
+                    pm.putString("SERVER_UPLOAD_URL", "http://" + getResources().getString(R.string.server_upload_url));
+                    proceedLogin();
+                }
+
             }
         });
+    }
+
+    public void proceedLogin()
+    {
+        cd = new ConnectionDetector(getApplicationContext());
+        isInternetPresent = cd.isConnectingToInternet();
+
+        // check for Internet status
+        if (!isInternetPresent) {
+            // Internet connection is not present
+            // Ask user to connect to Internet
+            LinearLayout main_content = (LinearLayout) findViewById(R.id.main_content);
+            Snackbar snackbar = Snackbar.make(main_content, getResources().getString(R.string.no_internet_error), Snackbar.LENGTH_LONG);
+            snackbar.show();
+
+        }
+        else
+        {
+            //validation for user and pass:
+            username = user.getText().toString();
+            password = pass.getText().toString();
+
+            if(username.isEmpty())
+            {
+                user.setError("Username field cannot be blank");
+            }
+
+            if(password.isEmpty())
+            {
+                pass.setError("Password field cannot be blank");
+            }
+
+            if(!username.isEmpty() && !password.isEmpty())
+            {
+                pDialog = new ProgressDialog(LoginScreen.this);
+                pDialog.setMessage("Checking Login ...");
+                pDialog.setIndeterminate(false);
+                pDialog.setCancelable(true);
+                pDialog.show();
+                class MyTask extends AsyncTask<Void, Void, Void> {
+
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        checkLogin();
+                        return null;
+                    }
+                }
+                new MyTask().execute();
+            }
+        }
     }
     public void checkLogin()
     {
         RequestQueue requestQueue = Volley.newRequestQueue(LoginScreen.this);
 
-        String url = LoginScreen.this.getResources().getString(R.string.server_url) + "/getLogin?userName=\""+username+"\""+"&password=\""+password+"\"";
+        String url = LoginScreen.this.pm.getString("SERVER_URL") + "/getLogin?userName=\""+username+"\""+"&password=\""+password+"\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -300,6 +348,11 @@ public class LoginScreen extends Activity implements View.OnClickListener {
                                     pm.putString("userId", userId);
                                     pm.putString("name", name);
                                     pm.putString("companyId", companyId);
+
+                                    if(dataObject.getString("roleId").equals("ROL001"))
+                                        pm.putInt("role", 1);
+                                    else
+                                        pm.putInt("role", 2);
 
                                     if(btn_remember.isChecked())
                                     {

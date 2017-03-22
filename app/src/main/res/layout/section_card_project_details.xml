@@ -58,7 +58,7 @@
                 android:imeOptions="actionNext"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
                 android:background="@drawable/edittext_states_red"
-                android:textSize="@dimen/_10sdp"
+                android:textSize="@dimen/_12sdp"
                 android:id="@+id/text_project_name"
                 android:inputType="textCapSentences" />
 
@@ -73,7 +73,7 @@
                 android:maxLines="3"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
                 android:background="@drawable/edittext_states_red"
-                android:textSize="@dimen/_10sdp"
+                android:textSize="@dimen/_12sdp"
                 android:id="@+id/text_project_desc"
                 android:inputType="textCapSentences" />
 
@@ -83,7 +83,7 @@
                 android:text="Select Currency"
                 android:textColorHint="#000000"
                 android:textColor="#000000"
-                android:textSize="@dimen/_10sdp"
+                android:textSize="@dimen/_12sdp"
                 android:padding="10dp"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
                 android:background="@drawable/edittext_states_red"

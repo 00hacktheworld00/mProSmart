@@ -30,7 +30,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
 
 public class QualityPlanItemCreate extends AppCompatActivity {
 
@@ -52,14 +54,28 @@ public class QualityPlanItemCreate extends AppCompatActivity {
     String[] wbsNameArray, activitiesNameArray, activityIdArray, wbsIdArray;
     String wbsName, activityName, activityId, wbsId;
 
+    Button attachBtn;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quality_plan_item_create);
 
+        pm = new PreferenceManager(getApplicationContext());
+        cd = new ConnectionDetector(getApplicationContext());
+        isInternetPresent = cd.isConnectingToInternet();
 
-        PreferenceManager pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
+
+        attachBtn = (Button) findViewById(R.id.attachBtn);
+        attachBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(QualityPlanItemCreate.this, AttachmentActivity.class);
+                intent.putExtra("class", "QualityPlanItem");
+                startActivity(intent);
+            }
+        });
 
         text_process_desc = (TextView) findViewById(R.id.text_process_desc);
         text_procedure = (TextView) findViewById(R.id.text_procedure);
@@ -75,24 +91,7 @@ public class QualityPlanItemCreate extends AppCompatActivity {
 
         createBtn = (Button) findViewById(R.id.createBtn);
 
-
-        pDialog = new ProgressDialog(QualityPlanItemCreate.this);
-        pDialog.setMessage("Getting WBS...");
-        pDialog.setIndeterminate(false);
-        pDialog.setCancelable(true);
-        pDialog.show();
-
-        class MyTask extends AsyncTask<Void, Void, Void>
-        {
-            @Override
-            protected Void doInBackground(Void... params)
-            {
-                getAllWbs();
-                return null;
-            }
-        }
-
-        new MyTask().execute();
+        getAllWbs();
 
         spinner_wbs.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -146,7 +145,6 @@ public class QualityPlanItemCreate extends AppCompatActivity {
         spinnerThirdParty.setAdapter(adapter);
         spinnerCustomerClient.setAdapter(adapter);
 
-        pm = new PreferenceManager(QualityPlanItemCreate.this);
         currentQualityPlan = pm.getString("currentQualityPlan");
         currentUserId = pm.getString("userId");
 
@@ -187,8 +185,6 @@ public class QualityPlanItemCreate extends AppCompatActivity {
 
                 else
                 {
-
-
                     Calendar c = Calendar.getInstance();
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                     String strDate = sdf.format(c.getTime());
@@ -206,7 +202,7 @@ public class QualityPlanItemCreate extends AppCompatActivity {
 
                         @Override
                         protected Void doInBackground(Void... params) {
-                            prepareItems();
+                            saveData();
                             return null;
                         }
                     }
@@ -224,7 +220,7 @@ public class QualityPlanItemCreate extends AppCompatActivity {
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getWbs?projectId=\""+currentProjectNo+"\"";
+        String url = pm.getString("SERVER_URL") + "/getWbs?projectId=\""+currentProjectNo+"\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -257,16 +253,28 @@ public class QualityPlanItemCreate extends AppCompatActivity {
                                     wbsNameArray[i+1]=wbsName;
                                     wbsIdArray[i+1]=wbsId;
                                 }
+
+
+                                if(dataArray==null)
+                                {
+                                    Toast.makeText(QualityPlanItemCreate.this, "No WBS Found in this project", Toast.LENGTH_SHORT).show();
+
+                                    wbsNameArray = new String[0];
+                                    wbsNameArray[0] = "No WBS";
+
+                                }
+                                else
+                                {
+                                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(QualityPlanItemCreate.this,
+                                            android.R.layout.simple_dropdown_item_1line,wbsNameArray);
+                                    spinner_wbs.setAdapter(adapter);
+                                }
                             }
-                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(QualityPlanItemCreate.this,
-                                    android.R.layout.simple_dropdown_item_1line,wbsNameArray);
-                            spinner_wbs.setAdapter(adapter);
 
                         }
                         catch(JSONException e){
                             e.printStackTrace();}
 
-                        pDialog.dismiss();
                     }
                 },
                 new Response.ErrorListener() {
@@ -274,7 +282,6 @@ public class QualityPlanItemCreate extends AppCompatActivity {
                     public void onErrorResponse(VolleyError error) {
                         Log.e("Volley","Error");
 
-                        pDialog.dismiss();
                     }
                 }
         );
@@ -289,7 +296,7 @@ public class QualityPlanItemCreate extends AppCompatActivity {
     public void prepareActivities(final String currentWbsId, final ProgressDialog pDialog)
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
-        String url = getString(R.string.server_url) + "/getWbsActivity?wbsId=\""+currentWbsId+"\"";
+        String url = pm.getString("SERVER_URL") + "/getWbsActivity?wbsId=\""+currentWbsId+"\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -362,7 +369,7 @@ public class QualityPlanItemCreate extends AppCompatActivity {
     }
 
 
-    public void prepareItems() {
+    public void saveData() {
         JSONObject object = new JSONObject();
 
         try {
@@ -378,21 +385,49 @@ public class QualityPlanItemCreate extends AppCompatActivity {
             object.put("createdBy", currentUserId);
             object.put("createdDate", currentDate);
 
+            if(pm.getString("className").equals("QualityPlanItem"))
+            {
+                object.put("totalAttachments", pm.getString("totalImageUrlSize"));
+            }
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
         RequestQueue requestQueue = Volley.newRequestQueue(QualityPlanItemCreate.this);
 
-        String url = QualityPlanItemCreate.this.getResources().getString(R.string.server_url) + "/postQualityPlanStatus";
+        String url = QualityPlanItemCreate.this.pm.getString("SERVER_URL") + "/postQualityPlanStatus";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            Toast.makeText(QualityPlanItemCreate.this, response.getString("msg").toString(), Toast.LENGTH_SHORT).show();
-                            pDialog.dismiss();
+                            if(response.getString("msg").equals("success"))
+                            {
+                                String totalImageUrls = pm.getString("totalImageUrls");
+                                if(pm.getString("className").equals("QualityPlanItem") && isInternetPresent
+                                        && !totalImageUrls.isEmpty())
+                                {
+                                    uploadImage(response.getString("data"), totalImageUrls);
+                                }
+
+                                else
+                                {
+                                    if (pDialog != null)
+                                        pDialog.dismiss();
+
+                                    Toast.makeText(QualityPlanItemCreate.this, "Quality Plan Line Item Created. ID - " + response.getString("data"), Toast.LENGTH_SHORT).show();
+                                    Intent intent = new Intent(QualityPlanItemCreate.this, QualityPlanActivity.class);
+                                    startActivity(intent);
+                                }
+                            }
+                            else
+                            {
+                                Toast.makeText(QualityPlanItemCreate.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
+                                pDialog.dismiss();
+                            }
+
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -413,6 +448,74 @@ public class QualityPlanItemCreate extends AppCompatActivity {
         Intent intent = new Intent(QualityPlanItemCreate.this,QualityPlanActivity.class);
         startActivity(intent);
     }
+
+    public void uploadImage(final String id, String totalUrls) {
+
+        final List<String> imageList = Arrays.asList(totalUrls.split(","));
+        String seperateImageUrl;
+
+
+        for (int i = 0; i < imageList.size(); i++) {
+
+            final int count = i;
+            JSONObject object = new JSONObject();
+
+            try {
+                seperateImageUrl = imageList.get(i);
+
+                object.put("qualityPlanStatusId", id);
+                object.put("url", seperateImageUrl);
+
+                Log.d("JSON OBJ SENT", object.toString());
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+
+            RequestQueue requestQueue = Volley.newRequestQueue(QualityPlanItemCreate.this);
+
+            String url = QualityPlanItemCreate.this.pm.getString("SERVER_URL") + "/postQualityPlanStatusFiles";
+
+            JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            try {
+
+                                Log.d("RESPONSE SERVER : ", response.toString());
+
+                                if (response.getString("msg").equals("success")) {
+
+                                    if (count == imageList.size() - 1) {
+                                        Toast.makeText(QualityPlanItemCreate.this, "Quality Plan Line created ID - " + id, Toast.LENGTH_SHORT).show();
+
+                                        if (pDialog != null)
+                                            pDialog.dismiss();
+                                        Intent intent = new Intent(QualityPlanItemCreate.this, QualityPlanActivity.class);
+                                        startActivity(intent);
+                                    }
+                                }
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            //response success message display
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.e("Volley", "Error");
+                            Toast.makeText(QualityPlanItemCreate.this, error.toString(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+            );
+
+            requestQueue.add(jor);
+        }
+    }
+
     @Override
     public void onBackPressed() {
         Intent intent = new Intent(QualityPlanItemCreate.this, AllQualityPlans.class);

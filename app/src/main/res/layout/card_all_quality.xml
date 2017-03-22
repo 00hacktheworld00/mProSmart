@@ -68,7 +68,7 @@
                         android:layout_height="match_parent"
                         android:textColor="@color/main_color_grey_800"
                         android:textSize="@dimen/_15sdp"
-                        android:text="#QIR : "
+                        android:text="#Inspection : "
                         android:textStyle="bold" />
 
                     <TextView

@@ -5,10 +5,8 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -20,6 +18,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -28,10 +27,12 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.android.volley.Cache;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.Adapters.AllResourceAdapter;
@@ -39,6 +40,8 @@ import com.example.sadashivsinha.mprosmart.Adapters.MyAdapter;
 import com.example.sadashivsinha.mprosmart.ModelLists.MomList;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
+import com.example.sadashivsinha.mprosmart.Utils.AppController;
+import com.example.sadashivsinha.mprosmart.Utils.Communicator;
 import com.example.sadashivsinha.mprosmart.Utils.ConnectionDetector;
 import com.example.sadashivsinha.mprosmart.Utils.CsvCreateUtility;
 import com.example.sadashivsinha.mprosmart.font.HelveticaBold;
@@ -49,10 +52,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 
 public class AllResource extends NewActivity implements View.OnClickListener  {
     private List<MomList> momList = new ArrayList<>();
@@ -71,10 +78,12 @@ public class AllResource extends NewActivity implements View.OnClickListener  {
     View dialogView;
     AlertDialog show;
     String[] resourceNameArray, resourceIdArray;
-    String firstName, lastName, fullName, id;
+    String firstName, lastName, fullName, id, resourceId;
     Spinner spinner_resource;
     PreferenceManager pm;
     String currentSelectedResource;
+
+    String url, resource_url, searchText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,9 +92,22 @@ public class AllResource extends NewActivity implements View.OnClickListener  {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        if (getIntent().hasExtra("search")) {
+            if (getIntent().getStringExtra("search").equals("yes")) {
+
+                searchText = getIntent().getStringExtra("searchText");
+
+                getSupportActionBar().setTitle("Resource Timesheet Search Results : " + searchText);
+            }
+        }
+
+
         pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
         currentUser = pm.getString("userId");
+
+        resource_url = pm.getString("SERVER_URL") + "/getResource";
+        url = pm.getString("SERVER_URL") + "/getResourceTimesheets?projectId='"+currentProjectNo+"'";
 
         Calendar c = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -94,46 +116,175 @@ public class AllResource extends NewActivity implements View.OnClickListener  {
         cd = new ConnectionDetector(getApplicationContext());
         isInternetPresent = cd.isConnectingToInternet();
 
+
+        allResourceAdapter = new AllResourceAdapter(momList);
+        recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(AllResource.this));
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setAdapter(allResourceAdapter);
+
         // check for Internet status
         if (!isInternetPresent) {
             // Internet connection is not present
             // Ask user to connect to Internet
-            RelativeLayout main_content = (RelativeLayout) findViewById(R.id.main_content);
-            Snackbar snackbar = Snackbar.make(main_content,getResources().getString(R.string.no_internet_error), Snackbar.LENGTH_LONG);
-            snackbar.show();
-        }
-        pDialog = new ProgressDialog(AllResource.this);
-        pDialog.setMessage("Getting Data ...");
-        pDialog.setIndeterminate(false);
-        pDialog.setCancelable(true);
-        pDialog.show();
+            RelativeLayout main_layout = (RelativeLayout) findViewById(R.id.main_layout);
+            Crouton.cancelAllCroutons();
+            Crouton.makeText(AllResource.this, R.string.no_internet_error, Style.ALERT, main_layout).show();
 
-        class MyTask extends AsyncTask<Void, Void, Void>
+            pDialog = new ProgressDialog(AllResource.this);
+            pDialog.setMessage("Getting cache data");
+            pDialog.show();
+
+            Cache cache = AppController.getInstance().getRequestQueue().getCache();
+            Cache.Entry entry = cache.get(resource_url);
+            if (entry != null) {
+                //Cache data available.
+                try {
+                    String data = new String(entry.data, "UTF-8");
+                    Log.d("CACHE DATA", data);
+                    JSONObject jsonObject = new JSONObject(data);
+                    try {
+                        dataArray = jsonObject.getJSONArray("data");
+                        resourceNameArray = new String[dataArray.length()+1];
+                        resourceIdArray = new String[dataArray.length()+1];
+
+                        resourceIdArray[0]="Select Resource";
+                        resourceNameArray[0]= "Select Resource";
+
+                        for(int i=0; i<dataArray.length();i++) {
+                            dataObject = dataArray.getJSONObject(i);
+                            firstName = dataObject.getString("firstName");
+                            lastName = dataObject.getString("lastName");
+
+                            id = dataObject.getString("id");
+
+                            fullName = firstName + " " + lastName;
+
+                            resourceNameArray[i + 1] = fullName;
+                            resourceIdArray[i + 1] = id;
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } catch (JSONException | UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+
+
+                if (pDialog != null)
+                    pDialog.dismiss();
+            }
+
+
+            entry = cache.get(url);
+            if (entry != null) {
+                //Cache data available.
+                try {
+                    String data = new String(entry.data, "UTF-8");
+                    Log.d("CACHE DATA", data);
+                    JSONObject jsonObject = new JSONObject(data);
+                    try {
+                        dataArray = jsonObject.getJSONArray("data");
+                        for (int i = 0; i < dataArray.length(); i++) {
+                            dataObject = dataArray.getJSONObject(i);
+                            projectId = dataObject.getString("projectId");
+
+                            if(projectId.equals(currentProjectNo))
+                            {
+                                resourceTimesheetsId = dataObject.getString("resourceTimesheetsId");
+                                name = dataObject.getString("name");
+                                photoUrl = dataObject.getString("photoUrl");
+                                createdBy = dataObject.getString("createdBy");
+                                createdDate = dataObject.getString("createdDate");
+
+                                for(int j=0; j<resourceIdArray.length; j++)
+                                {
+                                    if(resourceIdArray[j].equals(name))
+                                    {
+                                        name = resourceNameArray[j];
+                                    }
+                                }
+
+                                if (getIntent().hasExtra("search"))
+                                {
+                                    if (getIntent().getStringExtra("search").equals("yes")) {
+
+                                        if (resourceTimesheetsId.toLowerCase().contains(searchText.toLowerCase()) || name.toLowerCase().contains(searchText.toLowerCase())) {
+
+                                            items = new MomList(String.valueOf(i+1),resourceTimesheetsId, name, "", createdDate, createdBy);
+                                            momList.add(items);
+
+                                            allResourceAdapter.notifyDataSetChanged();
+
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    items = new MomList(String.valueOf(i+1),resourceTimesheetsId, name, "", createdDate, createdBy);
+                                    momList.add(items);
+
+                                    allResourceAdapter.notifyDataSetChanged();
+
+                                }
+                                }
+                            if (pDialog != null)
+                                pDialog.dismiss();
+                        }
+
+                        Boolean createResourceTimesheet = pm.getBoolean("createResourceTimesheet");
+
+                        if (createResourceTimesheet) {
+
+                            String jsonObjectVal = pm.getString("objectResourceTimesheet");
+                            Log.d("JSON Res PENDING :", jsonObjectVal);
+
+                            JSONObject jsonObjectPending = new JSONObject(jsonObjectVal);
+                            Log.d("JSONObj Res PENDING :", jsonObjectPending.toString());
+
+                            name = jsonObjectPending.getString("name");
+                            createdBy = jsonObjectPending.getString("createdBy");
+                            createdDate = jsonObjectPending.getString("createdDate");
+
+                            for(int j=0; j<resourceIdArray.length; j++)
+                            {
+                                if(resourceIdArray[j].equals(name))
+                                {
+                                    name = resourceNameArray[j];
+                                }
+                            }
+
+                            items = new MomList(String.valueOf(dataArray.length()),getResources().getString(R.string.waiting_to_connect), name, "", createdDate, createdBy);
+                            momList.add(items);
+
+                            allResourceAdapter.notifyDataSetChanged();
+
+                        }
+                    }catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
+                } catch (UnsupportedEncodingException | JSONException e) {
+                    e.printStackTrace();
+                }
+                if (pDialog != null)
+                    pDialog.dismiss();
+            }
+
+
+            else
+            {
+                Toast.makeText(AllResource.this, "Offline Data Not available for Resource Timesheets", Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        }
+
+        else
         {
-            @Override protected void onPreExecute()
-            {
-                allResourceAdapter = new AllResourceAdapter(momList);
-                recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
-                recyclerView.setLayoutManager(new LinearLayoutManager(AllResource.this));
-                recyclerView.setHasFixedSize(true);
-                recyclerView.setAdapter(allResourceAdapter);
-            }
-
-            @Override
-            protected Void doInBackground(Void... params)
-            {
-                prepareItems();
-                return null;
-            }
-
-            @Override protected void onPostExecute(Void result)
-            {
-                allResourceAdapter.notifyDataSetChanged();
-            }
-
+            // Cache data not exist.
+            getAllResources();
         }
 
-        new MyTask().execute();
 
         if(getIntent().hasExtra("create"))
         {
@@ -258,13 +409,26 @@ public class AllResource extends NewActivity implements View.OnClickListener  {
             case R.id.fab_search:
             {
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setTitle("Search Resource Timesheet !");
+                alert.setTitle("Search Resource Timesheets by Name or ID !");
                 // Set an EditText view to get user input
                 final EditText input = new EditText(this);
+                input.setMaxLines(1);
+                input.setImeOptions(EditorInfo.IME_ACTION_DONE);
                 alert.setView(input);
                 alert.setPositiveButton("Search", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        Toast.makeText(AllResource.this, "Search for it .", Toast.LENGTH_SHORT).show();
+
+                        if (input.getText().toString().isEmpty()) {
+                            input.setError("Enter Search Field");
+                        } else {
+                            Intent intent = new Intent(AllResource.this, AllResource.class);
+                            intent.putExtra("search", "yes");
+                            intent.putExtra("searchText", input.getText().toString());
+
+                            Log.d("SEARCH TEXT", input.getText().toString());
+
+                            startActivity(intent);
+                        }
                     }
                 });
                 alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -305,23 +469,9 @@ public class AllResource extends NewActivity implements View.OnClickListener  {
 
         Button createBtn = (Button) dialogView.findViewById(R.id.createBtn);
 
-        pDialog = new ProgressDialog(dialogView.getContext());
-        pDialog.setMessage("Getting Resources...");
-        pDialog.setIndeterminate(false);
-        pDialog.setCancelable(true);
-        pDialog.show();
-
-        class MyTask extends AsyncTask<Void, Void, Void>
-        {
-            @Override
-            protected Void doInBackground(Void... params)
-            {
-                getAllResources();
-                return null;
-            }
-        }
-
-        new MyTask().execute();
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(AllResource.this,
+                android.R.layout.simple_dropdown_item_1line,resourceNameArray);
+        spinner_resource.setAdapter(adapter);
 
         spinner_resource.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -364,64 +514,142 @@ public class AllResource extends NewActivity implements View.OnClickListener  {
         });
     }
 
-    public void prepareItems()
-    {
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
+    private void callJsonArrayRequest() {
+        // TODO Auto-generated method stub
 
-        String url = getResources().getString(R.string.server_url) + "/getResourceTimesheets?projectId='"+currentProjectNo+"'";
+        pDialog = new ProgressDialog(AllResource.this);
+        pDialog.setMessage("Getting server data");
+        pDialog.show();
 
-        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-
-                        try{
-
-                            String type = response.getString("type");
-
-                            if(type.equals("ERROR"))
+                        try
+                        {
+//                            dataObject = response.getJSONObject(0);
+                            dataArray = response.getJSONArray("data");
+                            for(int i=0; i<dataArray.length();i++)
                             {
-                                Toast.makeText(AllResource.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
-                            }
+                                dataObject = dataArray.getJSONObject(i);
+                                projectId = dataObject.getString("projectId");
 
-                            if(type.equals("INFO"))
-                            {
-                                dataArray = response.getJSONArray("data");
-                                for(int i=0; i<dataArray.length();i++)
+                                if(projectId.equals(currentProjectNo))
                                 {
-                                    dataObject = dataArray.getJSONObject(i);
-                                    projectId = dataObject.getString("projectId");
+                                    resourceTimesheetsId = dataObject.getString("resourceTimesheetsId");
+                                    name = dataObject.getString("name");
+                                    photoUrl = dataObject.getString("photoUrl");
+                                    createdBy = dataObject.getString("createdBy");
+                                    createdDate = dataObject.getString("createdDate");
 
-                                    if(projectId.equals(currentProjectNo))
+                                    for(int j=0; j<resourceIdArray.length; j++)
                                     {
-                                        resourceTimesheetsId = dataObject.getString("resourceTimesheetsId");
-                                        name = dataObject.getString("name");
-                                        photoUrl = dataObject.getString("photoUrl");
-                                        createdBy = dataObject.getString("createdBy");
-                                        createdDate = dataObject.getString("createdDate");
+                                        if(resourceIdArray[j].equals(name))
+                                        {
+                                            name = resourceNameArray[j];
+                                        }
+                                    }
 
+                                    if (getIntent().hasExtra("search"))
+                                    {
+                                        if (getIntent().getStringExtra("search").equals("yes")) {
+
+                                            if (resourceTimesheetsId.toLowerCase().contains(searchText.toLowerCase()) || name.toLowerCase().contains(searchText.toLowerCase())) {
+
+                                                items = new MomList(String.valueOf(i+1),resourceTimesheetsId, name, "", createdDate, createdBy);
+                                                momList.add(items);
+
+                                                allResourceAdapter.notifyDataSetChanged();
+
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
                                         items = new MomList(String.valueOf(i+1),resourceTimesheetsId, name, "", createdDate, createdBy);
                                         momList.add(items);
 
                                         allResourceAdapter.notifyDataSetChanged();
+
                                     }
                                 }
                             }
-                            pDialog.dismiss();
-                        }catch(JSONException e){e.printStackTrace();}
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("Volley","Error");
 
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+//                        setData(response,false);
                     }
-                }
-        );
-        requestQueue.add(jor);
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        });
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(jsonObjectRequest);
+        if(pDialog!=null)
+            pDialog.dismiss();
     }
 
+    private void getAllResources() {
+        // TODO Auto-generated method stub
+
+        pDialog = new ProgressDialog(AllResource.this);
+        pDialog.setMessage("Getting server data");
+        pDialog.show();
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, resource_url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try
+                        {
+//                            dataObject = response.getJSONObject(0);
+                            dataArray = response.getJSONArray("data");
+                            resourceNameArray = new String[dataArray.length()+1];
+                            resourceIdArray = new String[dataArray.length()+1];
+
+                            resourceIdArray[0]="Select Resource";
+                            resourceNameArray[0]= "Select Resource";
+
+                            for(int i=0; i<dataArray.length();i++)
+                            {
+                                dataObject = dataArray.getJSONObject(i);
+                                firstName = dataObject.getString("firstName");
+                                lastName = dataObject.getString("lastName");
+
+                                id = dataObject.getString("id");
+
+                                fullName = firstName + " " + lastName;
+
+                                resourceNameArray[i+1]=fullName;
+                                resourceIdArray[i+1]=id;
+                            }
+
+                            callJsonArrayRequest();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+//                        setData(response,false);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        });
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(jsonObjectRequest);
+        if(pDialog!=null)
+            pDialog.dismiss();
+    }
 
     public void createResource(final String resourceId)
     {
@@ -439,7 +667,7 @@ public class AllResource extends NewActivity implements View.OnClickListener  {
 
         RequestQueue requestQueue = Volley.newRequestQueue(AllResource.this);
 
-        String url = AllResource.this.getResources().getString(R.string.server_url) + "/postResourceTimesheet";
+        String url = AllResource.this.pm.getString("SERVER_URL") + "/postResourceTimesheet";
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -453,13 +681,12 @@ public class AllResource extends NewActivity implements View.OnClickListener  {
                                 pDialog.dismiss();
                                 show.dismiss();
 
-
                                 pm.putString("resourceId", response.getString("data"));
                                 pm.putString("resourceName", spinner_resource.getSelectedItem().toString());
                                 pm.putString("resourceDate", currentDate);
                                 pm.putString("resourceCreatedBy", currentUser);
 
-                                Intent intent = new Intent(AllResource.this, ResourceItemCreate.class);
+                                Intent intent = new Intent(AllResource.this, AllResource.class);
                                 startActivity(intent);
                             }
 
@@ -477,79 +704,43 @@ public class AllResource extends NewActivity implements View.OnClickListener  {
                     }
                 }
         );
-        requestQueue.add(jor);
-    }
 
-    public void getAllResources()
-    {
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getResource";
+        if (!isInternetPresent)
+        {
+            // Internet connection is not present
 
-        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
+            Communicator communicator = new Communicator();
+            Log.d("object", object.toString());
 
-                        try{
-                            String type = response.getString("type");
+            Boolean createResourceTimesheet = pm.getBoolean("createResourceTimesheet");
 
-                            if(type.equals("ERROR"))
-                            {
-                                Toast.makeText(AllResource.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
-                            }
+            if(createResourceTimesheet)
+            {
+                Toast.makeText(AllResource.this, "Already a Resource Timesheet creation is in progress. Please try after sometime.", Toast.LENGTH_LONG).show();
+            }
+            else
+            {
+                Toast.makeText(AllResource.this, "Internet not currently available. Resource Timesheet will automatically get created on internet connection.", Toast.LENGTH_SHORT).show();
 
-                            if(type.equals("INFO"))
-                            {
-                                dataArray = response.getJSONArray("data");
-                                resourceNameArray = new String[dataArray.length()+1];
-                                resourceIdArray = new String[dataArray.length()+1];
+                pm.putString("objectResourceTimesheet", object.toString());
+                pm.putString("urlResourceTimesheet", url);
+                pm.putString("toastMessageResourceTimesheet", "Resource Timesheet Created");
+                pm.putBoolean("createResourceTimesheet", true);
 
-                                resourceIdArray[0]="Select Resource";
-                                resourceNameArray[0]= "Select Resource";
-
-                                for(int i=0; i<dataArray.length();i++)
-                                {
-                                    dataObject = dataArray.getJSONObject(i);
-                                    firstName = dataObject.getString("firstName");
-                                    lastName = dataObject.getString("lastName");
-
-                                    id = dataObject.getString("id");
-
-                                    fullName = firstName + " " + lastName;
-
-                                    resourceNameArray[i+1]=fullName;
-                                    resourceIdArray[i+1]=id;
-                                }
-                                ArrayAdapter<String> adapter = new ArrayAdapter<String>(AllResource.this,
-                                        android.R.layout.simple_dropdown_item_1line,resourceNameArray);
-                                spinner_resource.setAdapter(adapter);
-                            }
-
-                        }
-                        catch(JSONException e){
-                            e.printStackTrace();}
-                        pDialog.dismiss();
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("Volley","Error");
-                        pDialog.dismiss();
-                    }
-                }
-        );
-        if (pDialog!=null)
-            pDialog.dismiss();
-
-        requestQueue.add(jor);
-
+                Intent intent = new Intent(AllResource.this, AllResource.class);
+                startActivity(intent);
+            }
+        }
+        else
+        {
+            requestQueue.add(jor);
+        }
     }
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(AllResource.this, ViewPurchaseOrders.class);
+        Intent intent = new Intent(AllResource.this, SiteProjectDelivery.class);
         startActivity(intent);
     }
 

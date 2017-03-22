@@ -4,10 +4,10 @@ package com.example.sadashivsinha.mprosmart.ModelLists;
  * Created by saDashiv sinha on 02-Jul-16.
  */
 public class ActivitiesInWbsList {
-    String id ,activityName ,progress ,startDate, endDate, resourceAllocated ,boq, status;
+    private String id ,activityName ,progress ,startDate, endDate, resourceAllocated ,boq, status, newEndDate;
 
     public ActivitiesInWbsList(String id, String activityName, String progress,
-                               String startDate, String endDate, String resourceAllocated, String boq, String status) {
+                               String startDate, String endDate, String newEndDate, String resourceAllocated, String boq, String status) {
         this.id = id;
         this.activityName = activityName;
         this.progress = progress;
@@ -16,6 +16,11 @@ public class ActivitiesInWbsList {
         this.resourceAllocated = resourceAllocated;
         this.boq = boq;
         this.status = status;
+        this.newEndDate = newEndDate;
+    }
+
+    public String getNewEndDate() {
+        return newEndDate;
     }
 
     public String getStatus() {

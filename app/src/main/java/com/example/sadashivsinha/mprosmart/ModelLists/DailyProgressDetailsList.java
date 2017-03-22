@@ -5,18 +5,25 @@ package com.example.sadashivsinha.mprosmart.ModelLists;
  */
 public class DailyProgressDetailsList {
     String wbs_name, activity;
-    String target_date, completed, percent_completed, res_worked, weather_title;
+    String completed, res_worked, percent_completed_today, percent_completed_total;
 
-    public DailyProgressDetailsList(String wbs_name, String activity, String target_date, String completed,
-                                    String percent_completed, String res_worked, String weather_title)
+    public DailyProgressDetailsList(String wbs_name, String activity, String completed, String res_worked,
+                                    String percent_completed_today, String percent_completed_total)
     {
         this.wbs_name = wbs_name;
         this.activity = activity;
-        this.target_date = target_date;
         this.completed = completed;
-        this.percent_completed = percent_completed;
         this.res_worked = res_worked;
-        this.weather_title = weather_title;
+        this.percent_completed_today = percent_completed_today;
+        this.percent_completed_total = percent_completed_total;
+    }
+
+    public String getPercent_completed_today() {
+        return percent_completed_today;
+    }
+
+    public String getPercent_completed_total() {
+        return percent_completed_total;
     }
 
     public String getWbs_name() {
@@ -26,24 +33,11 @@ public class DailyProgressDetailsList {
     public String getActivity() {
         return activity;
     }
-
-    public String getTarget_date() {
-        return target_date;
-    }
-
     public String getCompleted() {
         return completed;
     }
 
-    public String getPercent_completed() {
-        return percent_completed;
-    }
-
     public String getRes_worked() {
         return res_worked;
-    }
-
-    public String getWeather_title() {
-        return weather_title;
     }
 }

@@ -18,7 +18,8 @@
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
-    <android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <android.support.v4.widget.DrawerLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/DrawerLayout"
@@ -88,7 +89,7 @@
                                         android:textColor="#000000"
                                         android:maxLines="1"
                                         android:inputType="textCapSentences"
-                                        android:imeOptions="actionNext"
+                                        android:imeOptions="actionDone"
                                         android:background="@drawable/edittext_states_red"
                                         android:textSize="15sp"
                                         android:id="@+id/activity_name" />
@@ -126,22 +127,19 @@
                                             android:id="@+id/end_date"
                                             android:maxLines="1"
                                             android:hint="End Date" />
-
-
                                     </LinearLayout>
 
-                                    <Spinner
+                                    <com.thomashaertel.widget.MultiSpinner
                                         android:layout_width="match_parent"
                                         android:layout_height="@dimen/_35sdp"
                                         android:padding="10dp"
-                                        android:hint="Resource Allocated"
                                         android:textColorHint="#000000"
                                         android:textColor="#000000"
                                         android:background="@drawable/edittext_states_red"
                                         android:layout_marginBottom="@dimen/activity_vertical_margin"
                                         android:textSize="15sp"
-                                        android:id="@+id/spinner_resource" />
-
+                                        android:text="Select Resources"
+                                        android:id="@+id/multi_spinner_resource"/>
 
                                     <Spinner
                                         android:layout_width="match_parent"

@@ -46,7 +46,14 @@ public class PunchListsAdapter extends RecyclerView.Adapter<PunchListsAdapter.My
                 public void onClick(View v) {
                     Intent intent = new Intent(view.getContext(), PunchListActivity.class);
                     String punchListNo = punch_list_no.getText().toString();
+
                     pm.putString("punchListNo",punchListNo);
+                    pm.putString("projectIdPunchList",project_id.getText().toString());
+                    pm.putString("projectNamePunchList",project_name.getText().toString());
+                    pm.putString("vendorIdPunchList",vendor_id.getText().toString());
+                    pm.putString("vendorNamePunchList",vendor_name.getText().toString());
+                    pm.putString("createdByPunchList",created_by.getText().toString());
+
                     view.getContext().startActivity(intent);
                 }
             });

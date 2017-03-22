@@ -1,9 +1,7 @@
 package com.example.sadashivsinha.mprosmart.Activities;
 
 import android.app.ProgressDialog;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,16 +10,17 @@ import android.util.Log;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.android.volley.Cache;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.Adapters.InvoiceNewAdapter;
 import com.example.sadashivsinha.mprosmart.ModelLists.InvoiceNewList;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
+import com.example.sadashivsinha.mprosmart.Utils.AppController;
 import com.example.sadashivsinha.mprosmart.Utils.ConnectionDetector;
 import com.example.sadashivsinha.mprosmart.font.HelveticaRegular;
 
@@ -29,8 +28,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 
 public class InvoiceNew extends AppCompatActivity {
 
@@ -50,6 +53,7 @@ public class InvoiceNew extends AppCompatActivity {
     HelveticaRegular text_total_invoice_cost, text_total_currency;
     HelveticaRegular text_invoice_no, text_pr_no, text_vendor;
     String currentProjectNo, currentVendorInvoice, currentPurchaseReceipt, currentVendor, unitCost, acceptedQuantity;
+    String url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,112 +90,142 @@ public class InvoiceNew extends AppCompatActivity {
         cd = new ConnectionDetector(getApplicationContext());
         isInternetPresent = cd.isConnectingToInternet();
 
+        url = pm.getString("SERVER_URL") + "/getPurchaseReceiptItems?purchaseReceiptId=\""+currentPurchaseReceipt+"\"";
+
+        invoiceNewAdapter = new InvoiceNewAdapter(invoiceNewList);
+        recyclerView.setLayoutManager(new LinearLayoutManager(InvoiceNew.this));
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setAdapter(invoiceNewAdapter);
+
         // check for Internet status
         if (!isInternetPresent) {
             // Internet connection is not present
             // Ask user to connect to Internet
-            RelativeLayout main_content = (RelativeLayout) findViewById(R.id.main_content);
-            Snackbar snackbar = Snackbar.make(main_content,getResources().getString(R.string.no_internet_error), Snackbar.LENGTH_LONG);
-            snackbar.show();
+            RelativeLayout main_layout = (RelativeLayout) findViewById(R.id.main_layout);
+            Crouton.cancelAllCroutons();
+            Crouton.makeText(InvoiceNew.this, R.string.no_internet_error, Style.ALERT, main_layout).show();
+
+            pDialog = new ProgressDialog(InvoiceNew.this);
+            pDialog.setMessage("Getting cache data");
+            pDialog.show();
+
+            Cache cache = AppController.getInstance().getRequestQueue().getCache();
+            Cache.Entry entry = cache.get(url);
+            if (entry != null) {
+                //Cache data available.
+                try {
+                    String data = new String(entry.data, "UTF-8");
+                    Log.d("CACHE DATA", data);
+                    JSONObject jsonObject = new JSONObject(data);
+                    try {
+
+                        float totalCost, acceptedQuanVal, unitCostVal;
+                        dataArray = jsonObject.getJSONArray("data");
+                        for (int i = 0; i < dataArray.length(); i++) {
+                            dataObject = dataArray.getJSONObject(i);
+                            itemId = dataObject.getString("itemId");
+                            quantityReceived = dataObject.getString("quantityReceived");
+                            unitCost = dataObject.getString("unitCost");
+                            acceptedQuantity = dataObject.getString("acceptedQuantity");
+
+                            unitCostVal = Float.parseFloat(unitCost);
+                            acceptedQuanVal = Float.parseFloat(acceptedQuantity);
+
+                            totalCost = unitCostVal * acceptedQuanVal;
+
+                            items = new InvoiceNewList(itemId, quantityReceived, acceptedQuantity, unitCost, totalCost);
+                            invoiceNewList.add(items);
+
+                            invoiceNewAdapter.notifyDataSetChanged();
+
+                            totalInvoiceFloat = totalInvoiceFloat + totalCost;
+                        }
+
+                        text_total_invoice_cost.setText(String.valueOf(totalInvoiceFloat));
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
+                } catch (UnsupportedEncodingException | JSONException e) {
+                    e.printStackTrace();
+                }
+                if (pDialog != null)
+                    pDialog.dismiss();
+            }
+
+            else
+            {
+                Toast.makeText(InvoiceNew.this, "Offline Data Not available for this Invoice", Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
         }
 
-        pDialog = new ProgressDialog(InvoiceNew.this,R.style.MyTheme);
-        pDialog.setProgressStyle(android.R.style.Widget_ProgressBar_Small);
-        pDialog.setCancelable(false);
-        pDialog.show();
-
-        class MyTask extends AsyncTask<Void, Void, Void>
+        else
         {
-            @Override protected void onPreExecute()
-            {
-                invoiceNewAdapter = new InvoiceNewAdapter(invoiceNewList);
-                recyclerView.setLayoutManager(new LinearLayoutManager(InvoiceNew.this));
-                recyclerView.setHasFixedSize(true);
-                recyclerView.setAdapter(invoiceNewAdapter);
-
-            }
-
-            @Override
-            protected Void doInBackground(Void... params)
-            {
-                prepareItems();
-                return null;
-            }
-
-            @Override protected void onPostExecute(Void result)
-            {
-                invoiceNewAdapter.notifyDataSetChanged();
-            }
-
+            // Cache data not exist.
+            callJsonArrayRequest();
         }
-
-        new MyTask().execute();
     }
 
-    public void prepareItems()
-    {
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
+    private void callJsonArrayRequest() {
+        // TODO Auto-generated method stub
 
-        String url = getResources().getString(R.string.server_url) + "/getPurchaseReceiptItems?purchaseReceiptId=\""+currentPurchaseReceipt+"\"";
+        pDialog = new ProgressDialog(InvoiceNew.this);
+        pDialog.setMessage("Getting server data");
+        pDialog.show();
 
-        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+                        try {
 
-                        try{
-
-                            String type = response.getString("type");
                             float totalCost, acceptedQuanVal, unitCostVal;
 
-                            if(type.equals("ERROR"))
+//                            dataObject = response.getJSONObject(0);
+                            dataArray = response.getJSONArray("data");
+                            for (int i = 0; i < dataArray.length(); i++)
                             {
-                                pDialog.dismiss();
-                                Toast.makeText(InvoiceNew.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
+                                dataObject = dataArray.getJSONObject(i);
+                                itemId = dataObject.getString("itemId");
+                                quantityReceived = dataObject.getString("quantityReceived");
+                                unitCost = dataObject.getString("unitCost");
+                                acceptedQuantity = dataObject.getString("acceptedQuantity");
+
+                                unitCostVal = Float.parseFloat(unitCost);
+                                acceptedQuanVal = Float.parseFloat(acceptedQuantity);
+
+                                totalCost = unitCostVal * acceptedQuanVal;
+
+                                items = new InvoiceNewList(itemId, quantityReceived, acceptedQuantity, unitCost, totalCost);
+                                invoiceNewList.add(items);
+
+                                invoiceNewAdapter.notifyDataSetChanged();
+
+                                totalInvoiceFloat = totalInvoiceFloat + totalCost;
                             }
 
-                            if(type.equals("INFO"))
-                            {
-                                dataArray = response.getJSONArray("data");
-                                for(int i=0; i<dataArray.length();i++)
-                                {
-                                    dataObject = dataArray.getJSONObject(i);
+                            text_total_invoice_cost.setText(String.valueOf(totalInvoiceFloat));
 
-                                    itemId = dataObject.getString("itemId");
-                                    quantityReceived = dataObject.getString("quantityReceived");
-                                    unitCost =  dataObject.getString("unitCost");
-                                    acceptedQuantity =  dataObject.getString("acceptedQuantity");
 
-                                    unitCostVal = Float.parseFloat(unitCost);
-                                    acceptedQuanVal = Float.parseFloat(acceptedQuantity);
-
-                                    totalCost = unitCostVal * acceptedQuanVal;
-
-                                    items = new InvoiceNewList(itemId, quantityReceived, acceptedQuantity, unitCost, totalCost);
-                                    invoiceNewList.add(items);
-
-                                    invoiceNewAdapter.notifyDataSetChanged();
-
-                                    totalInvoiceFloat = totalInvoiceFloat + totalCost;
-                                }
-
-                                text_total_invoice_cost.setText(String.valueOf(totalInvoiceFloat));
-                            }
-                            pDialog.dismiss();
-                        }catch(JSONException e){
-                            pDialog.dismiss();
-                            e.printStackTrace();}
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+//                        setData(response,false);
                     }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        pDialog.dismiss();
-                        Log.e("Volley","Error");
-
-                    }
-                }
-        );
-        requestQueue.add(jor);
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        });
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(jsonObjectRequest);
+        if(pDialog!=null)
+            pDialog.dismiss();
     }
 }

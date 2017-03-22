@@ -40,6 +40,7 @@ public class SubmittalRegisterCreateActivity extends AppCompatActivity implement
     String[] priorityArray;
     Button select_start_date, select_end_date, createBtn;
     PreferenceManager pm;
+    String formattedStartDate, formattedEndDate;
 
     ConnectionDetector cd;
     public static final String TAG = SubmittalRegisterCreateActivity.class.getSimpleName();
@@ -116,12 +117,12 @@ public class SubmittalRegisterCreateActivity extends AppCompatActivity implement
                     text_desc.setError("Field cannot be empty");
                 } else {
 
-                    prepareItems();
+                    saveData();
                 }
             }
         });
     }
-    public void prepareItems()
+    public void saveData()
     {
         JSONObject object = new JSONObject();
 
@@ -129,8 +130,8 @@ public class SubmittalRegisterCreateActivity extends AppCompatActivity implement
             object.put("projectId",currentProjectNo);
             object.put("Description",text_desc.getText().toString());
             object.put("priority",spinnerPriority.getText().toString());
-            object.put("startDate",select_start_date.getText().toString());
-            object.put("EndDate",select_end_date.getText().toString());
+            object.put("startDate",formattedStartDate);
+            object.put("EndDate",formattedEndDate);
             object.put("Status",text_status.getText().toString());
             object.put("createdDate",currentDate);
             object.put("createdBy", currentUserId);
@@ -140,7 +141,7 @@ public class SubmittalRegisterCreateActivity extends AppCompatActivity implement
 
         RequestQueue requestQueue = Volley.newRequestQueue(SubmittalRegisterCreateActivity.this);
 
-        String url = SubmittalRegisterCreateActivity.this.getResources().getString(R.string.server_url) + "/postSubmittalRegisters";
+        String url = SubmittalRegisterCreateActivity.this.pm.getString("SERVER_URL") + "/postSubmittalRegisters";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -151,7 +152,7 @@ public class SubmittalRegisterCreateActivity extends AppCompatActivity implement
                             {
                                 Toast.makeText(SubmittalRegisterCreateActivity.this, "Submittal Resgiter Created. ID - " + response.getString("data"), Toast.LENGTH_SHORT).show();
 
-                                Intent intent = new Intent(SubmittalRegisterCreateActivity.this, SubmittalRegisterActivity.class);
+                                Intent intent = new Intent(SubmittalRegisterCreateActivity.this, AllSubmittalsRegister.class);
                                 pm.putString("currentProjectName",currentProjectName);
                                 pm.putString("submittalRegistersId",response.getString("data"));
                                 pm.putString("projectId",currentProjectNo);
@@ -225,10 +226,12 @@ public class SubmittalRegisterCreateActivity extends AppCompatActivity implement
     @Override
     public void onDateSet(DatePickerDialog view, final int year, final int monthOfYear, final int dayOfMonth) {
         String[] MONTHS = {"01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"};
-        final String date = year+"-"+(MONTHS[monthOfYear])+"-"+dayOfMonth;
+        final String date = dayOfMonth+"-"+(MONTHS[monthOfYear])+"-"+year;
+
         if(selected_btn.equals("start"))
         {
             select_start_date.setText(date);
+            formattedStartDate =  year+"-"+(MONTHS[monthOfYear])+"-"+dayOfMonth;
 
             select_end_date.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -251,6 +254,7 @@ public class SubmittalRegisterCreateActivity extends AppCompatActivity implement
         }
         else if(selected_btn.equals("end"))
         {
+            formattedEndDate =  year+"-"+(MONTHS[monthOfYear])+"-"+dayOfMonth;
             select_end_date.setText(date);
         }
     }

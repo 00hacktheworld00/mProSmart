@@ -2,7 +2,6 @@ package com.example.sadashivsinha.mprosmart.Activities;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -17,22 +16,34 @@ import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.android.volley.Cache;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
+import com.example.sadashivsinha.mprosmart.Utils.AppController;
+import com.example.sadashivsinha.mprosmart.Utils.Communicator;
+import com.example.sadashivsinha.mprosmart.Utils.ConnectionDetector;
+import com.example.sadashivsinha.mprosmart.font.HelveticaBold;
 import com.example.sadashivsinha.mprosmart.font.HelveticaRegular;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.List;
+import java.util.Scanner;
+
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 
 public class AddItemsActivity extends AppCompatActivity {
 
@@ -47,15 +58,24 @@ public class AddItemsActivity extends AppCompatActivity {
     String currentUser, currentProjectId, currentUomId;
     Boolean editItem = false;
     String editItemUom, editItemId;
+    HelveticaBold label_quantity;
+    PreferenceManager pm;
+    ConnectionDetector cd;
+    Boolean isInternetPresent;
+    String url;
+    public static final String TAG = AddItemsActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_items);
 
-        PreferenceManager pm = new PreferenceManager(this);
+        pm = new PreferenceManager(this);
         currentUser = pm.getString("userId");
         currentProjectId = pm.getString("projectId");
+
+        cd = new ConnectionDetector(getApplicationContext());
+        isInternetPresent = cd.isConnectingToInternet();
 
         spinner_uom = (Spinner) findViewById(R.id.spinner_uom);
 
@@ -64,12 +84,17 @@ public class AddItemsActivity extends AppCompatActivity {
         text_item_name = (EditText) findViewById(R.id.text_item_name);
         text_item_desc = (EditText) findViewById(R.id.text_item_desc);
 
+        label_quantity = (HelveticaBold) findViewById(R.id.label_quantity);
+
         text_item_quantity = (EditText) findViewById(R.id.text_item_quantity);
 
         text_item_quantity.setVisibility(View.GONE);
+        label_quantity.setVisibility(View.GONE);
 
         radiobtn_non_assembly = (RadioButton) findViewById(R.id.radiobtn_non_assembly);
         radiobtn_assembly = (RadioButton) findViewById(R.id.radiobtn_assembly);
+
+        url = pm.getString("SERVER_URL") + "/getUom";
 
         if(getIntent().hasExtra("editItem"))
         {
@@ -96,22 +121,78 @@ public class AddItemsActivity extends AppCompatActivity {
                 //editing is being done
             }
         }
+        if (!isInternetPresent) {
+            // Internet connection is not present
+            // Ask user to connect to Internet
+            LinearLayout main_layout = (LinearLayout) findViewById(R.id.main_layout);
+            Crouton.cancelAllCroutons();
+            Crouton.makeText(AddItemsActivity.this, R.string.no_internet_error, Style.ALERT, main_layout).show();
 
-        pDialog = new ProgressDialog(AddItemsActivity.this);
-        pDialog.setMessage("Getting Items List ...");
-        pDialog.setIndeterminate(false);
-        pDialog.setCancelable(true);
-        pDialog.show();
+            pDialog = new ProgressDialog(AddItemsActivity.this);
+            pDialog.setMessage("Getting cache data");
+            pDialog.show();
 
-        class MyTask extends AsyncTask<Void, Void, Void> {
+            Cache cache = AppController.getInstance().getRequestQueue().getCache();
+            Cache.Entry entry = cache.get(url);
+            if(entry != null){
+                //Cache data available.
+                try {
+                    int positionUomEdit=-1;
 
-            @Override
-            protected Void doInBackground(Void... params) {
-                getAllUom(editItem, editItemUom);
-                return null;
+                    String data = new String(entry.data, "UTF-8");
+                    Log.d("CACHE DATA", data);
+                    JSONObject jsonObject=new JSONObject(data);
+                    try
+                    {
+                        dataArray = jsonObject.getJSONArray("data");
+                        uomArray = new String[dataArray.length()+1];
+                        uomNameArray = new String[dataArray.length()+1];
+
+                        uomNameArray[0]="Select UOM";
+                        uomArray[0]="Select UOM";
+
+                        for(int i=0; i<dataArray.length();i++)
+                        {
+                            dataObject = dataArray.getJSONObject(i);
+                            uomArray[i+1] = dataObject.getString("uomCode");
+                            uomNameArray[i+1] = dataObject.getString("uomName");
+
+                            if(editItem)
+                            {
+                                if(uomNameArray[i+1].equals(editItemUom))
+                                {
+                                    positionUomEdit = i+1;
+                                }
+                            }
+
+                        }
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(AddItemsActivity.this,
+                                android.R.layout.simple_dropdown_item_1line,uomNameArray);
+                        spinner_uom.setAdapter(adapter);
+
+                        if(editItem)
+                            spinner_uom.setSelection(positionUomEdit);
+
+                        pDialog.dismiss();
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
+                }
+                catch (UnsupportedEncodingException | JSONException e) {
+                    e.printStackTrace();
+                }
+                if(pDialog!=null)
+                    pDialog.dismiss();
             }
         }
-        new MyTask().execute();
+
+        else
+        {
+            // Cache data not exist.
+            getAllUom(editItem, editItemUom);
+        }
 
         spinner_uom.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -135,10 +216,12 @@ public class AddItemsActivity extends AppCompatActivity {
                 if(isChecked)
                 {
                     text_item_quantity.setVisibility(View.VISIBLE);
+                    label_quantity.setVisibility(View.VISIBLE);
                 }
                 else
                 {
                     text_item_quantity.setVisibility(View.GONE);
+                    label_quantity.setVisibility(View.GONE);
                 }
             }
         });
@@ -168,16 +251,8 @@ public class AddItemsActivity extends AppCompatActivity {
                         pDialog.setCancelable(true);
                         pDialog.show();
 
-                        class MyTask extends AsyncTask<Void, Void, Void>
-                        {
-                            @Override
-                            protected Void doInBackground(Void... params)
-                            {
-                                updateItemsEditing();
-                                return null;
-                            }
-                        }
-                        new MyTask().execute();
+
+                        updateItemsEditing();
 
 
                     }
@@ -192,16 +267,8 @@ public class AddItemsActivity extends AppCompatActivity {
                             pDialog.setCancelable(true);
                             pDialog.show();
 
-                            class MyTask extends AsyncTask<Void, Void, Void>
-                            {
-                                @Override
-                                protected Void doInBackground(Void... params)
-                                {
-                                    saveNonAssemblyItems();
-                                    return null;
-                                }
-                            }
-                            new MyTask().execute();
+
+                            saveNonAssemblyItems();
                         }
                         else
                         {
@@ -217,16 +284,7 @@ public class AddItemsActivity extends AppCompatActivity {
                                 pDialog.setCancelable(true);
                                 pDialog.show();
 
-                                class MyTask extends AsyncTask<Void, Void, Void>
-                                {
-                                    @Override
-                                    protected Void doInBackground(Void... params)
-                                    {
-                                        saveAssemblyItems();
-                                        return null;
-                                    }
-                                }
-                                new MyTask().execute();
+                                saveAssemblyItems();
                             }
                         }
                     }
@@ -242,78 +300,62 @@ public class AddItemsActivity extends AppCompatActivity {
     public void getAllUom(final Boolean editItem, final String editItemUom)
     {
 
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-
-        String url = getResources().getString(R.string.server_url) + "/getUom";
-
-        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-
-                        try{
+                        Log.d("response project : ", response.toString());
+                        try {
 
                             int positionUomEdit = -1;
 
-                            String type = response.getString("type");
+//                            dataObject = response.getJSONObject(0);
+                            dataArray = response.getJSONArray("data");
+                            uomArray = new String[dataArray.length()+1];
+                            uomNameArray = new String[dataArray.length()+1];
 
-                            if(type.equals("ERROR"))
+                            uomNameArray[0]="Select UOM";
+                            uomArray[0]="Select UOM";
+
+                            for(int i=0; i<dataArray.length();i++)
                             {
-                                Toast.makeText(AddItemsActivity.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
-                            }
-
-                            if(type.equals("INFO"))
-                            {
-                                dataArray = response.getJSONArray("data");
-                                uomArray = new String[dataArray.length()+1];
-                                uomNameArray = new String[dataArray.length()+1];
-
-                                uomNameArray[0]="Select UOM";
-                                uomArray[0]="Select UOM";
-
-                                for(int i=0; i<dataArray.length();i++)
-                                {
-                                    dataObject = dataArray.getJSONObject(i);
-                                    uomArray[i+1] = dataObject.getString("uomCode");
-                                    uomNameArray[i+1] = dataObject.getString("uomName");
-
-                                    if(editItem)
-                                    {
-                                        if(uomNameArray[i+1].equals(editItemUom))
-                                        {
-                                            positionUomEdit = i+1;
-                                        }
-                                    }
-
-                                }
-                                ArrayAdapter<String> adapter = new ArrayAdapter<String>(AddItemsActivity.this,
-                                        android.R.layout.simple_dropdown_item_1line,uomNameArray);
-                                spinner_uom.setAdapter(adapter);
+                                dataObject = dataArray.getJSONObject(i);
+                                uomArray[i+1] = dataObject.getString("uomCode");
+                                uomNameArray[i+1] = dataObject.getString("uomName");
 
                                 if(editItem)
-                                    spinner_uom.setSelection(positionUomEdit);
+                                {
+                                    if(uomNameArray[i+1].equals(editItemUom))
+                                    {
+                                        positionUomEdit = i+1;
+                                    }
+                                }
 
                             }
+                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(AddItemsActivity.this,
+                                    android.R.layout.simple_dropdown_item_1line,uomNameArray);
+                            spinner_uom.setAdapter(adapter);
+                            if(pDialog!=null)
+                                pDialog.dismiss();
 
+                            if(editItem)
+                                spinner_uom.setSelection(positionUomEdit);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
-                        catch(JSONException e){
-                            e.printStackTrace();}
-                        pDialog.dismiss();
+//                        setData(response,false);
                     }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("Volley","Error");
-                        pDialog.dismiss();
-                    }
-                }
-        );
-        if (pDialog!=null)
-            pDialog.dismiss();
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        });
 
-        requestQueue.add(jor);
-
+        AppController.getInstance().addToRequestQueue(jsonObjectRequest);
     }
 
     public void updateItemsEditing()
@@ -339,7 +381,7 @@ public class AddItemsActivity extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(AddItemsActivity.this);
 
-        String url = AddItemsActivity.this.getResources().getString(R.string.server_url) + "/putItem?itemId=\"" + editItemId + "\"";
+        String url = pm.getString("SERVER_URL") + "/putItem?itemId=\"" + editItemId + "\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.PUT, url, object,
                 new Response.Listener<JSONObject>() {
@@ -371,10 +413,37 @@ public class AddItemsActivity extends AppCompatActivity {
                     }
                 }
         );
-        if (pDialog!=null)
-            pDialog.dismiss();
+        if (!isInternetPresent)
+        {
+            // Internet connection is not present
 
-        requestQueue.add(jor);
+            Communicator communicator = new Communicator();
+            Log.d("object", object.toString());
+
+            Boolean createItemUpdatePending = pm.getBoolean("createItemUpdatePending");
+
+            if(createItemUpdatePending)
+            {
+                Toast.makeText(AddItemsActivity.this, "Already an item updation is in progress. Please try after sometime.", Toast.LENGTH_LONG).show();
+            }
+            else
+            {
+                Toast.makeText(AddItemsActivity.this, "Internet not currently available. Item will automatically get updated on internet connection.", Toast.LENGTH_SHORT).show();
+
+                pm.putString("objectUpdateItem", object.toString());
+                pm.putString("urlUpdateItem", url);
+                pm.putString("toastMessageUpdateItem", "Item Updated - " + editItemId);
+                pm.putBoolean("createItemUpdatePending", true);
+
+                pDialog.dismiss();
+                Intent intent = new Intent(AddItemsActivity.this, AllItemsActivity.class);
+                startActivity(intent);
+            }
+        }
+        else
+        {
+            requestQueue.add(jor);
+        }
     }
 
     public void saveNonAssemblyItems()
@@ -383,7 +452,7 @@ public class AddItemsActivity extends AppCompatActivity {
 
 
         Calendar c = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String strDate = sdf.format(c.getTime());
 
         try {
@@ -403,13 +472,15 @@ public class AddItemsActivity extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(AddItemsActivity.this);
 
-        String url = AddItemsActivity.this.getResources().getString(R.string.server_url) + "/postItems";
+        String url = pm.getString("SERVER_URL") + "/postItems";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
+
+                            Log.d("RESPONSE", response.toString());
 
                             if(response.getString("msg").equals("success"))
                             {
@@ -437,7 +508,37 @@ public class AddItemsActivity extends AppCompatActivity {
         if (pDialog!=null)
             pDialog.dismiss();
 
-        requestQueue.add(jor);
+        if (!isInternetPresent)
+        {
+            // Internet connection is not present
+
+            Communicator communicator = new Communicator();
+            Log.d("object", object.toString());
+
+            Boolean createItemPending = pm.getBoolean("createItemPending");
+
+            if(createItemPending)
+            {
+                Toast.makeText(AddItemsActivity.this, "Already an item creation is in progress. Please try after sometime.", Toast.LENGTH_LONG).show();
+            }
+            else
+            {
+                Toast.makeText(AddItemsActivity.this, "Internet not currently available. Item will automatically get created on internet connection.", Toast.LENGTH_SHORT).show();
+
+                pm.putString("objectItem", object.toString());
+                pm.putString("urlItem", url);
+                pm.putString("toastMessageItem", "Item Created");
+                pm.putBoolean("createItemPending", true);
+
+                pDialog.dismiss();
+                Intent intent = new Intent(AddItemsActivity.this, AllItemsActivity.class);
+                startActivity(intent);
+            }
+        }
+        else
+        {
+            requestQueue.add(jor);
+        }
     }
 
     public void saveAssemblyItems()
@@ -469,7 +570,7 @@ public class AddItemsActivity extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(AddItemsActivity.this);
 
-        String url = AddItemsActivity.this.getResources().getString(R.string.server_url) + "/postBoq";
+        String url = pm.getString("SERVER_URL") + "/postBoq";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -481,7 +582,7 @@ public class AddItemsActivity extends AppCompatActivity {
 
                             if(response.getString("msg").equals("success"))
                             {
-                                String successMsg = "BOQ Created. ID - "+ response.getString("data");
+                                String successMsg = "Assembly Item Created. ID - "+ response.getString("data");
                                 Toast.makeText(AddItemsActivity.this, successMsg, Toast.LENGTH_SHORT).show();
 
                                 Intent intent = new Intent(AddItemsActivity.this, AllBoq.class);
@@ -502,9 +603,77 @@ public class AddItemsActivity extends AppCompatActivity {
                     }
                 }
         );
-        requestQueue.add(jor);
-        if(pDialog!=null)
-            pDialog.dismiss();
+        if (!isInternetPresent)
+        {
+            // Internet connection is not present
+
+            Communicator communicator = new Communicator();
+            Log.d("object", object.toString());
+
+            Boolean createAssemblyItemPending = pm.getBoolean("createAssemblyItemPending");
+
+            if(createAssemblyItemPending)
+            {
+                Toast.makeText(AddItemsActivity.this, "Already an Assembly item creation is in progress. Please try after sometime.", Toast.LENGTH_LONG).show();
+            }
+            else
+            {
+                Toast.makeText(AddItemsActivity.this, "Internet not currently available. Assembly item will automatically get created on internet connection.", Toast.LENGTH_SHORT).show();
+
+                pm.putString("objectAssemblyItem", object.toString());
+                pm.putString("urlAssemblyItem", url);
+                pm.putString("toastMessageAssemblyItem", "Assembly Item Created");
+                pm.putBoolean("createAssemblyItemPending", true);
+
+                pDialog.dismiss();
+                Intent intent = new Intent(AddItemsActivity.this, AllItemsActivity.class);
+                startActivity(intent);
+            }
+        }
+        else
+        {
+            requestQueue.add(jor);
+        }
     }
 
+
+    public void main(){
+        Scanner scanner = new Scanner(System. in);
+        String input = scanner. nextLine();
+        String[] values = input.split(",");
+        int[] intValues = new int[values.length];
+
+        for(int i=0; i<values.length; i++)
+            intValues[i] = Integer.parseInt(values[i]);
+
+        List<Integer> displayNum = null;
+        displayNum = findDuplicates(intValues);
+
+        if(displayNum.equals(null))
+        {
+            System.out.print("[]");
+        }
+        else
+        {
+            System.out.print("[]");
+            System.out.print("[" + findDuplicates(intValues) + "]");
+        }
+    }
+
+    public List<Integer> findDuplicates(int[] nums) {
+
+        List<Integer> newNum = null;
+
+        for(int i=0; i<nums.length; i++)
+        {
+            for(int j=0; j<nums.length; j++)
+            {
+                if(nums[i]==nums[j])
+                {
+                    newNum.add((nums[j]));
+                }
+            }
+        }
+        return newNum;
+    }
 }

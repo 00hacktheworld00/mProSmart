@@ -91,8 +91,7 @@ public class AllPurchaseReceipts extends NewActivity {
         currentPurchaseOrderNo=pm.getString("poNumber");
         currentProjectNo = pm.getString("projectId");
 
-        url = getResources().getString(R.string.server_url) + "/getPurchaseReceipts?projectId=\""+currentProjectNo+"\"";
-
+        url = pm.getString("SERVER_URL") + "/getPurchaseReceipts?projectId=\""+currentProjectNo+"\"";
 
         po_number = (TextView) findViewById(R.id.po_number);
         project_no = (TextView) findViewById(R.id.project_no);
@@ -391,7 +390,7 @@ public class AllPurchaseReceipts extends NewActivity {
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(AllPurchaseReceipts.this, ViewPurchaseOrders.class);
+        Intent intent = new Intent(AllPurchaseReceipts.this, InventoryMainActivity.class);
         startActivity(intent);
     }
 

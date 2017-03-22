@@ -4,10 +4,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.example.sadashivsinha.mprosmart.ModelLists.SiteTwoList;
 import com.example.sadashivsinha.mprosmart.R;
+import com.example.sadashivsinha.mprosmart.font.HelveticaRegular;
 
 import java.util.List;
 
@@ -19,16 +19,15 @@ public class SiteFourAdapter extends RecyclerView.Adapter<SiteFourAdapter.MyView
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
-        public TextView text_line_no, text_wbs, text_activity, text_item_code, text_quan_issued, text_rec_by;
+        public HelveticaRegular text_material_no, text_item_id, text_item_desc, text_quan_issued,text_uom;
 
         public MyViewHolder(final View view) {
             super(view);
-            text_line_no = (TextView) view.findViewById(R.id.text_line_no);
-            text_wbs = (TextView) view.findViewById(R.id.text_wbs);
-            text_activity = (TextView) view.findViewById(R.id.text_activity);
-            text_item_code = (TextView) view.findViewById(R.id.text_item_code);
-            text_quan_issued = (TextView) view.findViewById(R.id.text_quan_issued);
-            text_rec_by = (TextView) view.findViewById(R.id.text_rec_by);
+            text_material_no = (HelveticaRegular) view.findViewById(R.id.text_material_no);
+            text_item_id = (HelveticaRegular) view.findViewById(R.id.text_item_id);
+            text_item_desc = (HelveticaRegular) view.findViewById(R.id.text_item_desc);
+            text_uom = (HelveticaRegular) view.findViewById(R.id.text_uom);
+            text_quan_issued = (HelveticaRegular) view.findViewById(R.id.text_quan_issued);
         }
     }
 
@@ -48,12 +47,11 @@ public class SiteFourAdapter extends RecyclerView.Adapter<SiteFourAdapter.MyView
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
         SiteTwoList items = itemList.get(position);
-        holder.text_line_no.setText(String.valueOf(items.getText_line_no()));
-        holder.text_wbs.setText(String.valueOf(items.getText_wbs()));
-        holder.text_activity.setText(String.valueOf(items.getText_activity()));
-        holder.text_item_code.setText(String.valueOf(items.getText_item_code()));
+        holder.text_material_no.setText(String.valueOf(items.getText_material_no()));
+        holder.text_item_id.setText(String.valueOf(items.getText_item_id()));
+        holder.text_item_desc.setText(String.valueOf(items.getText_item_desc()));
         holder.text_quan_issued.setText(String.valueOf(items.getText_quan_issued()));
-        holder.text_rec_by.setText(String.valueOf(items.getText_rec_by()));
+        holder.text_uom.setText(String.valueOf(items.getText_uom()));
     }
 
     @Override

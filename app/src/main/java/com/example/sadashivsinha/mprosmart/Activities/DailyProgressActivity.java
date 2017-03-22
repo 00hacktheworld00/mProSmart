@@ -107,7 +107,7 @@ public class DailyProgressActivity extends AppCompatActivity implements View.OnC
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(DailyProgressActivity.this, ViewPurchaseOrders.class);
+        Intent intent = new Intent(DailyProgressActivity.this, SiteProjectDelivery.class);
         startActivity(intent);
     }
 

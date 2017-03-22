@@ -72,15 +72,16 @@ public class QualityControlItemCreate extends AppCompatActivity {
     TextView text_uom;
     String UPLOAD_URL;
     String currentDate;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quality_control_create);
+        pm = new PreferenceManager(QualityControlItemCreate.this);
 
-        UPLOAD_URL = QualityControlItemCreate.this.getResources().getString(R.string.server_url) + "/file-upload";
+        UPLOAD_URL = QualityControlItemCreate.this.pm.getString("SERVER_URL") + "/file-upload";
 
-        final PreferenceManager pm = new PreferenceManager(QualityControlItemCreate.this);
         currentReceiptNo = pm.getString("receiptNo");
         currentQirId = pm.getString("qirNo");
 
@@ -264,7 +265,7 @@ public class QualityControlItemCreate extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(QualityControlItemCreate.this);
 
-        String url = QualityControlItemCreate.this.getResources().getString(R.string.server_url) + "/postQualityInspectionLineItems";
+        String url = QualityControlItemCreate.this.pm.getString("SERVER_URL") + "/postQualityInspectionLineItems";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -272,7 +273,10 @@ public class QualityControlItemCreate extends AppCompatActivity {
                     public void onResponse(JSONObject response) {
                         try {
                             Toast.makeText(QualityControlItemCreate.this, response.getString("msg").toString(), Toast.LENGTH_SHORT).show();
+                            pDialog.dismiss();
 
+                            Intent intent = new Intent(QualityControlItemCreate.this, QualityControl.class);
+                            startActivity(intent);
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -288,9 +292,6 @@ public class QualityControlItemCreate extends AppCompatActivity {
                 }
         );
         requestQueue.add(jor);
-        pDialog.dismiss();
-        Intent intent = new Intent(QualityControlItemCreate.this, QualityControl.class);
-        startActivity(intent);
     }
 
     public void selectImage(final String imageSelectedText) {
@@ -430,7 +431,7 @@ public class QualityControlItemCreate extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getPurchaseReceiptItems?purchaseReceiptId=\""+currentReceiptNo+"\"";
+        String url = pm.getString("SERVER_URL") + "/getPurchaseReceiptItems?purchaseReceiptId=\""+currentReceiptNo+"\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -494,7 +495,6 @@ public class QualityControlItemCreate extends AppCompatActivity {
 //
 //        RequestQueue requestQueue = Volley.newRequestQueue(this);
 //
-//        String url = getResources().getString(R.string.server_url) + "/getUom";
 //
 //        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
 //                new Response.Listener<JSONObject>() {

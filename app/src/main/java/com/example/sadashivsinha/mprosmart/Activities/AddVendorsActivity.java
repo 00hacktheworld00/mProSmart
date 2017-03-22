@@ -6,7 +6,6 @@ import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.NotificationCompat;
@@ -15,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -25,6 +25,7 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.android.volley.Cache;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -33,6 +34,9 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
+import com.example.sadashivsinha.mprosmart.Utils.AppController;
+import com.example.sadashivsinha.mprosmart.Utils.Communicator;
+import com.example.sadashivsinha.mprosmart.Utils.ConnectionDetector;
 import com.example.sadashivsinha.mprosmart.font.HelveticaRegular;
 import com.weiwangcn.betterspinner.library.BetterSpinner;
 
@@ -40,8 +44,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 
 public class AddVendorsActivity extends AppCompatActivity {
 
@@ -58,6 +66,8 @@ public class AddVendorsActivity extends AppCompatActivity {
     EditText text_house_no_two, text_street_name_two, text_city_two, text_state_two, text_country_two, text_zipcode_two;
     EditText text_fax, text_email;
     EditText text_insurance_company, text_policy_no;
+    String[] vendorTypeIdArray, vendorTypeArray;
+    String currentVendorTypeId;
 
     Spinner spinner_ven_type, spinner_discipline;
 
@@ -69,14 +79,17 @@ public class AddVendorsActivity extends AppCompatActivity {
     JSONArray dataArray;
     JSONObject dataObject;
     String currentVendor;
-    String[] currencyArray;
+    String[] currencyArray, disciplineArray;
     PreferenceManager pm;
 
     String vendorName, vendorTypeId, license, address1, address2, addressLine3, city, zipCode, country, primaryContact, insuranceCompany,
         policyNumber, indemnificationAmount, minorityOwnedBusiness, DisadvantagedOwnedBusiness, certificateNo, contactCompany, contactFirstName,
         contactLastName, remarks, publishPath, emailId, currencyCode, decipline, statusId, coiExpirationDate, expDate, taxID, companyName, houseNo,
     streetName, state, fax;
-
+    ConnectionDetector cd;
+    public static final String TAG = AddVendorsActivity.class.getSimpleName();
+    Boolean isInternetPresent = false;
+    String vendor_type_url, vendor_details_url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,6 +171,105 @@ public class AddVendorsActivity extends AppCompatActivity {
 
         createBtn = (Button) findViewById(R.id.createBtn);
 
+        cd = new ConnectionDetector(getApplicationContext());
+        isInternetPresent = cd.isConnectingToInternet();
+
+        vendor_type_url = pm.getString("SERVER_URL") + "/getVendorType";
+        vendor_details_url = pm.getString("SERVER_URL") + "/getVendors";
+
+        if (!isInternetPresent) {
+            // Internet connection is not present
+            // Ask user to connect to Internet
+            RelativeLayout main_layout = (RelativeLayout) findViewById(R.id.main_content);
+            Crouton.cancelAllCroutons();
+            Crouton.makeText(AddVendorsActivity.this, R.string.no_internet_error, Style.ALERT, main_layout).show();
+
+            Cache cache = AppController.getInstance().getRequestQueue().getCache();
+            Cache.Entry entry = cache.get(vendor_type_url);
+            if (entry != null) {
+                //Cache data available.
+                try {
+                    String data = new String(entry.data, "UTF-8");
+                    Log.d("CACHE DATA", data);
+                    JSONObject jsonObject = new JSONObject(data);
+                    try {
+                        dataArray = jsonObject.getJSONArray("data");
+                        vendorTypeIdArray = new String[dataArray.length()+1];
+                        vendorTypeArray = new String[dataArray.length()+1];
+
+                        vendorTypeIdArray[0]="Select Vendor Type";
+                        vendorTypeArray[0]="Select Vendor Type";
+
+                        for(int i=0; i<dataArray.length();i++)
+                        {
+                            dataObject = dataArray.getJSONObject(i);
+                            vendorTypeIdArray[i+1] = dataObject.getString("id");
+                            vendorTypeArray[i+1] = dataObject.getString("type");
+                        }
+
+                        if(vendorTypeIdArray!=null)
+                        {
+                            ArrayAdapter<String> adapterVendor = new ArrayAdapter<String>(AddVendorsActivity.this,
+                                    android.R.layout.simple_dropdown_item_1line,vendorTypeArray);
+
+                            spinner_ven_type.setAdapter(adapterVendor);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
+                } catch (UnsupportedEncodingException | JSONException e) {
+                    e.printStackTrace();
+                }
+                if (pDialog != null)
+                    pDialog.dismiss();
+            }
+
+            else
+            {
+                Toast.makeText(AddVendorsActivity.this, "Offline Data Not available for Vendor Types", Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        }
+
+        else
+        {
+            pDialog = new ProgressDialog(AddVendorsActivity.this);
+            pDialog.setMessage("Getting Data");
+            pDialog.show();
+
+            // Cache data not exist.
+            getVendorType();
+        }
+
+
+        disciplineArray = new String[5];
+        disciplineArray[0] = "Select Discipline";
+        disciplineArray[1] = "Electrical";
+        disciplineArray[2] = "Mechanical";
+        disciplineArray[3] = "Civil";
+        disciplineArray[4] = "Architectural";
+
+        ArrayAdapter<String> adapterDiscipline = new ArrayAdapter<String>(AddVendorsActivity.this,
+                android.R.layout.simple_dropdown_item_1line, disciplineArray);
+        spinner_discipline.setAdapter(adapterDiscipline);
+
+        spinner_ven_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                for(int i=0; i<vendorTypeArray.length; i++)
+                {
+                    if(vendorTypeArray[i].equals(spinner_ven_type.getSelectedItem().toString()))
+                        currentVendorTypeId = vendorTypeIdArray[i];
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         currencyArray = new String[3];
         currencyArray[0] = "INR";
         currencyArray[1] = "$";
@@ -177,24 +289,113 @@ public class AddVendorsActivity extends AppCompatActivity {
 
                 currentVendor = getIntent().getStringExtra("vendorId");
 
-                pDialog = new ProgressDialog(AddVendorsActivity.this);
-                pDialog.setMessage("Getting Details ...");
-                pDialog.setIndeterminate(false);
-                pDialog.setCancelable(true);
-                pDialog.show();
+                if (!isInternetPresent) {
+                    // Internet connection is not present
+                    // Ask user to connect to Internet
 
-                class MyTask extends AsyncTask<Void, Void, Void> {
+                    Cache cache = AppController.getInstance().getRequestQueue().getCache();
+                    Cache.Entry entry = cache.get(vendor_details_url);
+                    if (entry != null) {
+                        //Cache data available.
+                        try {
+                            String data = new String(entry.data, "UTF-8");
+                            Log.d("CACHE DATA", data);
+                            JSONObject jsonObject = new JSONObject(data);
+                            try {
+                                dataArray = jsonObject.getJSONArray("data");
+                                vendorTypeIdArray = new String[dataArray.length()+1];
+                                vendorTypeArray = new String[dataArray.length()+1];
 
-                    @Override
-                    protected Void doInBackground(Void... params) {
-                        setVendorDetails();
-                        return null;
+                                vendorTypeIdArray[0]="Select Vendor Type";
+                                vendorTypeArray[0]="Select Vendor Type";
+
+                                for(int i=0; i<dataArray.length();i++) {
+                                    dataObject = dataArray.getJSONObject(i);
+                                    vendorId = dataObject.getString("vendorId");
+
+                                    if (vendorId.equals(currentVendor)) {
+                                        dataObject = dataArray.getJSONObject(i);
+                                        Log.d("equals? :", "yes");
+
+                                        vendorName = dataObject.getString("vendorName");
+
+                                        Log.d("vendorName: ", vendorName);
+                                        text_vendor_name.setText(vendorName);
+
+                                        vendorTypeId = dataObject.getString("vendorTypeId");
+                                        taxID = dataObject.getString("taxID");
+                                        license = dataObject.getString("license");
+                                        decipline = dataObject.getString("decipline");
+                                        companyName = dataObject.getString("companyName");
+                                        houseNo = dataObject.getString("houseNo");
+                                        streetName = dataObject.getString("streetName");
+                                        city = dataObject.getString("city");
+                                        state = dataObject.getString("state");
+                                        country = dataObject.getString("country");
+                                        zipCode = dataObject.getString("zipCode");
+                                        fax = dataObject.getString("fax");
+                                        emailId = dataObject.getString("emailId");
+                                        insuranceCompany = dataObject.getString("insuranceCompany");
+                                        policyNumber = dataObject.getString("policyNumber");
+
+
+                                        currencyCode = dataObject.getString("currencyCode");
+                                        for (String currentCurrency : currencyArray) {
+                                            //matching server currency and spinner currency and setting into spinner
+                                            if (currentCurrency.equals(currencyCode))
+                                                spinner_currency.setText(currentCurrency);
+                                        }
+
+                                        for (int j = 0; j < vendorTypeIdArray.length; j++) {
+                                            if (vendorTypeId.equals(vendorTypeIdArray[j]))
+                                                spinner_ven_type.setSelection(j);
+                                        }
+
+                                        spinner_discipline.setSelection(Integer.parseInt(decipline));
+
+
+                                        text_tax_id.setText(taxID);
+                                        text_licence_no.setText(license);
+                                        text_company_name.setText(companyName);
+                                        text_house_no.setText(houseNo);
+                                        text_street_name.setText(streetName);
+                                        text_city.setText(city);
+                                        text_state.setText(state);
+                                        text_country.setText(country);
+                                        text_zipcode.setText(zipCode);
+                                        text_fax.setText(fax);
+                                        text_email.setText(emailId);
+                                        text_insurance_company.setText(insuranceCompany);
+                                        text_policy_no.setText(policyNumber);
+
+                                        break;
+                                    }
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
+                        } catch (UnsupportedEncodingException | JSONException e) {
+                            e.printStackTrace();
+                        }
+                        if (pDialog != null)
+                            pDialog.dismiss();
+                    }
+
+                    else
+                    {
+                        Toast.makeText(AddVendorsActivity.this, "Offline Data Not available for Vendor Details", Toast.LENGTH_SHORT).show();
+                        pDialog.dismiss();
                     }
                 }
-                new MyTask().execute();
+
+                else
+                {
+                    // Cache data not exist.
+                    setVendorDetails();
+                }
             }
         }
-
 
         card_vendor.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -221,7 +422,7 @@ public class AddVendorsActivity extends AppCompatActivity {
                 {
                     text_vendor_name.setError("Cannot be left empty");
                 }
-                else if(spinner_ven_type.getSelectedItem().toString().isEmpty())
+                else if(spinner_ven_type.getSelectedItem().toString().equals("Select Vendor Type"))
                 {
                     Toast.makeText(AddVendorsActivity.this, "Select Vendor Type", Toast.LENGTH_SHORT).show();
                 }
@@ -233,7 +434,7 @@ public class AddVendorsActivity extends AppCompatActivity {
                 {
                     text_licence_no.setError("Cannot be left empty");
                 }
-                else if(spinner_discipline.getSelectedItem().toString().isEmpty())
+                else if(spinner_discipline.getSelectedItem().toString().equals("Select Discipline"))
                 {
                     Toast.makeText(AddVendorsActivity.this, "Select Discipline", Toast.LENGTH_SHORT).show();
                 }
@@ -517,7 +718,7 @@ public class AddVendorsActivity extends AppCompatActivity {
                     hiddenLayoutVendorDetails.setVisibility(View.VISIBLE);
                 }
 
-                else if(spinner_ven_type.getSelectedItem().toString().isEmpty())
+                else if(spinner_ven_type.getSelectedItem().toString().equals("Select Vendor Type"))
                 {
                     Toast.makeText(AddVendorsActivity.this, "Select Vendor Type", Toast.LENGTH_SHORT).show();
                 }
@@ -529,7 +730,7 @@ public class AddVendorsActivity extends AppCompatActivity {
                 {
                     text_licence_no.setError("Cannot be left empty");
                 }
-                else if(spinner_discipline.getSelectedItem().toString().isEmpty())
+                else if(spinner_discipline.getSelectedItem().equals("Select Discipline"))
                 {
                     Toast.makeText(AddVendorsActivity.this, "Select Discipline", Toast.LENGTH_SHORT).show();
                 }
@@ -572,39 +773,39 @@ public class AddVendorsActivity extends AppCompatActivity {
                 }
                 //address two
 
-                if(card_address_two.getVisibility()==View.VISIBLE)
-                {
-                    if(text_house_no_two.getText().toString().isEmpty())
-                    {
-                        text_house_no_two.setError("Cannot be left empty");
-                        hiddenLayoutAddressTwo.setVisibility(View.VISIBLE);
-                    }
-                    else if(text_street_name_two.getText().toString().isEmpty())
-                    {
-                        text_street_name_two.setError("Cannot be left empty");
-                        hiddenLayoutAddressTwo.setVisibility(View.VISIBLE);
-                    }
-                    else if(text_city_two.getText().toString().isEmpty())
-                    {
-                        text_city_two.setError("Cannot be left empty");
-                        hiddenLayoutAddressTwo.setVisibility(View.VISIBLE);
-                    }
-                    else if(text_state_two.getText().toString().isEmpty())
-                    {
-                        text_state_two.setError("Cannot be left empty");
-                        hiddenLayoutAddressTwo.setVisibility(View.VISIBLE);
-                    }
-                    else if(text_country_two.getText().toString().isEmpty())
-                    {
-                        text_country_two.setError("Cannot be left empty");
-                        hiddenLayoutAddressTwo.setVisibility(View.VISIBLE);
-                    }
-                    else if(text_zipcode_two.getText().toString().isEmpty())
-                    {
-                        text_zipcode_two.setError("Cannot be left empty");
-                        hiddenLayoutAddressTwo.setVisibility(View.VISIBLE);
-                    }
-                }
+//                if(card_address_two.getVisibility()==View.VISIBLE)
+//                {
+//                    if(text_house_no_two.getText().toString().isEmpty())
+//                    {
+//                        text_house_no_two.setError("Cannot be left empty");
+//                        hiddenLayoutAddressTwo.setVisibility(View.VISIBLE);
+//                    }
+//                    else if(text_street_name_two.getText().toString().isEmpty())
+//                    {
+//                        text_street_name_two.setError("Cannot be left empty");
+//                        hiddenLayoutAddressTwo.setVisibility(View.VISIBLE);
+//                    }
+//                    else if(text_city_two.getText().toString().isEmpty())
+//                    {
+//                        text_city_two.setError("Cannot be left empty");
+//                        hiddenLayoutAddressTwo.setVisibility(View.VISIBLE);
+//                    }
+//                    else if(text_state_two.getText().toString().isEmpty())
+//                    {
+//                        text_state_two.setError("Cannot be left empty");
+//                        hiddenLayoutAddressTwo.setVisibility(View.VISIBLE);
+//                    }
+//                    else if(text_country_two.getText().toString().isEmpty())
+//                    {
+//                        text_country_two.setError("Cannot be left empty");
+//                        hiddenLayoutAddressTwo.setVisibility(View.VISIBLE);
+//                    }
+//                    else if(text_zipcode_two.getText().toString().isEmpty())
+//                    {
+//                        text_zipcode_two.setError("Cannot be left empty");
+//                        hiddenLayoutAddressTwo.setVisibility(View.VISIBLE);
+//                    }
+//                }
 
                 //contact
 
@@ -643,34 +844,161 @@ public class AddVendorsActivity extends AppCompatActivity {
                     {
                         if (getIntent().getStringExtra("edit").equals("yes"))
                         {
-                            Intent intent = new Intent(AddVendorsActivity.this, AllVendors.class);
-                            Toast.makeText(AddVendorsActivity.this, "Details Updated", Toast.LENGTH_SHORT).show();
-                            startActivity(intent);
+                            updateVendor();
                         }
                     }
                     else
                     {
-                        pDialog = new ProgressDialog(AddVendorsActivity.this);
-                        pDialog.setMessage("Saving Details ...");
-                        pDialog.setIndeterminate(false);
-                        pDialog.setCancelable(true);
-                        pDialog.show();
-
-                        class MyTask extends AsyncTask<Void, Void, Void> {
-
-                            @Override
-                            protected Void doInBackground(Void... params) {
-                                createVendor();
-                                return null;
-                            }
-
-                        }
-                        new MyTask().execute();
+                        createVendor();
                     }
 
                 }
             }
         });
+    }
+
+    public void updateVendor()
+    {
+        JSONObject object = new JSONObject();
+
+        try {
+            object.put("vendorName", text_vendor_name.getText().toString());
+            object.put("taxID", text_tax_id.getText().toString());
+            object.put("companyName", text_company_name.getText().toString());
+            object.put("license", text_licence_no.getText().toString());
+            object.put("houseNo", text_house_no.getText().toString());
+            object.put("streetName", text_street_name.getText().toString());
+            object.put("city", text_city.getText().toString());
+            object.put("state", text_state.getText().toString());
+            object.put("zipCode", text_zipcode.getText().toString());
+            object.put("country", text_country.getText().toString());
+            object.put("fax", text_fax.getText().toString());
+            object.put("insuranceCompany", text_insurance_company.getText().toString());
+            object.put("policyNumber", text_policy_no.getText().toString());
+            object.put("emailId", text_email.getText().toString());
+            object.put("currencyCode", spinner_currency.getText().toString());
+
+
+            object.put("locality", "");
+            object.put("companyUrl", "");
+            object.put("primaryContact", "");
+            object.put("coiExpirationDate", "");
+            object.put("phone", "");
+            object.put("indemnificationAmount", "");
+            object.put("minorityOwnedBusiness", "");
+            object.put("DisadvantagedOwnedBusiness", "");
+            object.put("certificateNo", "");
+            object.put("contactCompany", "");
+            object.put("expDate", "");
+            object.put("contactFirstName", "");
+            object.put("contactLastName", "");
+            object.put("remarks", "");
+            object.put("statusId", "");
+            object.put("contactLastName", "");
+            object.put("publishPath", "");
+
+            Log.d("JSON SENT", object.toString());
+
+            switch (spinner_discipline.getSelectedItem().toString()) {
+                case "Electrical":
+                    object.put("decipline", "1");
+                    break;
+                case "Mechanical":
+                    object.put("decipline", "2");
+                    break;
+                case "Civil":
+                    object.put("decipline", "3");
+                    break;
+                case "Architectural":
+                    object.put("decipline", "4");
+                    break;
+            }
+
+
+            for(int i=0; i<vendorTypeArray.length; i++)
+            {
+                if(vendorTypeArray[i].equals(spinner_ven_type.getSelectedItem().toString()))
+                    object.put("vendorTypeId", currentVendorTypeId);
+            }
+
+            Log.d("object vendor", object.toString());
+        }
+        catch (JSONException e)
+        {
+            e.printStackTrace();
+        }
+
+        RequestQueue requestQueue = Volley.newRequestQueue(AddVendorsActivity.this);
+
+        String url = pm.getString("SERVER_URL") + "/putVendor?id=\"" + currentVendor + "\"";
+        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.PUT, url, object,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            Log.d("response vendor", response.toString());
+
+                            if(response.getString("msg").equals("success"))
+                            {
+                                Toast.makeText(AddVendorsActivity.this, "Vendor Updated. ID - " + currentVendor, Toast.LENGTH_SHORT).show();
+                                pDialog.dismiss();
+                                Intent intent = new Intent(AddVendorsActivity.this, AllVendors.class);
+                                startActivity(intent);
+                            }
+                            else
+                            {
+                                Toast.makeText(AddVendorsActivity.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
+                                pDialog.dismiss();
+                            }
+                        }
+                        catch (JSONException e)
+                        {
+                            e.printStackTrace();
+                            pDialog.dismiss();
+                        }
+                        //response success message display
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("Volley","Error");
+                        pDialog.dismiss();
+                    }
+                }
+        );
+
+        if (!isInternetPresent)
+        {
+            // Internet connection is not present
+
+            Communicator communicator = new Communicator();
+            Log.d("object", object.toString());
+
+            Boolean updateVendorPending = pm.getBoolean("updateVendorPending");
+
+            if(updateVendorPending)
+            {
+                Toast.makeText(AddVendorsActivity.this, "Already a Vendor updation is in progress. Please try after sometime.", Toast.LENGTH_LONG).show();
+            }
+            else
+            {
+                Toast.makeText(AddVendorsActivity.this, "Internet not currently available. Vendor will automatically get updated on internet connection.", Toast.LENGTH_SHORT).show();
+
+                pm.putString("objectVendorUpdate", object.toString());
+                pm.putString("urlVendorUpdate", url);
+                pm.putString("toastMessageVendorUpdate", "Vendor Updated");
+                pm.putBoolean("updateVendorPending", true);
+
+                pDialog.dismiss();
+                Intent intent = new Intent(AddVendorsActivity.this, AllVendors.class);
+                startActivity(intent);
+            }
+        }
+        else
+        {
+            requestQueue.add(jor);
+        }
     }
 
 
@@ -687,7 +1015,6 @@ public class AddVendorsActivity extends AppCompatActivity {
         builder.setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_LIGHTS | Notification.DEFAULT_VIBRATE);
 
         // This intent is fired when notification is clicked
-
 
 
         // Set the intent that will fire when the user taps the notification.
@@ -720,17 +1047,13 @@ public class AddVendorsActivity extends AppCompatActivity {
         // Will display the notification in the notification bar
         notificationManager.notify(999, builder.build());
 
-
-
     }
 
     public void setVendorDetails()
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getVendors";
-
-        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
+        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, vendor_details_url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -742,7 +1065,6 @@ public class AddVendorsActivity extends AppCompatActivity {
                             if(type.equals("ERROR"))
                             {
                                 Toast.makeText(AddVendorsActivity.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
-                                pDialog.dismiss();
                             }
 
                             if(type.equals("INFO"))
@@ -783,73 +1105,22 @@ public class AddVendorsActivity extends AppCompatActivity {
 
 
                                         currencyCode = dataObject.getString("currencyCode");
-                                        for(int j=0; j<currencyArray.length ;j++)
-                                        {
+                                        for (String currentCurrency : currencyArray) {
                                             //matching server currency and spinner currency and setting into spinner
-                                            if(currencyArray[j].equals(currencyCode))
-                                                spinner_currency.setText(currencyArray[j]);
+                                            if (currentCurrency.equals(currencyCode))
+                                                spinner_currency.setText(currentCurrency);
                                         }
 
-//                                        license = dataObject.getString("license");
-//                                        address1 = dataObject.getString("address1");
-//                                        address2 = dataObject.getString("address2");
-//                                        addressLine3 = dataObject.getString("addressLine3");
-//                                        city = dataObject.getString("city");
-//                                        zipCode = dataObject.getString("zipCode");
-//                                        taxID = dataObject.getString("taxID");
-//                                        country = dataObject.getString("country");
-//                                        primaryContact = dataObject.getString("primaryContact");
-//                                        insuranceCompany = dataObject.getString("insuranceCompany");
-//                                        policyNumber = dataObject.getString("policyNumber");
-//                                        indemnificationAmount = dataObject.getString("indemnificationAmount");
-//                                        minorityOwnedBusiness = dataObject.getString("minorityOwnedBusiness");
-//                                        DisadvantagedOwnedBusiness = dataObject.getString("DisadvantagedOwnedBusiness");
-//                                        certificateNo = dataObject.getString("certificateNo");
-//                                        contactCompany = dataObject.getString("contactCompany");
-//                                        contactFirstName = dataObject.getString("contactFirstName");
-//                                        contactLastName = dataObject.getString("contactLastName");
-//                                        remarks = dataObject.getString("remarks");
-//                                        publishPath = dataObject.getString("publishPath");
-//                                        emailId = dataObject.getString("emailId");
-//                                        decipline = dataObject.getString("decipline");
-//                                        statusId = dataObject.getString("statusId");
-//                                        coiExpirationDate = dataObject.getString("coiExpirationDate");
-//                                        expDate = dataObject.getString("expDate");
+                                        for(int j=0; j<vendorTypeIdArray.length; j++)
+                                        {
+                                            if(vendorTypeId.equals(vendorTypeIdArray[j]))
+                                                spinner_ven_type.setSelection(j);
+                                        }
 
-                                        spinner_ven_type.setPrompt(vendorTypeId);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                                        spinner_discipline.setSelection(Integer.parseInt(decipline));
 
                                         text_tax_id.setText(taxID);
                                         text_licence_no.setText(license);
-                                        spinner_discipline.setPrompt(decipline);
                                         text_company_name.setText(companyName);
                                         text_house_no.setText(houseNo);
                                         text_street_name.setText(streetName);
@@ -862,26 +1133,17 @@ public class AddVendorsActivity extends AppCompatActivity {
                                         text_insurance_company.setText(insuranceCompany);
                                         text_policy_no.setText(policyNumber);
 
-//                                        text_house_no_two.setText(lastName);
-//                                        text_street_name_two.setText(designationId);
-//                                        text_city_two.setText(emailId);
-//                                        text_state_two.setText(phone);
-//                                        text_country_two.setText(ratePerHour);
-//                                        text_zipcode_two.setText(houseNo);
-
+                                        break;
 
                                     }
                                 }
-                                pDialog.dismiss();
                             }
-                        }catch(JSONException e){e.printStackTrace();
-                            pDialog.dismiss();}
+                        }catch(JSONException e){e.printStackTrace();}
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        pDialog.dismiss();
                         Log.e("Volley","Error");
 
                     }
@@ -890,16 +1152,18 @@ public class AddVendorsActivity extends AppCompatActivity {
         requestQueue.add(jor);
     }
 
-
     public void createVendor()
     {
+        pDialog = new ProgressDialog(AddVendorsActivity.this);
+        pDialog.setMessage("Sending data");
+        pDialog.show();
+
         JSONObject object = new JSONObject();
 
         try {
             object.put("vendorName", text_vendor_name.getText().toString());
             object.put("taxID", text_tax_id.getText().toString());
             object.put("companyName", text_company_name.getText().toString());
-            object.put("vendorTypeId", spinner_ven_type.getSelectedItem().toString());
             object.put("license", text_licence_no.getText().toString());
             object.put("houseNo", text_house_no.getText().toString());
             object.put("streetName", text_street_name.getText().toString());
@@ -911,16 +1175,49 @@ public class AddVendorsActivity extends AppCompatActivity {
             object.put("insuranceCompany", text_insurance_company.getText().toString());
             object.put("policyNumber", text_policy_no.getText().toString());
             object.put("emailId", text_email.getText().toString());
-            object.put("decipline", spinner_discipline.getSelectedItem().toString());
-            object.put("createdBy", currentUser);
-            object.put("createdDate", currentDate);
-//            object.put("currencyCode", spinner_currency.getText().toString());
+            object.put("currencyCode", spinner_currency.getText().toString());
+
+            object.put("locality", "");
+            object.put("companyUrl", "");
+            object.put("primaryContact", "");
+            object.put("coiExpirationDate", "");
+            object.put("phone", "");
+            object.put("indemnificationAmount", "");
+            object.put("minorityOwnedBusiness", "");
+            object.put("DisadvantagedOwnedBusiness", "");
+            object.put("certificateNo", "");
+            object.put("contactCompany", "");
+            object.put("expDate", "");
+            object.put("contactFirstName", "");
+            object.put("contactLastName", "");
+            object.put("remarks", "");
+            object.put("statusId", "");
+            object.put("contactLastName", "");
+            object.put("publishPath", "");
+
+            switch (spinner_discipline.getSelectedItem().toString()) {
+                case "Electrical":
+                    object.put("decipline", "1");
+                    break;
+                case "Mechanical":
+                    object.put("decipline", "2");
+                    break;
+                case "Civil":
+                    object.put("decipline", "3");
+                    break;
+                case "Architectural":
+                    object.put("decipline", "4");
+                    break;
+            }
 
 
-//            {"vendorId":"VDR001","vendorName":"Sam","vendorTypeId":2,"decipline":1,"taxID":null,"license":null,"companyName":null,"companyUrl":null,"houseNo":null,"streetName":null,"locality":"",
-//                    "city":"","primaryContact":0,"phone":0,"fax":null,"emailId":null,"state":null,"policyNumber":null,"country":null,"zipCode":null,"insuranceCompany":null,"coiExpirationDate":"",
-//                    "indemnificationAmount":"","minorityOwnedBusiness":"","DisadvantagedOwnedBusiness":"","certificateNo":"","contactCompany":0,"expDate":"0000-00-00",
-//                    "contactFirstName":"","contactLastName":"","remarks":"","publishPath":"","statusId":0,"createdBy":"USR001","createdDate":"2016-04-01T00:00:00.000Z"}
+            Log.d("JSON SENT", object.toString());
+
+            for(int i=0; i<vendorTypeArray.length; i++)
+            {
+                if(vendorTypeArray[i].equals(spinner_ven_type.getSelectedItem().toString()))
+                    object.put("vendorTypeId", currentVendorTypeId);
+            }
 
             Log.d("object vendor", object.toString());
         }
@@ -931,7 +1228,7 @@ public class AddVendorsActivity extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(AddVendorsActivity.this);
 
-        String url = AddVendorsActivity.this.getResources().getString(R.string.server_url) + "/postVendor";
+        String url = pm.getString("SERVER_URL") + "/postVendor";
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -968,6 +1265,101 @@ public class AddVendorsActivity extends AppCompatActivity {
                     }
                 }
         );
+
+        if (!isInternetPresent)
+        {
+            // Internet connection is not present
+
+            Communicator communicator = new Communicator();
+            Log.d("object", object.toString());
+
+            Boolean createVendorPending = pm.getBoolean("createVendorPending");
+
+            if(createVendorPending)
+            {
+                Toast.makeText(AddVendorsActivity.this, "Already a Vendor creation is in progress. Please try after sometime.", Toast.LENGTH_LONG).show();
+            }
+            else
+            {
+                Toast.makeText(AddVendorsActivity.this, "Internet not currently available. Vendor will automatically get created on internet connection.", Toast.LENGTH_SHORT).show();
+
+                pm.putString("objectVendor", object.toString());
+                pm.putString("urlVendor", url);
+                pm.putString("toastMessageVendor", "Vendor Added");
+                pm.putBoolean("createVendorPending", true);
+
+                pDialog.dismiss();
+                Intent intent = new Intent(AddVendorsActivity.this, AllVendors.class);
+                startActivity(intent);
+            }
+        }
+        else
+        {
+            requestQueue.add(jor);
+        }
+    }
+
+    public void getVendorType()
+    {
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+
+        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, vendor_type_url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        try{
+                            String type = response.getString("type");
+
+                            if(type.equals("ERROR"))
+                            {
+                                Toast.makeText(AddVendorsActivity.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
+                            }
+
+                            if(type.equals("INFO"))
+                            {
+                                dataArray = response.getJSONArray("data");
+                                vendorTypeIdArray = new String[dataArray.length()+1];
+                                vendorTypeArray = new String[dataArray.length()+1];
+
+                                vendorTypeIdArray[0]="Select Vendor Type";
+                                vendorTypeArray[0]="Select Vendor Type";
+
+                                for(int i=0; i<dataArray.length();i++)
+                                {
+                                    dataObject = dataArray.getJSONObject(i);
+                                    vendorTypeIdArray[i+1] = dataObject.getString("id");
+                                    vendorTypeArray[i+1] = dataObject.getString("type");
+                                }
+
+                                if(vendorTypeIdArray!=null)
+                                {
+                                    ArrayAdapter<String> adapterVendor = new ArrayAdapter<String>(AddVendorsActivity.this,
+                                            android.R.layout.simple_dropdown_item_1line,vendorTypeArray);
+
+                                    spinner_ven_type.setAdapter(adapterVendor);
+                                }
+
+                                pDialog.dismiss();
+                            }
+
+                        }
+                        catch(JSONException e){
+                            e.printStackTrace();}
+                        pDialog.dismiss();
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("Volley","Error");
+                        pDialog.dismiss();
+                    }
+                }
+        );
+        if (pDialog!=null)
+            pDialog.dismiss();
+
         requestQueue.add(jor);
     }
 }

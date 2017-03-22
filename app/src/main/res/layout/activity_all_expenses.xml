@@ -61,6 +61,16 @@
                 fab:fab_size="mini"
                 fab:fab_label="Create New Expense" />
 
+            <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/exportBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_export"
+                app:fab_colorNormal="@color/colorAccent"
+                app:fab_colorPressed="@color/colorAccentDark"
+                fab:fab_size="mini"
+                fab:fab_label="Export data to CSV" />
+
         </com.github.clans.fab.FloatingActionMenu>
 
         <android.support.v7.widget.RecyclerView

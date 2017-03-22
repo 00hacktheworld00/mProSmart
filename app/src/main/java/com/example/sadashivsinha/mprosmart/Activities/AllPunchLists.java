@@ -5,10 +5,8 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -29,10 +27,12 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.android.volley.Cache;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.Adapters.MyAdapter;
@@ -40,6 +40,8 @@ import com.example.sadashivsinha.mprosmart.Adapters.PunchListsAdapter;
 import com.example.sadashivsinha.mprosmart.ModelLists.MomList;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
+import com.example.sadashivsinha.mprosmart.Utils.AppController;
+import com.example.sadashivsinha.mprosmart.Utils.Communicator;
 import com.example.sadashivsinha.mprosmart.Utils.ConnectionDetector;
 import com.example.sadashivsinha.mprosmart.Utils.CsvCreateUtility;
 import com.example.sadashivsinha.mprosmart.font.HelveticaRegular;
@@ -49,10 +51,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 
 public class AllPunchLists extends NewActivity implements View.OnClickListener  {
     private List<MomList> momList = new ArrayList<>();
@@ -69,11 +75,11 @@ public class AllPunchLists extends NewActivity implements View.OnClickListener  
     String currentProjectNo, vendorNameText, currentUserId;
     View dialogView;
     AlertDialog show;
-    LinearLayout hiddenLayout;
     Spinner spinner_vendor;
-    HelveticaRegular text_vendor;
     String[] vendorIdArray, vendorNameArray;
     PreferenceManager pm;
+    String url, vendor_url;
+    ArrayAdapter<String> vendorAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,50 +91,149 @@ public class AllPunchLists extends NewActivity implements View.OnClickListener  
         currentProjectNo = pm.getString("projectId");
         currentUserId = pm.getString("userId");
 
+        url = pm.getString("SERVER_URL") + "/getAllPunchLists?projectId='"+currentProjectNo+"'";
+        vendor_url = pm.getString("SERVER_URL") + "/getVendors";
+
         cd = new ConnectionDetector(getApplicationContext());
         isInternetPresent = cd.isConnectingToInternet();
+
+        punchListsAdapter = new PunchListsAdapter(momList);
+        recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(AllPunchLists.this));
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setAdapter(punchListsAdapter);
 
         // check for Internet status
         if (!isInternetPresent) {
             // Internet connection is not present
             // Ask user to connect to Internet
-            RelativeLayout main_content = (RelativeLayout) findViewById(R.id.main_content);
-            Snackbar snackbar = Snackbar.make(main_content,getResources().getString(R.string.no_internet_error), Snackbar.LENGTH_LONG);
-            snackbar.show();
-        }
-        pDialog = new ProgressDialog(AllPunchLists.this);
-        pDialog.setMessage("Getting Data ...");
-        pDialog.setIndeterminate(false);
-        pDialog.setCancelable(true);
-        pDialog.show();
+            RelativeLayout main_layout = (RelativeLayout) findViewById(R.id.main_layout);
+            Crouton.cancelAllCroutons();
+            Crouton.makeText(AllPunchLists.this, R.string.no_internet_error, Style.ALERT, main_layout).show();
 
-        class MyTask extends AsyncTask<Void, Void, Void>
+            pDialog = new ProgressDialog(AllPunchLists.this);
+            pDialog.setMessage("Getting cache data");
+            pDialog.show();
+
+            Cache cache = AppController.getInstance().getRequestQueue().getCache();
+            Cache.Entry entry = cache.get(url);
+            if (entry != null) {
+                //Cache data available.
+                try {
+                    String data = new String(entry.data, "UTF-8");
+                    Log.d("CACHE DATA", data);
+                    JSONObject jsonObject = new JSONObject(data);
+                    try {
+                        dataArray = jsonObject.getJSONArray("data");
+                        for (int i = 0; i < dataArray.length(); i++) {
+                            dataObject = dataArray.getJSONObject(i);
+                            projectId = dataObject.getString("projectId");
+                            projectName = dataObject.getString("projectName");
+                            vendorId = dataObject.getString("vendorId");
+                            vendorName = dataObject.getString("vendorName");
+                            createdDate = dataObject.getString("createdDate");
+                            createdBy = dataObject.getString("createdBy");
+                            punchListId = dataObject.getString("punchListId");
+
+                            items = new MomList(String.valueOf(i+1), punchListId ,projectId, projectName, createdDate,
+                                    vendorId, createdBy, vendorName);
+                            momList.add(items);
+                            punchListsAdapter.notifyDataSetChanged();
+                            pDialog.dismiss();
+                        }
+
+                        Boolean createPunchList = pm.getBoolean("createPunchList");
+
+                        if (createPunchList) {
+
+                            String jsonObjectVal = pm.getString("objectPunchList");
+                            Log.d("JSON subC PENDING :", jsonObjectVal);
+
+                            JSONObject jsonObjectPending = new JSONObject(jsonObjectVal);
+                            Log.d("JSONObj subC PENDING :", jsonObjectPending.toString());
+
+                            projectId = dataObject.getString("projectId");
+                            projectName = dataObject.getString("projectName");
+                            vendorId = dataObject.getString("vendorId");
+                            vendorName = dataObject.getString("vendorName");
+                            createdDate = dataObject.getString("createdDate");
+                            createdBy = dataObject.getString("createdBy");
+
+                            items = new MomList(String.valueOf(dataArray.length()), getResources().getString(R.string.waiting_to_connect) ,projectId, projectName, createdDate,
+                                    vendorId, createdBy, vendorName);
+                            momList.add(items);
+                            punchListsAdapter.notifyDataSetChanged();
+                        }
+                    }catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
+                } catch (UnsupportedEncodingException | JSONException e) {
+                    e.printStackTrace();
+                }
+                if (pDialog != null)
+                    pDialog.dismiss();
+            }
+
+            else
+            {
+                Toast.makeText(AllPunchLists.this, "Offline Data Not available for Punch Lists", Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+
+            entry = cache.get(vendor_url);
+            if (entry != null) {
+                //Cache data available.
+                try {
+                    String data = new String(entry.data, "UTF-8");
+                    Log.d("CACHE DATA", data);
+                    JSONObject jsonObject = new JSONObject(data);
+                    try {
+                        dataArray = jsonObject.getJSONArray("data");
+                        vendorIdArray = new String[dataArray.length() + 1];
+                        vendorNameArray = new String[dataArray.length() + 1];
+
+                        vendorIdArray[0] = "Select Vendor";
+                        vendorNameArray[0] = "Select Vendor";
+
+                        for (int i = 0; i < dataArray.length(); i++) {
+                            dataObject = dataArray.getJSONObject(i);
+                            vendorId = dataObject.getString("vendorId");
+                            vendorNameText = dataObject.getString("vendorName");
+                            vendorIdArray[i + 1] = vendorId;
+                            vendorNameArray[i + 1] = vendorNameText;
+                        }
+                        Log.d("VENDOR'S NAMES: ", vendorNameArray.toString());
+
+                        vendorAdapter = new ArrayAdapter<String>(AllPunchLists.this,
+                                android.R.layout.simple_dropdown_item_1line, vendorNameArray);
+
+                        pDialog.dismiss();
+
+                    }catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
+                } catch (UnsupportedEncodingException | JSONException e) {
+                    e.printStackTrace();
+                }
+                if (pDialog != null)
+                    pDialog.dismiss();
+            }
+
+            else
+            {
+                Toast.makeText(AllPunchLists.this, "Offline Data Not available for Punch Lists", Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        }
+
+        else
         {
-            @Override protected void onPreExecute()
-            {
-                punchListsAdapter = new PunchListsAdapter(momList);
-                recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
-                recyclerView.setLayoutManager(new LinearLayoutManager(AllPunchLists.this));
-                recyclerView.setHasFixedSize(true);
-                recyclerView.setAdapter(punchListsAdapter);
-
-            }
-
-            @Override
-            protected Void doInBackground(Void... params)
-            {
-                prepareItems();
-                return null;
-            }
-
-            @Override protected void onPostExecute(Void result)
-            {
-                punchListsAdapter.notifyDataSetChanged();
-            }
-
+            // Cache data not exist.
+            callJsonArrayRequest();
+            getAllVendors();
         }
-
-        new MyTask().execute();
 
         mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView); // Assigning the RecyclerView Object to the xml View
         mRecyclerView.setHasFixedSize(true);                            // Letting the system know that the list objects are of fixed size
@@ -255,50 +360,10 @@ public class AllPunchLists extends NewActivity implements View.OnClickListener  
 
                 spinner_vendor = (Spinner) dialogView.findViewById(R.id.spinner_vendor);
 
-                hiddenLayout = (LinearLayout) dialogView.findViewById(R.id.hiddenLayout);
-                hiddenLayout.setVisibility(View.INVISIBLE);
-
-                text_vendor = (HelveticaRegular) dialogView.findViewById(R.id.text_vendor);
+                spinner_vendor.setAdapter(vendorAdapter);
 
                 Button createBtn = (Button) dialogView.findViewById(R.id.createBtn);
 
-                pDialog = new ProgressDialog(dialogView.getContext());
-                pDialog.setMessage("Getting Vendors...");
-                pDialog.setIndeterminate(false);
-                pDialog.setCancelable(true);
-                pDialog.show();
-
-                class MyTask extends AsyncTask<Void, Void, Void>
-                {
-                    @Override
-                    protected Void doInBackground(Void... params)
-                    {
-                        getAllVendors();
-                        return null;
-                    }
-                }
-
-                new MyTask().execute();
-
-                spinner_vendor.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        if(position==0)
-                        {
-                            hiddenLayout.setVisibility(View.INVISIBLE);
-                        }
-                        else
-                        {
-                            hiddenLayout.setVisibility(View.VISIBLE);
-                            text_vendor.setText(vendorNameArray[position]);
-                        }
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-
-                    }
-                });
                 createBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -315,7 +380,14 @@ public class AllPunchLists extends NewActivity implements View.OnClickListener  
                             pDialog.setIndeterminate(false);
                             pDialog.setCancelable(true);
                             pDialog.show();
-                            createPunchList(spinner_vendor.getSelectedItem().toString());
+
+                            for(int i=0; i<vendorNameArray.length;i++)
+                            {
+                                if(vendorNameArray[i] == spinner_vendor.getSelectedItem().toString())
+                                    createPunchList(vendorIdArray[i]);
+                            }
+
+//                            createPunchList(spinner_vendor.getSelectedItem().toString());
                         }
                     }
                 });
@@ -344,70 +416,65 @@ public class AllPunchLists extends NewActivity implements View.OnClickListener  
         }
     }
 
-    public void prepareItems()
-    {
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
+    private void callJsonArrayRequest() {
+        // TODO Auto-generated method stub
 
-        String url = getResources().getString(R.string.server_url) + "/getAllPunchLists?projectId='"+currentProjectNo+"'";
+        pDialog = new ProgressDialog(AllPunchLists.this);
+        pDialog.setMessage("Getting server data");
+        pDialog.show();
 
-        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-
-                        try{
-
-                            String type = response.getString("type");
-
-                            if(type.equals("ERROR"))
+                        try
+                        {
+//                            dataObject = response.getJSONObject(0);
+                            Log.d("RESPONSE JSON", response.toString());
+                            dataArray = response.getJSONArray("data");
+                            for(int i=0; i<dataArray.length();i++)
                             {
-                                Toast.makeText(AllPunchLists.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
+                                dataObject = dataArray.getJSONObject(i);
+
+                                projectId = dataObject.getString("projectId");
+                                projectName = dataObject.getString("projectName");
+                                vendorId = dataObject.getString("vendorId");
+                                vendorName = dataObject.getString("vendorName");
+                                createdDate = dataObject.getString("createdDate");
+                                createdBy = dataObject.getString("createdBy");
+                                punchListId = dataObject.getString("punchListId");
+
+                                items = new MomList(String.valueOf(i+1), punchListId ,projectId, projectName, createdDate,
+                                        vendorId, createdBy, vendorName);
+                                momList.add(items);
+                                punchListsAdapter.notifyDataSetChanged();
                             }
 
-                            if(type.equals("INFO"))
-                            {
-                                dataArray = response.getJSONArray("data");
-                                for(int i=0; i<dataArray.length();i++)
-                                {
-                                    dataObject = dataArray.getJSONObject(i);
-                                    projectId = dataObject.getString("projectId");
-                                    projectName = dataObject.getString("projectName");
-                                    vendorId = dataObject.getString("vendorId");
-                                    vendorName = dataObject.getString("vendorName");
-                                    createdDate = dataObject.getString("createdDate");
-                                    createdBy = dataObject.getString("createdBy");
-                                    punchListId = dataObject.getString("punchListId");
-
-                                    items = new MomList(String.valueOf(i+1), punchListId ,projectId, projectName, createdDate,
-                                            vendorId, createdBy, vendorName);
-                                    momList.add(items);
-                                    punchListsAdapter.notifyDataSetChanged();
-
-                                }
-                            }
-                            pDialog.dismiss();
-                        }catch(JSONException e){e.printStackTrace();}
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+//                        setData(response,false);
                     }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("Volley","Error");
-
-                    }
-                }
-        );
-        requestQueue.add(jor);
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        });
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(jsonObjectRequest);
+        if(pDialog!=null)
+            pDialog.dismiss();
     }
 
     public void getAllVendors()
     {
-
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getVendors";
-
-        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
+        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, vendor_url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -437,9 +504,9 @@ public class AllPunchLists extends NewActivity implements View.OnClickListener  
                                     vendorIdArray[i+1]=vendorId;
                                     vendorNameArray[i+1]=vendorNameText;
                                 }
-                                ArrayAdapter<String> adapter = new ArrayAdapter<String>(AllPunchLists.this,
-                                        android.R.layout.simple_dropdown_item_1line,vendorIdArray);
-                                spinner_vendor.setAdapter(adapter);
+
+                                vendorAdapter = new ArrayAdapter<String>(AllPunchLists.this,
+                                        android.R.layout.simple_dropdown_item_1line,vendorNameArray);
                                 pDialog.dismiss();
 
                             }
@@ -480,7 +547,7 @@ public class AllPunchLists extends NewActivity implements View.OnClickListener  
 
         RequestQueue requestQueue = Volley.newRequestQueue(AllPunchLists.this);
 
-        String url = AllPunchLists.this.getResources().getString(R.string.server_url) + "/postPunchLists";
+        String url = AllPunchLists.this.pm.getString("SERVER_URL") + "/postPunchLists";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -493,7 +560,8 @@ public class AllPunchLists extends NewActivity implements View.OnClickListener  
                                 Toast.makeText(AllPunchLists.this, "Punchlist Created . ID - "+ response.getString("data"), Toast.LENGTH_SHORT).show();
                                 pm.putString("punchListNo",response.getString("data"));
                                 pDialog.dismiss();
-                                Intent intent = new Intent(AllPunchLists.this, PunchItemCreate.class);
+
+                                Intent intent = new Intent(AllPunchLists.this, AllPunchLists.class);
                                 startActivity(intent);
                             }
                         } catch (JSONException e) {
@@ -510,19 +578,42 @@ public class AllPunchLists extends NewActivity implements View.OnClickListener  
                     }
                 }
         );
-        if(pDialog!=null)
-            pDialog.dismiss();
+        if (!isInternetPresent)
+        {
+            // Internet connection is not present
 
-        requestQueue.add(jor);
-        Intent intent = new Intent(AllPunchLists.this, AllPunchLists.class);
-        startActivity(intent);
+            Communicator communicator = new Communicator();
+            Log.d("object", object.toString());
+
+            Boolean createPunchList = pm.getBoolean("createPunchList");
+
+            if(createPunchList)
+            {
+                Toast.makeText(AllPunchLists.this, "Already a Punch List creation is in progress. Please try after sometime.", Toast.LENGTH_LONG).show();
+            }
+            else
+            {
+                Toast.makeText(AllPunchLists.this, "Internet not currently available. Punch List will automatically get created on internet connection.", Toast.LENGTH_SHORT).show();
+
+                pm.putString("objectPunchList", object.toString());
+                pm.putString("urlPunchList", url);
+                pm.putString("toastMessagePunchList", "Punch List Created");
+                pm.putBoolean("createPunchList", true);
+
+                Intent intent = new Intent(AllPunchLists.this, AllPunchLists.class);
+                startActivity(intent);
+            }
+        }
+        else
+        {
+            requestQueue.add(jor);
+        }
     }
 
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(AllPunchLists.this, ViewPurchaseOrders.class);
-        intent.putExtra("projectNo","1");
+        Intent intent = new Intent(AllPunchLists.this, QualityControlMain.class);
         startActivity(intent);
     }
 

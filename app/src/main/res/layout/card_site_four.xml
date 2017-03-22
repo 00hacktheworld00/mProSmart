@@ -7,7 +7,6 @@
     android:layout_marginTop="@dimen/small_margin"
     android:layout_marginLeft="@dimen/activity_horizontal_margin"
     android:layout_marginRight="@dimen/activity_horizontal_margin"
-    app:cardCornerRadius="20dp"
     xmlns:fancy="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout
@@ -30,74 +29,73 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="vertical" >
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:text="# "
-                        android:textSize="@dimen/heading_main"
-                        android:textColor="@color/fbColor"
-                        android:gravity="center_vertical"
-                        android:typeface="normal"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:text="1"
-                        android:textSize="@dimen/heading_main"
-                        android:textColor="@color/fbColor"
-                        android:gravity="center_vertical"
-                        android:typeface="normal"
-                        android:id="@+id/text_line_no" />
-
-                </LinearLayout>
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/activity_horizontal_margin"
+                    android:weightSum="2"
                     android:orientation="horizontal">
 
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                        android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:text="WBS : "
+                        android:text="Material Issue"
+                        android:layout_weight="1"
                         android:textColor="@color/fbColor"
                         />
 
 
-                    <TextView
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:text="44444"
-                        android:id="@+id/text_wbs" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/activity_horizontal_margin"
-                    android:orientation="horizontal">
-
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:text="Activity : "
+                        android:text=" : "
                         android:textColor="@color/fbColor"
                         />
 
 
-                    <TextView
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="0"
+                        android:layout_weight="1"
+                        android:gravity="right"
+                        android:id="@+id/text_material_no" />
+
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin"
+                    android:weightSum="2"
+                    android:orientation="horizontal">
+
+
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="Item ID"
+                        android:layout_weight="1"
+                        android:textColor="@color/fbColor"
+                        />
+
+
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:text="Processing"
-                        android:id="@+id/text_activity" />
+                        android:text=" : "
+                        android:textColor="@color/fbColor"
+                        />
+
+
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="001"
+                        android:layout_weight="1"
+                        android:gravity="right"
+                        android:id="@+id/text_item_id" />
 
                 </LinearLayout>
 
@@ -105,66 +103,98 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/activity_horizontal_margin"
+                    android:weightSum="2"
                     android:orientation="horizontal">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:text="Quantity Issued : "
-                        android:textColor="@color/fbColor"
-                        android:gravity="center" />
 
-                    <TextView
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="Item Description"
+                        android:layout_weight="1"
+                        android:textColor="@color/fbColor"
+                        />
+
+
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:text="Issue xyz"
-                        android:layout_marginRight="@dimen/activity_vertical_margin"
-                        android:gravity="center"
+                        android:text=" : "
+                        android:textColor="@color/fbColor"
+                        />
+
+
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="ABC"
+                        android:gravity="right"
+                        android:layout_weight="1"
+                        android:id="@+id/text_item_desc" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin"
+                    android:weightSum="2"
+                    android:orientation="horizontal">
+
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="Quantity Issued"
+                        android:layout_weight="1"
+                        android:textColor="@color/fbColor" />
+
+
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text=" : "
+                        android:textColor="@color/fbColor"
+                        />
+
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="0"
+                        android:layout_weight="1"
+                        android:gravity="right"
                         android:id="@+id/text_quan_issued" />
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/activity_horizontal_margin"
+                    android:weightSum="2"
                     android:orientation="horizontal">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                        android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:text="Item Code : "
-                        android:textColor="@color/fbColor"
-                        android:gravity="center" />
+                        android:text="UOM"
+                        android:layout_weight="1"
+                        android:textColor="@color/fbColor" />
 
-                    <TextView
+
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:text="I-001"
-                        android:layout_marginRight="@dimen/activity_vertical_margin"
-                        android:gravity="center"
-                        android:id="@+id/text_item_code" />
+                        android:text=" : "
+                        android:textColor="@color/fbColor"
+                        />
+
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="KGs"
+                        android:layout_weight="1"
+                        android:gravity="right"
+                        android:id="@+id/text_uom" />
                 </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/activity_horizontal_margin"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:text="Received by : "
-                        android:textColor="@color/fbColor"
-                        android:gravity="center" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:text="Abcde"
-                        android:layout_marginRight="@dimen/activity_vertical_margin"
-                        android:gravity="center"
-                        android:id="@+id/text_rec_by" />
-                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

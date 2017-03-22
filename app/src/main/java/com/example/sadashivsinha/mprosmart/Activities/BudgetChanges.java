@@ -52,6 +52,7 @@ public class BudgetChanges extends AppCompatActivity {
     Boolean isInternetPresent = false;
     ProgressDialog pDialog, pDialog1;
     String currentProjectNo, currentProjectName, currentCreatedBy, currentBudgetChangeId;
+    PreferenceManager pm;
 
 
     @Override
@@ -100,7 +101,7 @@ public class BudgetChanges extends AppCompatActivity {
 //        });
 
 
-        PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
         currentProjectName = pm.getString("projectName");
         currentCreatedBy = pm.getString("userId");
@@ -171,7 +172,7 @@ public class BudgetChanges extends AppCompatActivity {
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getBudgetChangesLine?budgetChangesId=\""+currentBudgetChangeId+"\"";
+        String url = pm.getString("SERVER_URL") + "/getBudgetChangesLine?budgetChangesId=\""+currentBudgetChangeId+"\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -236,7 +237,6 @@ public class BudgetChanges extends AppCompatActivity {
 //    {
 //        RequestQueue requestQueue = Volley.newRequestQueue(this);
 //
-//        String url = getResources().getString(R.string.server_url) + "/getBudgetChanges?projectId=\""+currentProjectNo+"\"";
 //
 //        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
 //                new Response.Listener<JSONObject>() {

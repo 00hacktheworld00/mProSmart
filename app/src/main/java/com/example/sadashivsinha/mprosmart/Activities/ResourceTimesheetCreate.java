@@ -37,6 +37,7 @@ public class ResourceTimesheetCreate extends AppCompatActivity {
     JSONObject dataObject;
     Spinner spinnerResName;
     String[] resourceArray;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +48,7 @@ public class ResourceTimesheetCreate extends AppCompatActivity {
 
         spinnerResName = (Spinner) findViewById(R.id.spinnerResName);
 
-        final PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
         currentUserId = pm.getString("userId");
 
@@ -123,7 +124,7 @@ public class ResourceTimesheetCreate extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(ResourceTimesheetCreate.this);
 
-        String url = ResourceTimesheetCreate.this.getResources().getString(R.string.server_url) + "/postResourceTimesheet";
+        String url = ResourceTimesheetCreate.this.pm.getString("SERVER_URL") + "/postResourceTimesheet";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -132,6 +133,8 @@ public class ResourceTimesheetCreate extends AppCompatActivity {
                         try {
                             Toast.makeText(ResourceTimesheetCreate.this, response.getString("msg").toString(), Toast.LENGTH_SHORT).show();
                             pDialog.dismiss();
+                            Intent intent = new Intent(ResourceTimesheetCreate.this, AllResource.class);
+                            startActivity(intent);
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -149,8 +152,6 @@ public class ResourceTimesheetCreate extends AppCompatActivity {
                 }
         );
         requestQueue.add(jor);
-        Intent intent = new Intent(ResourceTimesheetCreate.this, AllResource.class);
-        startActivity(intent);
         }
 
     public void prepareResources()
@@ -158,7 +159,7 @@ public class ResourceTimesheetCreate extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getResource";
+        String url = pm.getString("SERVER_URL") + "/getResource";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {

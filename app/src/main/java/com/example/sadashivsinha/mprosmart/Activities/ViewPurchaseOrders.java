@@ -69,9 +69,11 @@ public class ViewPurchaseOrders extends NewActivity implements View.OnClickListe
     AlertDialog show;
     String whichDate, item, itemDesc, budget, currency;
     String[] itemArray, itemDescArray;
-    TextView from_date, to_date;
+    TextView from_date, to_date, daily_progress_date;
+    String dateToSendDailyProgress;
     Spinner spinner_item;
     CircleImageView company_logo;
+
     RelativeLayout create_mom, create_submittals, create_sub_register, create_subcontractor,
             create_resources, create_invoice, create_purchase, create_quality, create_punch_list, create_wbs, create_quality_plan,
             create_quality_standard, create_quality_checklist, create_boq, create_material_issue, create_item, create_inventory,create_requisition;
@@ -112,7 +114,7 @@ public class ViewPurchaseOrders extends NewActivity implements View.OnClickListe
 
         currentUserId = pm.getString("userId");
 
-        url = getResources().getString(R.string.server_url) + "/getProjects?companyId=\""+currentCompanyId+"\"";
+        url = pm.getString("SERVER_URL") + "/getProjects?companyId=\""+currentCompanyId+"\"";
 
         text_currency = (TextView) findViewById(R.id.text_currency);
         text_budget = (TextView) findViewById(R.id.text_budget);
@@ -442,8 +444,49 @@ public class ViewPurchaseOrders extends NewActivity implements View.OnClickListe
             break;
             case R.id.card_daily_progress:
             {
-                Intent intent = new Intent(ViewPurchaseOrders.this, DailyProgressActivity.class);
-                startActivity(intent);
+//                Intent intent = new Intent(ViewPurchaseOrders.this, DailyProgressDetails.class);
+//                startActivity(intent);
+                final AlertDialog.Builder alert = new AlertDialog.Builder(ViewPurchaseOrders.this,android.R.style.Theme_Translucent_NoTitleBar);
+                // Set an EditText view to get user input
+
+                dialogView = LayoutInflater.from(ViewPurchaseOrders.this).inflate(R.layout.dialog_daily_progress, null);
+                alert.setView(dialogView);
+
+                show = alert.show();
+
+                final PreferenceManager pm = new PreferenceManager(dialogView.getContext());
+                currentProjectNo = pm.getString("projectId");
+
+                Button viewBtn;
+
+                daily_progress_date = (TextView) dialogView.findViewById(R.id.text_date);
+                viewBtn = (Button) dialogView.findViewById(R.id.viewBtn);
+
+
+                daily_progress_date.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        whichDate = "dailyProgress";
+                        Calendar now = Calendar.getInstance();
+                        DatePickerDialog dpd = DatePickerDialog.newInstance(
+                                ViewPurchaseOrders.this,
+                                now.get(Calendar.YEAR),
+                                now.get(Calendar.MONTH),
+                                now.get(Calendar.DAY_OF_MONTH)
+                        );
+                        dpd.setMaxDate(now);
+                        dpd.show(getFragmentManager(), "Datepickerdialog");
+                    }
+                });
+
+                viewBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(ViewPurchaseOrders.this, DailyProgressDetails.class);
+                        pm.putString("currentProgressDate", dateToSendDailyProgress);
+                        startActivity(intent);
+                    }
+                });
             }
             break;
             case R.id.card_add_items:
@@ -749,9 +792,6 @@ public class ViewPurchaseOrders extends NewActivity implements View.OnClickListe
                     }
                 });
 
-
-
-
                 saveBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -759,6 +799,10 @@ public class ViewPurchaseOrders extends NewActivity implements View.OnClickListe
                         if(spinner_item.getSelectedItem().toString().equals("Select Item"))
                         {
                             Toast.makeText(ViewPurchaseOrders.this, "Select Item First", Toast.LENGTH_SHORT).show();
+                        }
+                        else if(spinner_item.getSelectedItem().toString().equals("No Items"))
+                        {
+                            Toast.makeText(ViewPurchaseOrders.this, "NO ITEMS IN THIS PROJECT", Toast.LENGTH_SHORT).show();
                         }
                         else if(item_desc.getText().toString().isEmpty())
                         {
@@ -783,9 +827,6 @@ public class ViewPurchaseOrders extends NewActivity implements View.OnClickListe
                         }
                     }
                 });
-
-
-
 
             }
             break;
@@ -819,10 +860,9 @@ public class ViewPurchaseOrders extends NewActivity implements View.OnClickListe
 
     public void prepareItemList()
     {
-
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getItems?projectId='"+currentProjectNo+"'";
+        String url = pm.getString("SERVER_URL") + "/getItems?projectId='"+currentProjectNo+"'";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -837,6 +877,15 @@ public class ViewPurchaseOrders extends NewActivity implements View.OnClickListe
                             {
                                 Toast.makeText(ViewPurchaseOrders.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
 
+                            }
+
+                            if(type.equals("WARN"))
+                            {
+                                Toast.makeText(ViewPurchaseOrders.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
+
+                                pDialog.dismiss();
+                                Intent intent = new Intent(ViewPurchaseOrders.this, ViewPurchaseOrders.class);
+                                startActivity(intent);
                             }
 
                             if(type.equals("INFO"))
@@ -856,10 +905,25 @@ public class ViewPurchaseOrders extends NewActivity implements View.OnClickListe
                                     itemArray[i+1]=item;
                                     itemDescArray[i+1]=itemDesc;
                                 }
+
+                                if(dataArray.length()==0)
+                                {
+                                    Toast.makeText(ViewPurchaseOrders.this, "NO ITEMS IN THIS PROJECT", Toast.LENGTH_SHORT).show();
+
+                                    itemArray = new String[1];
+                                    itemArray[0]="No Items";
+                                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(ViewPurchaseOrders.this,
+                                            R.layout.spinner_small_text,itemArray);
+                                    spinner_item.setAdapter(adapter);
+                                }
+                                else
+                                {
+                                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(ViewPurchaseOrders.this,
+                                            R.layout.spinner_small_text,itemArray);
+                                    spinner_item.setAdapter(adapter);
+                                }
                             }
-                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(ViewPurchaseOrders.this,
-                                    R.layout.spinner_small_text,itemArray);
-                            spinner_item.setAdapter(adapter);
+
 
                             pDialog.dismiss();
                         }catch(JSONException e){
@@ -895,7 +959,6 @@ public class ViewPurchaseOrders extends NewActivity implements View.OnClickListe
         }
         else
         {
-
             pDialog = new ProgressDialog(ViewPurchaseOrders.this);
             pDialog.setMessage("Getting server data");
             pDialog.show();
@@ -937,6 +1000,7 @@ public class ViewPurchaseOrders extends NewActivity implements View.OnClickListe
                                         break;
                                     }
                                 }
+                                pDialog.dismiss();
                             } catch (ParseException | JSONException e) {
                                 e.printStackTrace();
                             }
@@ -953,8 +1017,6 @@ public class ViewPurchaseOrders extends NewActivity implements View.OnClickListe
             });
             // Adding request to request queue
             AppController.getInstance().addToRequestQueue(jsonObjectRequest);
-            if(pDialog!=null)
-                pDialog.dismiss();
         }
         String imageUrl = pm.getString("imageUrl");
 
@@ -978,7 +1040,6 @@ public class ViewPurchaseOrders extends NewActivity implements View.OnClickListe
 //    {
 //        RequestQueue requestQueue = Volley.newRequestQueue(this);
 //
-//        final String url = getResources().getString(R.string.server_url) + "/getProjects?companyId=\""+currentCompanyId+"\"";
 //
 //        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
 //                new Response.Listener<JSONObject>() {
@@ -1093,6 +1154,22 @@ public class ViewPurchaseOrders extends NewActivity implements View.OnClickListe
                 }
             });
 
+        }
+        else if(whichDate.equals("dailyProgress"))
+        {
+            dateToSendDailyProgress = date;
+            try
+            {
+                tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(date);
+            }
+            catch (ParseException e)
+            {
+                e.printStackTrace();
+            }
+
+            date = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+
+            daily_progress_date.setText(date);
         }
         else
         {

@@ -62,7 +62,7 @@
             app:fab_colorNormal="@color/colorAccent"
             app:fab_colorPressed="@color/colorAccentDark"
             fab:fab_size="mini"
-            fab:fab_label="View WBS Progress" />
+            fab:fab_label="View Gannt chart" />
 
         <com.github.clans.fab.FloatingActionButton
             android:id="@+id/fab_search"

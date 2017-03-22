@@ -2,7 +2,6 @@ package com.example.sadashivsinha.mprosmart.Activities;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -13,25 +12,35 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Cache;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
+import com.example.sadashivsinha.mprosmart.Utils.AppController;
+import com.example.sadashivsinha.mprosmart.Utils.Communicator;
+import com.example.sadashivsinha.mprosmart.Utils.ConnectionDetector;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
+
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 
 public class ResourceItemCreate extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
 
@@ -43,14 +52,30 @@ public class ResourceItemCreate extends AppCompatActivity implements DatePickerD
     JSONArray dataArray;
     JSONObject dataObject;
     String dateTOSendServer;
+    ConnectionDetector cd;
+    public static final String TAG = ResourceItemCreate.class.getSimpleName();
+    Boolean isInternetPresent = false;
+
+    PreferenceManager pm;
 
     String[] wbsNameArray, activitiesNameArray, activityIdArray, wbsIdArray;
-    String wbsName, activityName, activityId, wbsId;
+    String wbsName, activityName, activityId, wbsId, wbs_url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_resource_item_create);
+
+        pm = new PreferenceManager(getApplicationContext());
+        currentProjectNo = pm.getString("projectId");
+        currentResourceId = pm.getString("resourceId");
+        currentResourceName = pm.getString("resourceName");
+
+        wbs_url = pm.getString("SERVER_URL") + "/getWbs?projectId=\""+currentProjectNo+"\"";
+
+
+        cd = new ConnectionDetector(getApplicationContext());
+        isInternetPresent = cd.isConnectingToInternet();
 
         Button createBtn = (Button) findViewById(R.id.createBtn);
 
@@ -97,11 +122,6 @@ public class ResourceItemCreate extends AppCompatActivity implements DatePickerD
 
         select_date = (TextView) findViewById(R.id.select_date);
 
-        PreferenceManager pm = new PreferenceManager(getApplicationContext());
-        currentProjectNo = pm.getString("projectId");
-        currentResourceId = pm.getString("resourceId");
-        currentResourceName = pm.getString("resourceName");
-
         select_date.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -112,27 +132,75 @@ public class ResourceItemCreate extends AppCompatActivity implements DatePickerD
                         now.get(Calendar.MONTH),
                         now.get(Calendar.DAY_OF_MONTH)
                 );
+                dpd.setMaxDate(now);
                 dpd.show(getFragmentManager(), "Datepickerdialog");
             }
         });
 
-        pDialog = new ProgressDialog(ResourceItemCreate.this);
-        pDialog.setMessage("Getting WBS...");
-        pDialog.setIndeterminate(false);
-        pDialog.setCancelable(true);
-        pDialog.show();
+        if (!isInternetPresent) {
+            // Internet connection is not present
+            // Ask user to connect to Internet
+            LinearLayout main_layout = (LinearLayout) findViewById(R.id.main_layout);
+            Crouton.cancelAllCroutons();
+            Crouton.makeText(ResourceItemCreate.this, R.string.no_internet_error, Style.ALERT, main_layout).show();
 
-        class MyTask extends AsyncTask<Void, Void, Void>
-        {
-            @Override
-            protected Void doInBackground(Void... params)
-            {
-                getAllWbs();
-                return null;
+            pDialog = new ProgressDialog(ResourceItemCreate.this);
+            pDialog.setMessage("Getting cache data");
+            pDialog.show();
+
+            Cache cache = AppController.getInstance().getRequestQueue().getCache();
+            Cache.Entry entry = cache.get(wbs_url);
+            if (entry != null) {
+                //Cache data available.
+                try {
+                    String data = new String(entry.data, "UTF-8");
+                    Log.d("CACHE DATA", data);
+                    JSONObject jsonObject = new JSONObject(data);
+                    try {
+                        dataArray = jsonObject.getJSONArray("data");
+                        wbsNameArray = new String[dataArray.length() + 1];
+                        wbsIdArray = new String[dataArray.length() + 1];
+                        wbsNameArray[0] = "Select WBS";
+                        wbsIdArray[0] = "";
+
+                        for (int i = 0; i < dataArray.length(); i++) {
+                            dataObject = dataArray.getJSONObject(i);
+                            wbsName = dataObject.getString("wbsName");
+                            wbsId = dataObject.getString("wbsId");
+
+                            wbsNameArray[i + 1] = wbsName;
+                            wbsIdArray[i + 1] = wbsId;
+                        }
+
+                        ArrayAdapter<String> adapter;
+
+                        if (wbsNameArray == null) {
+                            adapter = new ArrayAdapter<String>(ResourceItemCreate.this,
+                                    android.R.layout.simple_dropdown_item_1line, new String[]{"No WBS Found"});
+                        } else {
+                            adapter = new ArrayAdapter<String>(ResourceItemCreate.this,
+                                    android.R.layout.simple_dropdown_item_1line, wbsNameArray);
+                        }
+                        spinner_wbs.setAdapter(adapter);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
+                } catch (UnsupportedEncodingException | JSONException e) {
+                    e.printStackTrace();
+                }
+                if (pDialog != null)
+                    pDialog.dismiss();
+            } else {
+                Toast.makeText(ResourceItemCreate.this, "Offline Data Not available for WBS", Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
             }
         }
 
-        new MyTask().execute();
+        else
+        {
+            getAllWbs();
+        }
 
         spinner_activity.setVisibility(View.GONE);
 
@@ -150,25 +218,9 @@ public class ResourceItemCreate extends AppCompatActivity implements DatePickerD
                 {
                     spinner_activity.setVisibility(View.VISIBLE);
 
-                    pDialog = new ProgressDialog(ResourceItemCreate.this);
-                    pDialog.setMessage("Getting Activities in WBS - "+ wbsIdArray[position]);
-                    pDialog.setIndeterminate(false);
-                    pDialog.setCancelable(true);
-                    pDialog.show();
+                    String currentSelectedWbs = wbsIdArray[position];
 
-                    final String currentSelectedWbs = wbsIdArray[position];
-
-                    class MyTask extends AsyncTask<Void, Void, Void>
-                    {
-                        @Override
-                        protected Void doInBackground(Void... params)
-                        {
-                            prepareActivities(currentSelectedWbs, pDialog);
-                            return null;
-                        }
-                    }
-
-                    new MyTask().execute();
+                    prepareActivities(currentSelectedWbs);
                 }
             }
 
@@ -184,6 +236,15 @@ public class ResourceItemCreate extends AppCompatActivity implements DatePickerD
                 if(spinner_wbs.getSelectedItem().toString().equals("Select WBS"))
                 {
                     Toast.makeText(ResourceItemCreate.this, "Select WBS", Toast.LENGTH_SHORT).show();
+                }
+                else if(spinner_wbs.getSelectedItem().toString().equals("No WBS Found"))
+                {
+                    Toast.makeText(ResourceItemCreate.this, "No WBS in this Project", Toast.LENGTH_SHORT).show();
+                }
+                else if(spinner_activity.getSelectedItem().toString().equals("No Activity Found") ||
+                        spinner_activity.getSelectedItem().toString().equals(""))
+                {
+                    Toast.makeText(ResourceItemCreate.this, "No Activity in this WBS", Toast.LENGTH_SHORT).show();
                 }
                 else if(spinner_activity.getSelectedItem().toString().equals("Select Activity"))
                 {
@@ -203,28 +264,14 @@ public class ResourceItemCreate extends AppCompatActivity implements DatePickerD
                 }
                 else
                 {
-                    pDialog = new ProgressDialog(ResourceItemCreate.this);
-                    pDialog.setMessage("Sending Data ...");
-                    pDialog.setIndeterminate(false);
-                    pDialog.setCancelable(true);
-                    pDialog.show();
 
-                    class MyTask extends AsyncTask<Void, Void, Void> {
-
-                        @Override
-                        protected Void doInBackground(Void... params) {
-                            prepareItems();
-                            return null;
-                        }
-                    }
-
-                    new MyTask().execute();
+                    saveResourceLineItem();
                 }
             }
         });
     }
 
-    public void prepareItems()
+    public void saveResourceLineItem()
     {
         JSONObject object = new JSONObject();
 
@@ -242,7 +289,7 @@ public class ResourceItemCreate extends AppCompatActivity implements DatePickerD
 
         RequestQueue requestQueue = Volley.newRequestQueue(ResourceItemCreate.this);
 
-        String url = ResourceItemCreate.this.getResources().getString(R.string.server_url) + "/postResourceLineItems";
+        String url = ResourceItemCreate.this.pm.getString("SERVER_URL") + "/postResourceLineItems";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -253,6 +300,9 @@ public class ResourceItemCreate extends AppCompatActivity implements DatePickerD
                             if(response.getString("msg").equals("success"))
                                 Toast.makeText(ResourceItemCreate.this, "Resource Timesheet Line Item has been created", Toast.LENGTH_SHORT).show();
                             pDialog.dismiss();
+
+                            Intent intent = new Intent(ResourceItemCreate.this, ResourceTimesheetActivity.class);
+                            startActivity(intent);
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -269,37 +319,61 @@ public class ResourceItemCreate extends AppCompatActivity implements DatePickerD
                     }
                 }
         );
-        requestQueue.add(jor);
-        if(pDialog!=null)
-            pDialog.dismiss();
+        if (!isInternetPresent)
+        {
+            // Internet connection is not present
 
-        Intent intent = new Intent(ResourceItemCreate.this, ResourceTimesheetActivity.class);
-        startActivity(intent);
+            Communicator communicator = new Communicator();
+            Log.d("object", object.toString());
+
+            Boolean createResourceLineItem = pm.getBoolean("createResourceLineItem");
+
+            if(createResourceLineItem)
+            {
+                Toast.makeText(ResourceItemCreate.this, "Already a Resource Timesheet Item creation is in progress. Please try after sometime.", Toast.LENGTH_LONG).show();
+            }
+            else
+            {
+                Toast.makeText(ResourceItemCreate.this, "Internet not currently available. Resource Timesheet Item will automatically get created on internet connection.", Toast.LENGTH_SHORT).show();
+
+                pm.putString("objectResourceLineItem", object.toString());
+                pm.putString("urlResourceLineItem", url);
+                pm.putString("toastMessageResourceLineItem", "Resource Timesheet Line Item Created");
+                pm.putBoolean("createResourceLineItem", true);
+
+                Intent intent = new Intent(ResourceItemCreate.this, ResourceTimesheetActivity.class);
+                startActivity(intent);
+            }
+        }
+        else
+        {
+            requestQueue.add(jor);
+        }
     }
 
 
     public void getAllWbs()
     {
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getWbs?projectId=\""+currentProjectNo+"\"";
+        // Cache data not exist.
+        // TODO Auto-generated method stub
 
-        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
+        pDialog = new ProgressDialog(ResourceItemCreate.this);
+        pDialog.setMessage("Getting server data");
+        pDialog.show();
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, wbs_url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-
-                        try{
+                        try
+                        {
 
                             String type = response.getString("type");
-
-                            if(type.equals("ERROR"))
-                            {
-                                Toast.makeText(ResourceItemCreate.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
-                            }
-
                             if(type.equals("INFO"))
                             {
+                                Log.d("RESPONSE WBS :", response.toString());
+//                            dataObject = response.getJSONObject(0);
                                 dataArray = response.getJSONArray("data");
                                 wbsNameArray = new String[dataArray.length()+1];
                                 wbsIdArray = new String[dataArray.length()+1];
@@ -315,108 +389,179 @@ public class ResourceItemCreate extends AppCompatActivity implements DatePickerD
                                     wbsNameArray[i+1]=wbsName;
                                     wbsIdArray[i+1]=wbsId;
                                 }
+
+                                ArrayAdapter<String> adapter = new ArrayAdapter<String>(ResourceItemCreate.this,
+                                        android.R.layout.simple_dropdown_item_1line, wbsNameArray);
+                                spinner_wbs.setAdapter(adapter);
                             }
-                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(ResourceItemCreate.this,
-                                    android.R.layout.simple_dropdown_item_1line,wbsNameArray);
-                            spinner_wbs.setAdapter(adapter);
+                            else
+                            {
 
+                                ArrayAdapter<String> adapter = new ArrayAdapter<String>(ResourceItemCreate.this,
+                                        android.R.layout.simple_dropdown_item_1line, new String[]{"No WBS Found"});
+                                spinner_wbs.setAdapter(adapter);
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
-                        catch(JSONException e){
-                            e.printStackTrace();}
-
-                        pDialog.dismiss();
+//                        setData(response,false);
                     }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("Volley","Error");
-
-                        pDialog.dismiss();
-                    }
-                }
-        );
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        });
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(jsonObjectRequest);
         if(pDialog!=null)
             pDialog.dismiss();
-
-        requestQueue.add(jor);
 
     }
 
 
-    public void prepareActivities(final String currentWbsId, final ProgressDialog pDialog)
-    {
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        String url = getString(R.string.server_url) + "/getWbsActivity?wbsId=\""+currentWbsId+"\"";
+    public void prepareActivities(final String currentWbsId) {
 
-        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
+        final ProgressDialog pDialog = new ProgressDialog(ResourceItemCreate.this);
 
-                        try{
-                            String type = response.getString("type");
 
-                            if(type.equals("ERROR"))
-                            {
-                                pDialog.dismiss();
-                                Toast.makeText(ResourceItemCreate.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
-                            }
+        String activity_url = pm.getString("SERVER_URL") + "/getWbsActivity?wbsId=\"" + currentWbsId + "\"";
 
-                            if(type.equals("INFO"))
-                            {
 
-                                JSONArray dataArray = response.getJSONArray("data");
-                                JSONObject dataObject;
-                                activityIdArray = new String[dataArray.length()+1];
-                                activitiesNameArray = new String[dataArray.length()+1];
-                                activityIdArray[0]= "Select Activity";
-                                activitiesNameArray[0]= "Select Activity";
+        if (!isInternetPresent) {
+            // Internet connection is not present
+            // Ask user to connect to Internet
+            LinearLayout main_layout = (LinearLayout) findViewById(R.id.main_layout);
+            Crouton.cancelAllCroutons();
+            Crouton.makeText(ResourceItemCreate.this, R.string.no_internet_error, Style.ALERT, main_layout).show();
 
-                                for(int i=0; i<dataArray.length();i++)
+
+            pDialog.setMessage("Getting cache data");
+            pDialog.show();
+
+            Cache cache = AppController.getInstance().getRequestQueue().getCache();
+            Cache.Entry entry = cache.get(activity_url);
+            if (entry != null) {
+                //Cache data available.
+                try {
+                    String data = new String(entry.data, "UTF-8");
+                    Log.d("CACHE DATA", data);
+                    JSONObject jsonObject = new JSONObject(data);
+                    try {
+                        dataArray = jsonObject.getJSONArray("data");
+                        activityIdArray = new String[dataArray.length() + 1];
+                        activitiesNameArray = new String[dataArray.length() + 1];
+                        activityIdArray[0] = "Select Activity";
+                        activitiesNameArray[0] = "Select Activity";
+
+                        for (int i = 0; i < dataArray.length(); i++) {
+                            dataObject = dataArray.getJSONObject(i);
+
+                            activityId = dataObject.getString("id");
+                            activityName = dataObject.getString("activityName");
+
+                            activityIdArray[i + 1] = activityId;
+                            activitiesNameArray[i + 1] = activityName;
+                        }
+
+                        ArrayAdapter<String> adapter;
+
+                        if (activitiesNameArray == null) {
+                            adapter = new ArrayAdapter<String>(ResourceItemCreate.this,
+                                    android.R.layout.simple_dropdown_item_1line, new String[]{"No Activity Found"});
+                        } else {
+                            adapter = new ArrayAdapter<String>(ResourceItemCreate.this,
+                                    android.R.layout.simple_dropdown_item_1line, activitiesNameArray);
+                        }
+
+                        spinner_activity.setAdapter(adapter);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
+                } catch (UnsupportedEncodingException | JSONException e) {
+                    e.printStackTrace();
+                }
+                pDialog.dismiss();
+            } else {
+                Toast.makeText(ResourceItemCreate.this, "Offline Data Not available for Resources", Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        } else {
+            // Cache data not exist.
+            // TODO Auto-generated method stub
+
+            final ProgressDialog progressDialog = new ProgressDialog(ResourceItemCreate.this);
+            progressDialog.setMessage("Getting server data");
+            progressDialog.show();
+
+            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, activity_url, null,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            try {
+//                            dataObject = response.getJSONObject(0);
+
+                                String type = response.getString("type");
+
+                                if(type.equals("INFO"))
                                 {
-                                    dataObject = dataArray.getJSONObject(i);
+                                    dataArray = response.getJSONArray("data");
+                                    activityIdArray = new String[dataArray.length() + 1];
+                                    activitiesNameArray = new String[dataArray.length() + 1];
+                                    activityIdArray[0] = "Select Activity";
+                                    activitiesNameArray[0] = "Select Activity";
 
-                                    activityId = dataObject.getString("id");
-                                    activityName = dataObject.getString("activityName");
+                                    for (int i = 0; i < dataArray.length(); i++) {
+                                        dataObject = dataArray.getJSONObject(i);
 
-                                    activityIdArray[i+1] = activityId;
-                                    activitiesNameArray[i+1] = activityName;
+                                        activityId = dataObject.getString("id");
+                                        activityName = dataObject.getString("activityName");
+
+                                        activityIdArray[i + 1] = activityId;
+                                        activitiesNameArray[i + 1] = activityName;
+                                    }
+
+                                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(ResourceItemCreate.this,
+                                            android.R.layout.simple_dropdown_item_1line, activitiesNameArray);
+
+
+                                    spinner_activity.setAdapter(adapter);
+
                                 }
 
-                                ArrayAdapter<String> adapter;
-
-                                if(activitiesNameArray==null)
-                                {
-                                    adapter = new ArrayAdapter<String>(ResourceItemCreate.this,
-                                            android.R.layout.simple_dropdown_item_1line, new String[] {"No Activity Found"});
-                                }
                                 else
                                 {
-                                    adapter = new ArrayAdapter<String>(ResourceItemCreate.this,
-                                            android.R.layout.simple_dropdown_item_1line, activitiesNameArray);
+                                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(ResourceItemCreate.this,
+                                            android.R.layout.simple_dropdown_item_1line, new String[]{"No Activity Found"});
+                                    spinner_activity.setAdapter(adapter);
+
                                 }
-
-                                spinner_activity.setAdapter(adapter);
-
+                            } catch (JSONException e) {
+                                e.printStackTrace();
                             }
-                            pDialog.dismiss();
+//                        setData(response,false);
                         }
-                        catch(JSONException e){
-                            pDialog.dismiss();
-                            e.printStackTrace();}
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        pDialog.dismiss();
-                        Log.e("Volley","Error");
-                    }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    VolleyLog.d(TAG, "Error: " + error.getMessage());
+                    Toast.makeText(getApplicationContext(),
+                            error.getMessage(), Toast.LENGTH_SHORT).show();
+                    progressDialog.dismiss();
                 }
-        );
-        requestQueue.add(jor);
+            });
+            // Adding request to request queue
+            AppController.getInstance().addToRequestQueue(jsonObjectRequest);
+            progressDialog.dismiss();
 
+            pDialog.dismiss();
+
+        }
     }
 
     @Override

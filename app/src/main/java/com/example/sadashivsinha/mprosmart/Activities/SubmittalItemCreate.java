@@ -26,16 +26,20 @@ import com.weiwangcn.betterspinner.library.BetterSpinner;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class SubmittalItemCreate extends AppCompatActivity {
 
     EditText text_doc_type, text_short_desc, text_variation_contract, text_variation_doc;
-    BetterSpinner spinner_status, spinner_type;
+    BetterSpinner spinner_status;
     ProgressDialog pDialog;
     String currentSubmittalId;
     ConnectionDetector cd;
     public static final String TAG = SubmittalItemCreate.class.getSimpleName();
     Boolean isInternetPresent = false;
     PreferenceManager pm;
+    String SERVER_URL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,11 +49,16 @@ public class SubmittalItemCreate extends AppCompatActivity {
         Button createBtn, attachBtn;
 
         pm = new PreferenceManager(this);
+        pm.putString("totalImageUrls", "");
+
         currentSubmittalId = pm.getString("submittalNo");
 
-        createBtn = (Button) findViewById(R.id.createBtn);
-        attachBtn = (Button) findViewById(R.id.attachBtn);
+        cd = new ConnectionDetector(getApplicationContext());
+        isInternetPresent = cd.isConnectingToInternet();
 
+        SERVER_URL = pm.getString("SERVER_UPLOAD_URL") + "/upload/file-upload";;
+
+        createBtn = (Button) findViewById(R.id.createBtn);
         attachBtn = (Button) findViewById(R.id.attachBtn);
 
         text_doc_type = (EditText) findViewById(R.id.text_doc_type);
@@ -58,7 +67,6 @@ public class SubmittalItemCreate extends AppCompatActivity {
         text_variation_doc = (EditText) findViewById(R.id.text_variation_doc);
 
         spinner_status = (BetterSpinner) findViewById(R.id.spinner_status);
-        spinner_type = (BetterSpinner) findViewById(R.id.spinner_type);
 
         ArrayAdapter<String> adapterStatus = new ArrayAdapter<String>(this,
                 android.R.layout.simple_dropdown_item_1line,
@@ -66,17 +74,11 @@ public class SubmittalItemCreate extends AppCompatActivity {
 
         spinner_status.setAdapter(adapterStatus);
 
-
-        ArrayAdapter<String> adapterType = new ArrayAdapter<String>(this,
-                android.R.layout.simple_dropdown_item_1line,
-                new String[] {"Incoming", "Outgoing"});
-
-        spinner_type.setAdapter(adapterType);
-
         attachBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(SubmittalItemCreate.this, AttachmentActivity.class);
+                intent.putExtra("class", "SubmittalLine");
                 startActivity(intent);
             }
         });
@@ -85,7 +87,30 @@ public class SubmittalItemCreate extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                saveSubmittalLine();
+                if(text_doc_type.getText().toString().isEmpty())
+                {
+                    text_doc_type.setError("Field cannot be empty");
+                }
+                else if(text_short_desc.getText().toString().isEmpty())
+                {
+                    text_short_desc.setError("Field cannot be empty");
+                }
+                else if(text_variation_contract.getText().toString().isEmpty())
+                {
+                    text_variation_contract.setError("Field cannot be empty");
+                }
+                else if(text_variation_doc.getText().toString().isEmpty())
+                {
+                    text_variation_doc.setError("Field cannot be empty");
+                }
+                else if(spinner_status.getText().toString().isEmpty())
+                {
+                    Toast.makeText(SubmittalItemCreate.this, "Select Item Status", Toast.LENGTH_SHORT).show();
+                }
+                else
+                {
+                    saveSubmittalLine();
+                }
             }
         });
     }
@@ -101,6 +126,12 @@ public class SubmittalItemCreate extends AppCompatActivity {
             object.put("variationFromContractDocDsc", text_variation_doc.getText().toString());
             object.put("status", spinner_status.getText().toString());
             object.put("submittalsId", currentSubmittalId);
+            object.put("submittalRegisterType", "");
+
+            if(pm.getString("className").equals("SubmittalLine"))
+            {
+                object.put("noOfAttachments", pm.getString("totalImageUrlSize"));
+            }
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -108,7 +139,7 @@ public class SubmittalItemCreate extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(SubmittalItemCreate.this);
 
-        String url = SubmittalItemCreate.this.getResources().getString(R.string.server_url) + "/postSubmittalLineItems";
+        String url = SubmittalItemCreate.this.pm.getString("SERVER_URL") + "/postSubmittalLineItems";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -120,7 +151,22 @@ public class SubmittalItemCreate extends AppCompatActivity {
 
                             if(response.getString("msg").equals("success"))
                             {
-                                Toast.makeText(SubmittalItemCreate.this, "Submittal Line created ID - " + response.getString("data"), Toast.LENGTH_SHORT).show();
+                                String totalImageUrls = pm.getString("totalImageUrls");
+                                if(pm.getString("className").equals("SubmittalLine") && isInternetPresent
+                                        && !totalImageUrls.isEmpty())
+                                {
+                                    uploadImage(response.getString("data"), totalImageUrls);
+                                }
+                                else
+                                {
+                                    if(pDialog!=null)
+                                        pDialog.dismiss();
+
+                                    Toast.makeText(SubmittalItemCreate.this, "Submittal Line Item created. ID - "+response.getString("data"), Toast.LENGTH_SHORT).show();
+
+                                    Intent intent = new Intent(SubmittalItemCreate.this, SubmittalActivity.class);
+                                    startActivity(intent);
+                                }
                             }
 
                         }
@@ -139,9 +185,6 @@ public class SubmittalItemCreate extends AppCompatActivity {
                     }
                 }
         );
-
-        cd = new ConnectionDetector(getApplicationContext());
-        isInternetPresent = cd.isConnectingToInternet();
 
         if (!isInternetPresent)
         {
@@ -164,16 +207,84 @@ public class SubmittalItemCreate extends AppCompatActivity {
                 pm.putString("urlSubmittalLine", url);
                 pm.putString("toastMessageSubmittalLine", "Submittal Line Created");
                 pm.putBoolean("createSubmittalLinePending", true);
+
+                if(pDialog!=null)
+                    pDialog.dismiss();
+
+                Intent intent = new Intent(SubmittalItemCreate.this, SubmittalActivity.class);
+                startActivity(intent);
             }
         }
         else
         {
             requestQueue.add(jor);
         }
-        if(pDialog!=null)
-            pDialog.dismiss();
-
-        Intent intent = new Intent(SubmittalItemCreate.this, SubmittalActivity.class);
-        startActivity(intent);
     }
+
+    public void uploadImage(final String id, String totalUrls) {
+
+        final List<String> imageList = Arrays.asList(totalUrls.split(","));
+        String seperateImageUrl;
+
+
+        for (int i = 0; i < imageList.size(); i++) {
+
+            final int count = i;
+            JSONObject object = new JSONObject();
+
+            try {
+
+                seperateImageUrl = imageList.get(i);
+
+                object.put("lineNo", id);
+                object.put("url", seperateImageUrl);
+
+                Log.d("JSON OBJ SENT", object.toString());
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            RequestQueue requestQueue = Volley.newRequestQueue(SubmittalItemCreate.this);
+
+            String url = SubmittalItemCreate.this.pm.getString("SERVER_URL") + "/postSubmittalLineFiles";
+
+            JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            try {
+
+                                Log.d("RESPONSE SERVER : ", response.toString());
+
+                                if (response.getString("msg").equals("success")) {
+                                    if (count == imageList.size() - 1) {
+                                        Toast.makeText(SubmittalItemCreate.this, "Submittal Line created ID - " + id, Toast.LENGTH_SHORT).show();
+
+                                        if (pDialog != null)
+                                            pDialog.dismiss();
+                                        Intent intent = new Intent(SubmittalItemCreate.this, SubmittalActivity.class);
+                                        startActivity(intent);
+                                    }
+                                }
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            //response success message display
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.e("Volley", "Error");
+                            Toast.makeText(SubmittalItemCreate.this, error.toString(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+            );
+
+            requestQueue.add(jor);
+        }
+    }
+
 }

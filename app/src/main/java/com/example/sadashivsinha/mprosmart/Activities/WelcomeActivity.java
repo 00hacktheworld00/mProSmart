@@ -5,7 +5,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -26,6 +28,8 @@ import android.widget.Toast;
 import com.example.sadashivsinha.mprosmart.Adapters.MyAdapter;
 import com.example.sadashivsinha.mprosmart.GCMRegistrationIntentService;
 import com.example.sadashivsinha.mprosmart.R;
+import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
+import com.example.sadashivsinha.mprosmart.Utils.Communicator;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
@@ -33,14 +37,24 @@ public class WelcomeActivity extends NewActivity {
 
     String upperLayout_name;
     ProgressDialog pDialog;
-    private RelativeLayout all_projects_layout, dashboard_layout, record_expense_layout, my_profile_layout,
+    private RelativeLayout all_projects_layout, dashboard_layout, my_profile_layout,
             fifth_layout,sixth_layout;
     String currentUserId;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
+
+        pm = new PreferenceManager(getApplicationContext());
+
+        Communicator.PendingServices communicator = new Communicator.PendingServices();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            registerReceiver(communicator,
+                    new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -111,15 +125,14 @@ public class WelcomeActivity extends NewActivity {
 
         final RelativeLayout upperLayout = (RelativeLayout) findViewById(R.id.upperLayout);
         all_projects_layout = (RelativeLayout) findViewById(R.id.all_projects_layout);
-        record_expense_layout = (RelativeLayout) findViewById(R.id.record_expense_layout);
+        dashboard_layout = (RelativeLayout) findViewById(R.id.dashboard_layout);
         my_profile_layout = (RelativeLayout) findViewById(R.id.my_profile_layout);
 
-        record_expense_layout.setOnClickListener(new View.OnClickListener() {
+        dashboard_layout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                //settings button
-                Intent intent = new Intent(WelcomeActivity.this, Example.class);
+                Intent intent = new Intent(WelcomeActivity.this, DashboardActivity.class);
                 startActivity(intent);
 
             }
@@ -174,7 +187,8 @@ public class WelcomeActivity extends NewActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_welcome, menu);
+        if(pm.getInt("role")==1)
+            getMenuInflater().inflate(R.menu.menu_welcome, menu);
         return true;
     }
 

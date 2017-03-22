@@ -1,5 +1,6 @@
 package com.example.sadashivsinha.mprosmart.Activities;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
@@ -8,16 +9,33 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.Adapters.MyAdapter;
 import com.example.sadashivsinha.mprosmart.R;
+import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
+import com.example.sadashivsinha.mprosmart.Utils.AppController;
+import com.example.sadashivsinha.mprosmart.Utils.Communicator;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class ChangeOrdersNew extends NewActivity {
 
@@ -31,6 +49,17 @@ public class ChangeOrdersNew extends NewActivity {
     EditText text_documents_impacted;
     EditText text_decision;
     ImageButton attachBtn;
+    PreferenceManager pm;
+
+    TextView project_id, project_name, date_created, due_date;
+    Button saveBtn;
+
+    String currentOrderNo;
+
+    JSONArray dataArray;
+    JSONObject dataObject;
+
+    String id,changeDescription,justification,projectImpact,budgetImpact,scheduleImpact,documentImpact,decision;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +70,18 @@ public class ChangeOrdersNew extends NewActivity {
         setSupportActionBar(toolbar);
 
         attachBtn = (ImageButton) findViewById(R.id.attachBtn);
+        saveBtn = (Button) findViewById(R.id.saveBtn);
+
+        project_id = (TextView) findViewById(R.id.project_id);
+        project_name = (TextView) findViewById(R.id.project_name);
+        due_date = (TextView) findViewById(R.id.date_created);
+        date_created = (TextView) findViewById(R.id.due_date);
+
+        pm = new PreferenceManager(getApplicationContext());
+        project_id.setText(pm.getString("text_project_id"));
+        project_name.setText(pm.getString("text_project_name"));
+        due_date.setText(pm.getString("text_due_date"));
+        date_created.setText(pm.getString("text_date_created"));
 
         getSupportActionBar().setTitle("Change Orders");
 
@@ -90,6 +131,74 @@ public class ChangeOrdersNew extends NewActivity {
         hiddenLayoutSectionTwo = (LinearLayout) findViewById(R.id.hiddenLayoutSectionTwo);
         hiddenLayoutSectionThree = (LinearLayout) findViewById(R.id.hiddenLayoutSectionThree);
         hiddenLayoutSectionFour = (LinearLayout) findViewById(R.id.hiddenLayoutSectionFour);
+
+
+        currentOrderNo = pm.getString("currentOrderNo");
+        String url = pm.getString("SERVER_URL") + "/getChangeOrderLineItems?changeOrderId=\"" + currentOrderNo + "\"" ;
+
+        final ProgressDialog pDialog = new ProgressDialog(ChangeOrdersNew.this);
+        pDialog.setMessage("Getting server data");
+        pDialog.show();
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try
+                        {
+//                            dataObject = response.getJSONObject(0);
+                            dataArray = response.getJSONArray("data");
+                            if(response.getString("msg").equals("success"))
+                            {
+                                pm.putBoolean("changeOrderIsNull", false);
+                                for(int i=0; i<dataArray.length();i++)
+                                {
+
+
+                                    dataObject = dataArray.getJSONObject(i);
+
+                                    id = dataObject.getString("id");
+                                    changeDescription = dataObject.getString("changeDescription");
+                                    justification = dataObject.getString("justification");
+                                    projectImpact = dataObject.getString("projectImpact");
+                                    budgetImpact = dataObject.getString("budgetImpact");
+                                    scheduleImpact = dataObject.getString("scheduleImpact");
+                                    documentImpact = dataObject.getString("documentImpact");
+                                    decision = dataObject.getString("decision");
+
+                                    text_change_desc.setText(changeDescription);
+                                    text_justification.setText(justification);
+                                    text_project_impact.setText(projectImpact);
+                                    text_budget_impact.setText(budgetImpact);
+                                    text_schedule_imapact.setText(scheduleImpact);
+                                    text_documents_impacted.setText(documentImpact);
+                                    text_decision.setText(decision);
+
+                                    pDialog.dismiss();
+                                }
+                            }
+                            else
+                                pm.putBoolean("changeOrderIsNull", true);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+//                        setData(response,false);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d("", "Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        });
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(jsonObjectRequest);
+        if(pDialog!=null)
+            pDialog.dismiss();
+
+
 
 
         attachBtn.setOnClickListener(new View.OnClickListener() {
@@ -252,62 +361,142 @@ public class ChangeOrdersNew extends NewActivity {
         });
 
 
-//        createBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//
-//                //section one
-//
-//                if(text_change_desc.getText().toString().isEmpty())
-//                {
-//                    text_change_desc.setError("Cannot be left empty");
-//                    hiddenLayoutSectionOne.setVisibility(View.VISIBLE);
-//                }
-//                else if(text_justification.getText().toString().isEmpty())
-//                {
-//                    text_justification.setError("Cannot be left empty");
-//                    hiddenLayoutSectionOne.setVisibility(View.VISIBLE);
-//                }
-//                else if(text_project_impact.getText().toString().isEmpty())
-//                {
-//                    text_project_impact.setError("Cannot be left empty");
-//                    hiddenLayoutSectionOne.setVisibility(View.VISIBLE);
-//                }
-//                //section two
-//
-//                else if(text_budget_impact.getText().toString().isEmpty())
-//                {
-//                    text_budget_impact.setError("Cannot be left empty");
-//                    hiddenLayoutSectionTwo.setVisibility(View.VISIBLE);
-//                }
-//                else if(text_schedule_imapact.getText().toString().isEmpty())
-//                {
-//                    text_schedule_imapact.setError("Cannot be left empty");
-//                    hiddenLayoutSectionTwo.setVisibility(View.VISIBLE);
-//                }
-//                //section three
-//
-//                else if(text_documents_impacted.getText().toString().isEmpty())
-//                {
-//                    text_documents_impacted.setError("Cannot be left empty");
-//                    hiddenLayoutSectionThree.setVisibility(View.VISIBLE);
-//                }
-//                //section four
-//
-//                else if(text_decision.getText().toString().isEmpty())
-//                {
-//                    text_decision.setError("Cannot be left empty");
-//                    hiddenLayoutSectionFour.setVisibility(View.VISIBLE);
-//                }
-//
-//
-//                else
-//                {
-//                    Intent intent = new Intent(ChangeOrdersNew.this, AllChangeOrders.class);
-//                    Toast.makeText(ChangeOrdersNew.this, "Change Orders Saved", Toast.LENGTH_SHORT).show();
-//                    startActivity(intent);
-//                }
-//            }
-//        });
+        saveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                //section one
+
+                if(text_change_desc.getText().toString().isEmpty())
+                {
+                    text_change_desc.setError("Cannot be left empty");
+                    hiddenLayoutSectionOne.setVisibility(View.VISIBLE);
+                }
+                else if(text_justification.getText().toString().isEmpty())
+                {
+                    text_justification.setError("Cannot be left empty");
+                    hiddenLayoutSectionOne.setVisibility(View.VISIBLE);
+                }
+                else if(text_project_impact.getText().toString().isEmpty())
+                {
+                    text_project_impact.setError("Cannot be left empty");
+                    hiddenLayoutSectionOne.setVisibility(View.VISIBLE);
+                }
+                //section two
+
+                else if(text_budget_impact.getText().toString().isEmpty())
+                {
+                    text_budget_impact.setError("Cannot be left empty");
+                    hiddenLayoutSectionTwo.setVisibility(View.VISIBLE);
+                }
+                else if(text_schedule_imapact.getText().toString().isEmpty())
+                {
+                    text_schedule_imapact.setError("Cannot be left empty");
+                    hiddenLayoutSectionTwo.setVisibility(View.VISIBLE);
+                }
+                //section three
+
+                else if(text_documents_impacted.getText().toString().isEmpty())
+                {
+                    text_documents_impacted.setError("Cannot be left empty");
+                    hiddenLayoutSectionThree.setVisibility(View.VISIBLE);
+                }
+                //section four
+
+                else if(text_decision.getText().toString().isEmpty())
+                {
+                    text_decision.setError("Cannot be left empty");
+                    hiddenLayoutSectionFour.setVisibility(View.VISIBLE);
+                }
+
+
+                else
+                {
+
+                    final ProgressDialog progressDialog = new ProgressDialog(ChangeOrdersNew.this);
+                    progressDialog.setMessage("Sending Data");
+                    progressDialog.show();
+
+                    JSONObject object = new JSONObject();
+
+                    try {
+                        object.put("changeOrderId", currentOrderNo);
+                        object.put("changeDescription",text_change_desc.getText().toString());
+                        object.put("justification",text_justification.getText().toString());
+                        object.put("projectImpact", text_project_impact.getText().toString());
+                        object.put("budgetImpact",text_budget_impact.getText().toString());
+                        object.put("scheduleImpact",text_schedule_imapact.getText().toString());
+                        object.put("documentImpact", text_documents_impacted.getText().toString());
+                        object.put("decision",text_decision.getText().toString());
+
+
+                        Log.d("change order object :", object.toString());
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    RequestQueue requestQueue = Volley.newRequestQueue(ChangeOrdersNew.this);
+
+                    int requestMethod;
+                    String url;
+
+                    if(pm.getBoolean("changeOrderIsNull"))
+                    {
+                        requestMethod = Request.Method.POST;
+                        Log.d("METHOD", "POST");
+
+                        url = pm.getString("SERVER_URL") + "/postChangeOrderLineItems";
+                        try {
+                            object.put("changeOrderId",currentOrderNo);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else
+                    {
+                        requestMethod = Request.Method.PUT;
+                        Log.d("METHOD", "PUT");
+
+                        url = pm.getString("SERVER_URL") + "/putChangeOrderLineItems?changeOrderId=\"" + currentOrderNo + "\"" ;
+                    }
+
+                    JsonObjectRequest jor = new JsonObjectRequest(requestMethod, url, object,
+                            new Response.Listener<JSONObject>() {
+                                @Override
+                                public void onResponse(JSONObject response) {
+                                    try {
+                                        Log.d("order response :", response.toString());
+                                        if(response.getString("msg").equals("success"))
+                                        {
+                                            Toast.makeText(ChangeOrdersNew.this, "Saved", Toast.LENGTH_SHORT).show();
+                                            progressDialog.dismiss();
+                                            Intent intent = new Intent(ChangeOrdersNew.this, ChangeOrdersNew.class);
+                                            startActivity(intent);
+                                        }
+                                    }
+                                    catch (JSONException e)
+                                    {
+                                        e.printStackTrace();
+                                        progressDialog.dismiss();
+                                    }
+                                    //response success message display
+                                }
+                            },
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Log.e("Volley","Error");
+                                    Toast.makeText(ChangeOrdersNew.this, error.toString(), Toast.LENGTH_SHORT).show();
+                                    progressDialog.dismiss();
+                                }
+                            }
+                    );
+
+                    requestQueue.add(jor);
+
+                }
+            }
+        });
     }
 }

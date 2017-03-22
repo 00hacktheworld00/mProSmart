@@ -35,13 +35,14 @@ public class BOQCreate extends AppCompatActivity {
     Button createBtn;
     String currentProjectId, currentProjectName, currentUserId, currentDate, currentProjectDesc;
     ProgressDialog pDialog;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_boq_create);
 
-        PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
 
         text_boq_item = (EditText) findViewById(R.id.text_boq_item);
         text_boq_name = (EditText) findViewById(R.id.text_boq_name);
@@ -138,7 +139,7 @@ public class BOQCreate extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(BOQCreate.this);
 
-        String url = BOQCreate.this.getResources().getString(R.string.server_url) + "/postBoq";
+        String url = BOQCreate.this.pm.getString("SERVER_URL") + "/postBoq";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -146,9 +147,9 @@ public class BOQCreate extends AppCompatActivity {
                     public void onResponse(JSONObject response) {
                         try {
 
-                            if(response.getString("msg").toString().equals("success"))
+                            if(response.getString("msg").equals("success"))
                             {
-                                String successMsg = "BOQ Created. ID - "+response.getString("data").toString();
+                                String successMsg = "BOQ Created. ID - "+ response.getString("data");
                                 Toast.makeText(BOQCreate.this, successMsg, Toast.LENGTH_SHORT).show();
                             }
 

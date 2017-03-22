@@ -54,6 +54,7 @@ public class AllInventoryManagement extends AppCompatActivity implements View.On
     Boolean isInternetPresent = false;
 
     AllInventoryList items;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +63,7 @@ public class AllInventoryManagement extends AppCompatActivity implements View.On
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
         currentProjectName = pm.getString("projectName");
 
@@ -165,7 +166,7 @@ public class AllInventoryManagement extends AppCompatActivity implements View.On
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getInventoryManagement?projectId='"+currentProjectNo+"'";
+        String url = pm.getString("SERVER_URL") + "/getInventoryManagement?projectId='"+currentProjectNo+"'";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {

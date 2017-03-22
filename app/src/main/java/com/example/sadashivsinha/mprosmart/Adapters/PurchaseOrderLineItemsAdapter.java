@@ -40,6 +40,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -58,6 +59,7 @@ public class PurchaseOrderLineItemsAdapter extends RecyclerView.Adapter<Purchase
     JSONObject dataObject;
     Context mContext;
     TextView textViewDate;
+    PreferenceManager pm;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView text_item_id, lineItemOldTotal, text_need_by_date;
@@ -68,6 +70,9 @@ public class PurchaseOrderLineItemsAdapter extends RecyclerView.Adapter<Purchase
 
         public MyViewHolder(final View view) {
             super(view);
+
+            pm = new PreferenceManager(view.getContext());
+
             text_item_id = (TextView) view.findViewById(R.id.text_item_id);
             lineItemOldTotal = (TextView) view.findViewById(R.id.lineItemOldTotal);
 
@@ -98,8 +103,13 @@ public class PurchaseOrderLineItemsAdapter extends RecyclerView.Adapter<Purchase
             editBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                        text_quantity.setEnabled(true);
-                        text_need_by_date.setEnabled(true);
+
+                    DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+                    Date date = new Date();
+
+                    text_need_by_date.setText(dateFormat.format(date));
+
+//                        text_quantity.setEnabled(true);
 
                         text_quantity.requestFocus();
 
@@ -152,7 +162,6 @@ public class PurchaseOrderLineItemsAdapter extends RecyclerView.Adapter<Purchase
                         text_uom.setEnabled(false);
                         text_quantity.setEnabled(false);
                         text_total_amount.setEnabled(false);
-                        text_need_by_date.setEnabled(false);
 
                         if(text_uom.getText().toString().isEmpty())
                         {
@@ -316,7 +325,7 @@ public class PurchaseOrderLineItemsAdapter extends RecyclerView.Adapter<Purchase
 
         RequestQueue requestQueue = Volley.newRequestQueue(context);
 
-        String url = context.getResources().getString(R.string.server_url) + "/putPurchaseOrderLine?purchaseLineItemsId=\""+ lineNo + "\"";
+        String url = pm.getString("SERVER_URL")  + "/putPurchaseOrderLine?purchaseLineItemsId=\""+ lineNo + "\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.PUT, url, object,
                 new Response.Listener<JSONObject>() {
@@ -351,7 +360,7 @@ public class PurchaseOrderLineItemsAdapter extends RecyclerView.Adapter<Purchase
     {
         RequestQueue requestQueue = Volley.newRequestQueue(context);
 
-        String url = context.getString(R.string.server_url) + "/getPurchaseOrderTotal?purchaseOrderId='"+currentPoNo+"'";
+        String url = pm.getString("SERVER_URL")  + "/getPurchaseOrderTotal?purchaseOrderId='"+currentPoNo+"'";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -433,7 +442,7 @@ public class PurchaseOrderLineItemsAdapter extends RecyclerView.Adapter<Purchase
 
         RequestQueue requestQueue = Volley.newRequestQueue(context);
 
-        String url = context.getResources().getString(R.string.server_url) + "/putPurchaseOrderTotal?purchaseOrderId=\""+ currentPoNo + "\"";
+        String url = pm.getString("SERVER_URL")  + "/putPurchaseOrderTotal?purchaseOrderId=\""+ currentPoNo + "\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.PUT, url, object,
                 new Response.Listener<JSONObject>() {
@@ -477,7 +486,7 @@ public class PurchaseOrderLineItemsAdapter extends RecyclerView.Adapter<Purchase
 
         RequestQueue requestQueue = Volley.newRequestQueue(context);
 
-        String url = context.getResources().getString(R.string.server_url) + "/deletePurchaseOrderLineItem?purchaseLineItemsId=\""+ itemId + "\"";
+        String url = pm.getString("SERVER_URL")  + "/deletePurchaseOrderLineItem?purchaseLineItemsId=\""+ itemId + "\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.DELETE, url, null,
                 new Response.Listener<JSONObject>() {

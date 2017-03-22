@@ -78,6 +78,13 @@
                                         android:gravity="center"
                                         android:id="@+id/title" />
 
+                                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:textColor="@color/colorPrimary"
+                                        android:text="Criteria"
+                                        android:layout_marginBottom="@dimen/very_small_margin"/>
+
                                     <EditText
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
@@ -88,27 +95,19 @@
                                         android:textColor="#000000"
                                         android:maxLines="1"
                                         android:inputType="textCapSentences"
-                                        android:imeOptions="actionDone"
+                                        android:imeOptions="actionNext"
                                         android:background="@drawable/edittext_states_red"
                                         android:textSize="15sp"
                                         android:id="@+id/text_criteria"
                                         />
 
-                                    <EditText
+
+                                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
-                                        android:padding="10dp"
-                                        android:hint="Acceptable Value (UOM)"
-                                        android:maxLines="1"
-                                        android:inputType="textCapSentences"
-                                        android:imeOptions="actionDone"
-                                        android:textColorHint="#000000"
-                                        android:textColor="#000000"
-                                        android:background="@drawable/edittext_states_red"
-                                        android:layout_marginBottom="@dimen/activity_vertical_margin"
-                                        android:textSize="15sp"
-                                        android:id="@+id/text_uom"
-                                        android:layout_gravity="center_horizontal" />
+                                        android:textColor="@color/colorPrimary"
+                                        android:text="Inspection Result"
+                                        android:layout_marginBottom="@dimen/very_small_margin"/>
 
                                     <EditText
                                         android:layout_width="match_parent"
@@ -126,6 +125,33 @@
                                         android:id="@+id/text_result"
                                         />
 
+                                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:textColor="@color/colorPrimary"
+                                        android:text="Select UOM"
+                                        android:layout_marginBottom="@dimen/very_small_margin"/>
+
+                                    <Spinner
+                                        android:layout_width="match_parent"
+                                        android:layout_height="@dimen/_35sdp"
+                                        android:padding="10dp"
+                                        android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                        android:textColorHint="#000000"
+                                        android:textColor="#000000"
+                                        android:text="Select UOM"
+                                        android:background="@drawable/edittext_states_red"
+                                        android:textSize="15sp"
+                                        android:id="@+id/spinner_uom" />
+
+
+                                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:textColor="@color/colorPrimary"
+                                        android:text="Status"
+                                        android:layout_marginBottom="@dimen/very_small_margin"/>
+
                                     <com.weiwangcn.betterspinner.library.BetterSpinner
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
@@ -138,13 +164,20 @@
                                         android:textSize="15sp"
                                         android:id="@+id/spinner_status" />
 
+
+                                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:textColor="@color/colorPrimary"
+                                        android:text="Comments"
+                                        android:layout_marginBottom="@dimen/very_small_margin"/>
+
                                     <EditText
                                         android:layout_width="match_parent"
                                         android:layout_height="@dimen/_80sdp"
                                         android:padding="10dp"
                                         android:hint="Comments"
                                         android:inputType="textCapSentences"
-                                        android:imeOptions="actionDone"
                                         android:textColorHint="#000000"
                                         android:textColor="#000000"
                                         android:background="@drawable/edittext_states_red"

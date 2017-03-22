@@ -56,7 +56,7 @@
                             <com.example.sadashivsinha.mprosmart.font.HelveticaBold
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Item"
+                                android:text="Item ID"
                                 android:textColor="@color/colorPrimary"/>
 
                             <TextView
@@ -72,6 +72,27 @@
                                 android:layout_marginBottom="@dimen/activity_vertical_margin"
                                 android:textSize="15sp"
                                 android:id="@+id/text_item"
+                                android:enabled="false" />
+
+                            <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Item Name"
+                                android:textColor="@color/colorPrimary"/>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="10dp"
+                                android:maxLines="1"
+                                android:inputType="textCapSentences"
+                                android:imeOptions="actionNext"
+                                android:textColorHint="#000000"
+                                android:textColor="#000000"
+                                android:background="@drawable/edittext_states_red"
+                                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                android:textSize="15sp"
+                                android:id="@+id/text_item_name"
                                 android:enabled="false" />
 
                             <com.example.sadashivsinha.mprosmart.font.HelveticaBold
@@ -111,60 +132,6 @@
                                 android:background="@drawable/edittext_states_red"
                                 android:textSize="15sp"
                                 android:id="@+id/text_uom"
-                                android:enabled="false" />
-
-                            <com.example.sadashivsinha.mprosmart.font.HelveticaBold
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Cost"
-                                android:textColor="@color/colorPrimary"/>
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:padding="10dp"
-                                android:layout_marginBottom="@dimen/activity_vertical_margin"
-                                android:textColorHint="#000000"
-                                android:textColor="#000000"
-                                android:background="@drawable/edittext_states_red"
-                                android:textSize="15sp"
-                                android:id="@+id/text_cost"
-                                android:enabled="false" />
-
-                            <com.example.sadashivsinha.mprosmart.font.HelveticaBold
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Currency"
-                                android:textColor="@color/colorPrimary"/>
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:padding="10dp"
-                                android:layout_marginBottom="@dimen/activity_vertical_margin"
-                                android:textColorHint="#000000"
-                                android:textColor="#000000"
-                                android:background="@drawable/edittext_states_red"
-                                android:textSize="15sp"
-                                android:id="@+id/text_currency"
-                                android:enabled="false" />
-
-                            <com.example.sadashivsinha.mprosmart.font.HelveticaBold
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Total Cost"
-                                android:textColor="@color/colorPrimary"/>
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:padding="10dp"
-                                android:layout_marginBottom="@dimen/activity_vertical_margin"
-                                android:textColorHint="#000000"
-                                android:textColor="#000000"
-                                android:background="@drawable/edittext_states_red"
-                                android:textSize="15sp"
-                                android:id="@+id/text_total_cost"
                                 android:enabled="false" />
 
                         </LinearLayout>

@@ -16,6 +16,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -64,8 +65,8 @@ public class SubmittalRegisterActivity extends NewActivity implements View.OnCli
     public static final String TAG = SubmittalRegisterActivity.class.getSimpleName();
     Boolean isInternetPresent = false;
     ProgressDialog pDialog,pDialog1;
-    String currentSubRegId, currentProjectNo, currentProjectName;
-    String url;
+    String currentSubRegId, currentProjectNo, currentProjectName, contractId, totalAttachments;
+    String url, searchText;
     PreferenceManager pm;
 
     @Override
@@ -74,6 +75,15 @@ public class SubmittalRegisterActivity extends NewActivity implements View.OnCli
         setContentView(R.layout.activity_new_sub_register);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        if (getIntent().hasExtra("search")) {
+            if (getIntent().getStringExtra("search").equals("yes")) {
+
+                searchText = getIntent().getStringExtra("searchText");
+
+                getSupportActionBar().setTitle("Submittal Register Item Search Results : " + searchText);
+            }
+        }
 
         pm = new PreferenceManager(this);
         currentProjectNo =pm.getString("projectId");
@@ -101,7 +111,7 @@ public class SubmittalRegisterActivity extends NewActivity implements View.OnCli
         recyclerView.setHasFixedSize(false);
         recyclerView.setAdapter(submittalAdapter);
 
-        url = getResources().getString(R.string.server_url) + "/getsubmittalRegistersIdById?submittalRegistersId='"+currentSubRegId+"'";
+        url = pm.getString("SERVER_URL") + "/getsubmittalRegistersIdById?submittalRegistersId='"+currentSubRegId+"'";
 
 
         // check for Internet status
@@ -133,40 +143,78 @@ public class SubmittalRegisterActivity extends NewActivity implements View.OnCli
                             submittaltittle = dataObject.getString("submittaltittle");
                             submittalType = dataObject.getString("submittalType");
                             status = dataObject.getString("status");
+                            contractId = dataObject.getString("contractId");
+                            totalAttachments = dataObject.getString("totalAttachments");
 
-                            items = new SubmittalList(submittalregisterLineItemId, submittaltittle,submittalType, status, lineNo, "");
+                            if (getIntent().hasExtra("search"))
+                            {
+                                if (getIntent().getStringExtra("search").equals("yes")) {
+
+                                    if (lineNo.toLowerCase().contains(searchText.toLowerCase()) || submittaltittle.toLowerCase().contains(searchText.toLowerCase())) {
+
+                                        items = new SubmittalList(String.valueOf(i + 1), submittalregisterLineItemId, submittaltittle, submittalType, status, contractId, Integer.parseInt(totalAttachments));
+                                        submittalList.add(items);
+
+                                        submittalAdapter.notifyDataSetChanged();
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                items = new SubmittalList(String.valueOf(i + 1), submittalregisterLineItemId, submittaltittle, submittalType, status, contractId, Integer.parseInt(totalAttachments));
+                                submittalList.add(items);
+
+                                submittalAdapter.notifyDataSetChanged();
+                            }
+
+                            pDialog.dismiss();
+                        }
+
+                        Boolean createSubmittalRegItemPending = pm.getBoolean("createSubmittalRegItemPending");
+
+                        if (createSubmittalRegItemPending) {
+
+                            String jsonObjectVal = pm.getString("objectSubmittalRegItem");
+                            Log.d("JSON SubReg PENDING :", jsonObjectVal);
+
+                            JSONObject jsonObjectPending = new JSONObject(jsonObjectVal);
+                            Log.d("JSONO SubReg PENDING :", jsonObjectPending.toString());
+
+                            submittaltittle = dataObject.getString("submittaltittle");
+                            submittalType = dataObject.getString("submittalType");
+                            status = dataObject.getString("status");
+                            contractId = dataObject.getString("contractId");
+
+                            items = new SubmittalList(String.valueOf(dataArray.length()+1), getResources().getString(R.string.waiting_to_connect)
+                                    , submittaltittle, submittalType, status, contractId, Integer.parseInt("0"));
                             submittalList.add(items);
 
                             submittalAdapter.notifyDataSetChanged();
                             pDialog.dismiss();
+
                         }
+//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    // TODO Auto-generated catch block
+                    if (pDialog != null)
+                        pDialog.dismiss();
+                }catch (UnsupportedEncodingException | JSONException e) {
                     e.printStackTrace();
                 }
-                if (pDialog != null)
-                    pDialog.dismiss();
             }
 
-            else
+                else
             {
                 Toast.makeText(SubmittalRegisterActivity.this, "Offline Data Not available for this Submittal Register Line Items", Toast.LENGTH_SHORT).show();
                 pDialog.dismiss();
             }
         }
-
         else
         {
             // Cache data not exist.
             callJsonArrayRequest();
         }
-
 
         view_details_btn = (Button) findViewById(R.id.view_details_btn);
 
@@ -274,13 +322,26 @@ public class SubmittalRegisterActivity extends NewActivity implements View.OnCli
             case R.id.fab_search:
             {
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setTitle("Search Submittal Register !");
+                alert.setTitle("Search Submittal Register by Line No or Submittal Title !");
                 // Set an EditText view to get user input
                 final EditText input = new EditText(this);
+                input.setMaxLines(1);
+                input.setImeOptions(EditorInfo.IME_ACTION_DONE);
                 alert.setView(input);
                 alert.setPositiveButton("Search", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        Toast.makeText(SubmittalRegisterActivity.this, "Search for it .", Toast.LENGTH_SHORT).show();
+
+                        if (input.getText().toString().isEmpty()) {
+                            input.setError("Enter Search Field");
+                        } else {
+                            Intent intent = new Intent(SubmittalRegisterActivity.this, SubmittalRegisterActivity.class);
+                            intent.putExtra("search", "yes");
+                            intent.putExtra("searchText", input.getText().toString());
+
+                            Log.d("SEARCH TEXT", input.getText().toString());
+
+                            startActivity(intent);
+                        }
                     }
                 });
                 alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -309,6 +370,9 @@ public class SubmittalRegisterActivity extends NewActivity implements View.OnCli
                         {
 //                            dataObject = response.getJSONObject(0);
                             dataArray = response.getJSONArray("data");
+
+                            Log.d("SubReg Res", response.toString());
+
                             for(int i=0; i<dataArray.length();i++)
                             {
                                 dataObject = dataArray.getJSONObject(i);
@@ -317,11 +381,29 @@ public class SubmittalRegisterActivity extends NewActivity implements View.OnCli
                                 submittaltittle = dataObject.getString("submittaltittle");
                                 submittalType = dataObject.getString("submittalType");
                                 status = dataObject.getString("status");
+                                contractId = dataObject.getString("contractId");
+                                totalAttachments = dataObject.getString("totalAttachments");
 
-                                items = new SubmittalList(submittalregisterLineItemId, submittaltittle,submittalType, status, lineNo, "");
-                                submittalList.add(items);
+                                if (getIntent().hasExtra("search"))
+                                {
+                                    if (getIntent().getStringExtra("search").equals("yes")) {
 
-                                submittalAdapter.notifyDataSetChanged();
+                                        if (lineNo.toLowerCase().contains(searchText.toLowerCase()) || submittaltittle.toLowerCase().contains(searchText.toLowerCase())) {
+
+                                            items = new SubmittalList(String.valueOf(i + 1), submittalregisterLineItemId, submittaltittle, submittalType, status, contractId, Integer.parseInt(totalAttachments));
+                                            submittalList.add(items);
+
+                                            submittalAdapter.notifyDataSetChanged();
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    items = new SubmittalList(String.valueOf(i + 1), submittalregisterLineItemId, submittaltittle, submittalType, status, contractId, Integer.parseInt(totalAttachments));
+                                    submittalList.add(items);
+
+                                    submittalAdapter.notifyDataSetChanged();
+                                }
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();

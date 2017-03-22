@@ -7,19 +7,33 @@ import android.graphics.drawable.Drawable;
  */
 public class AttachmentList
 {
-        private String file_name;
-        private Drawable file_preview;
+    private String file_name, imageUrl;
+    private Drawable file_preview;
+    private Boolean isViewOnly;
 
-        public AttachmentList() {
-        }
+    public AttachmentList(Boolean isViewOnly, String file_name,Drawable file_preview) {
 
-        public AttachmentList(String file_name,Drawable file_preview) {
+        this.file_name = file_name;
+        this.file_preview = file_preview;
+        this.isViewOnly = isViewOnly;
+    }
 
-            this.file_name = file_name;
-            this.file_preview = file_preview;
-        }
+    public AttachmentList(Boolean isViewOnly, String file_name,String imageUrl) {
 
-        public Drawable getFile_preview() {
+        this.file_name = file_name;
+        this.imageUrl = imageUrl;
+        this.isViewOnly = isViewOnly;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public Boolean getViewOnly() {
+        return isViewOnly;
+    }
+
+    public Drawable getFile_preview() {
             return file_preview;
         }
 

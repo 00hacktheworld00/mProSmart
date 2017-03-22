@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/main_layout"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/back_five"
     tools:context=".Activities.FormActivity">
@@ -65,8 +66,7 @@
                                 <LinearLayout
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:orientation="vertical"
-                                    android:id="@+id/main_layout">
+                                    android:orientation="vertical">
 
                                     <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
                                         android:layout_width="match_parent"
@@ -115,6 +115,30 @@
                                             android:layout_marginBottom="@dimen/activity_vertical_margin"
                                             android:textSize="15sp"
                                             android:id="@+id/spinner_wbs" />
+
+                                        <RadioGroup
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:orientation="horizontal"
+                                            android:weightSum="2"
+                                            android:layout_marginBottom="@dimen/activity_vertical_margin">
+
+                                            <RadioButton
+                                                android:layout_width="match_parent"
+                                                android:layout_height="wrap_content"
+                                                android:layout_weight="1"
+                                                android:checked="true"
+                                                android:id="@+id/radio_btn_add"
+                                                android:text="ADD"/>
+
+                                            <RadioButton
+                                                android:layout_width="match_parent"
+                                                android:layout_height="wrap_content"
+                                                android:layout_weight="1"
+                                                android:id="@+id/radio_btn_deduct"
+                                                android:text="DEDUCT"/>
+
+                                        </RadioGroup>
 
                                         <com.example.sadashivsinha.mprosmart.font.HelveticaBold
                                             android:layout_width="match_parent"
@@ -208,28 +232,6 @@
                                                 android:layout_alignParentTop="true"
                                                 android:layout_alignParentEnd="true" />
                                         </RelativeLayout>
-
-
-                                        <com.example.sadashivsinha.mprosmart.font.HelveticaBold
-                                            android:layout_width="match_parent"
-                                            android:layout_height="wrap_content"
-                                            android:text="Description"
-                                            android:textColor="@color/colorPrimary"
-                                            android:layout_marginBottom="@dimen/_3sdp"/>
-
-                                        <EditText
-                                            android:layout_width="match_parent"
-                                            android:layout_height="wrap_content"
-                                            android:padding="10dp"
-                                            android:maxLines="1"
-                                            android:inputType="textCapSentences"
-                                            android:imeOptions="actionDone"
-                                            android:textColorHint="#000000"
-                                            android:textColor="#000000"
-                                            android:background="@drawable/edittext_states_red"
-                                            android:layout_marginBottom="@dimen/activity_vertical_margin"
-                                            android:textSize="15sp"
-                                            android:id="@+id/desc"/>
                                     </LinearLayout>
 
                                 </LinearLayout>

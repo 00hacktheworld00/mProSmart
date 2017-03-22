@@ -18,6 +18,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -32,6 +33,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.Adapters.AllMomAdapter;
 import com.example.sadashivsinha.mprosmart.Adapters.MyAdapter;
+import com.example.sadashivsinha.mprosmart.ModelLists.AllBoqList;
 import com.example.sadashivsinha.mprosmart.ModelLists.MomList;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
@@ -73,6 +75,7 @@ public class AllMom extends NewActivity implements View.OnClickListener  {
     private ProgressDialog pDialog;
     PreferenceManager pm;
     String url;
+    String searchText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,12 +84,21 @@ public class AllMom extends NewActivity implements View.OnClickListener  {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        if (getIntent().hasExtra("search")) {
+            if (getIntent().getStringExtra("search").equals("yes")) {
+
+                searchText = getIntent().getStringExtra("searchText");
+
+                getSupportActionBar().setTitle("MOM Search Results : " + searchText);
+            }
+        }
+
         pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
 
         allMomAdapter = new AllMomAdapter(momList);
 
-        url = getResources().getString(R.string.server_url) + "/getAllMom?projectId='"+currentProjectNo+"'";
+        url = pm.getString("SERVER_URL") + "/getAllMom?projectId='"+currentProjectNo+"'";
 
         cd = new ConnectionDetector(getApplicationContext());
         isInternetPresent = cd.isConnectingToInternet();
@@ -130,22 +142,58 @@ public class AllMom extends NewActivity implements View.OnClickListener  {
                             Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(createDate);
                             createDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
 
-                            items = new MomList(String.valueOf(i+1), momId, currentProjectNo, projectName, createDate, createdBy);
+                            if (getIntent().hasExtra("search"))
+                            {
+                                if (getIntent().getStringExtra("search").equals("yes")) {
+
+                                    if (momId.toLowerCase().contains(searchText.toLowerCase())) {
+
+                                        items = new MomList(String.valueOf(i+1), momId, currentProjectNo, projectName, createDate, createdBy);
+                                        momList.add(items);
+
+                                        allMomAdapter.notifyDataSetChanged();
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                items = new MomList(String.valueOf(i+1), momId, currentProjectNo, projectName, createDate, createdBy);
+                                momList.add(items);
+
+                                allMomAdapter.notifyDataSetChanged();
+                            }
+                            pDialog.dismiss();
+                        }
+
+                        Boolean createMomPending = pm.getBoolean("createMomPending");
+
+                        if(createMomPending)
+                        {
+
+                            String jsonObjectVal = pm.getString("objectMom");
+                            Log.d("JSON MOM PENDING :", jsonObjectVal);
+
+                            JSONObject jsonObjectPending = new JSONObject(jsonObjectVal);
+                            Log.d("JSONObj MOM PENDING :", jsonObjectPending.toString());
+
+                            projectName = jsonObjectPending.getString("projectName");
+                            createDate = jsonObjectPending.getString("createDate");
+                            createdBy = jsonObjectPending.getString("createdBy");
+
+                            Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(createDate);
+                            createDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+
+                            items = new MomList(String.valueOf(dataArray.length()+1),  getResources().getString(R.string.waiting_to_connect), currentProjectNo, projectName, createDate, createdBy);
                             momList.add(items);
 
                             allMomAdapter.notifyDataSetChanged();
-                            pDialog.dismiss();
                         }
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    } catch (JSONException e) {
+
+                    } catch (ParseException | JSONException e) {
                         e.printStackTrace();
                     }
 //                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    // TODO Auto-generated catch block
+                } catch (UnsupportedEncodingException | JSONException e) {
                     e.printStackTrace();
                 }
                 if (pDialog != null)
@@ -189,8 +237,6 @@ public class AllMom extends NewActivity implements View.OnClickListener  {
                 // Code here will execute once drawer is closed
             }
 
-
-
         }; // Drawer Toggle Object Made
         Drawer.setDrawerListener(mDrawerToggle); // Drawer Listener set to the Drawer toggle
         mDrawerToggle.syncState();               // Finally we set the drawer toggle sync State
@@ -199,7 +245,6 @@ public class AllMom extends NewActivity implements View.OnClickListener  {
         fab_add = (FloatingActionButton) findViewById(R.id.fab_add);
         fab_search = (FloatingActionButton) findViewById(R.id.fab_search);
         exportBtn = (FloatingActionButton) findViewById(R.id.exportBtn);
-
 
         fab_add.setOnClickListener(this);
         fab_search.setOnClickListener(this);
@@ -212,7 +257,6 @@ public class AllMom extends NewActivity implements View.OnClickListener  {
                 createNewMom();
             }
         }
-
     }
 
     @Override
@@ -289,14 +333,28 @@ public class AllMom extends NewActivity implements View.OnClickListener  {
             break;
             case R.id.fab_search:
             {
+
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setTitle("Search MOM !");
+                alert.setTitle("Search MOM by ID !");
                 // Set an EditText view to get user input
                 final EditText input = new EditText(this);
+                input.setMaxLines(1);
+                input.setImeOptions(EditorInfo.IME_ACTION_DONE);
                 alert.setView(input);
                 alert.setPositiveButton("Search", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        Toast.makeText(AllMom.this, "Search for it .", Toast.LENGTH_SHORT).show();
+
+                        if (input.getText().toString().isEmpty()) {
+                            input.setError("Enter Search Field");
+                        } else {
+                            Intent intent = new Intent(AllMom.this, AllMom.class);
+                            intent.putExtra("search", "yes");
+                            intent.putExtra("searchText", input.getText().toString());
+
+                            Log.d("SEARCH TEXT", input.getText().toString());
+
+                            startActivity(intent);
+                        }
                     }
                 });
                 alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -337,10 +395,26 @@ public class AllMom extends NewActivity implements View.OnClickListener  {
                                 Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(createDate);
                                 createDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
 
-                                items = new MomList(String.valueOf(i+1), momId, currentProjectNo, projectName, createDate, createdBy);
-                                momList.add(items);
+                                if (getIntent().hasExtra("search"))
+                                {
+                                    if (getIntent().getStringExtra("search").equals("yes")) {
 
-                                allMomAdapter.notifyDataSetChanged();
+                                        if (momId.toLowerCase().contains(searchText.toLowerCase())) {
+
+                                            items = new MomList(String.valueOf(i+1), momId, currentProjectNo, projectName, createDate, createdBy);
+                                            momList.add(items);
+
+                                            allMomAdapter.notifyDataSetChanged();
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    items = new MomList(String.valueOf(i+1), momId, currentProjectNo, projectName, createDate, createdBy);
+                                    momList.add(items);
+
+                                    allMomAdapter.notifyDataSetChanged();
+                                }
                             }
                         } catch (ParseException e) {
                             e.printStackTrace();
@@ -385,7 +459,7 @@ public class AllMom extends NewActivity implements View.OnClickListener  {
 
         RequestQueue requestQueue = Volley.newRequestQueue(context);
 
-        String url = context.getResources().getString(R.string.server_url) + "/postMom";
+        String url = pm.getString("SERVER_URL") + "/postMom";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -423,9 +497,9 @@ public class AllMom extends NewActivity implements View.OnClickListener  {
             Communicator communicator = new Communicator();
             Log.d("object", object.toString());
 
-            Boolean createPoPending = pm.getBoolean("createPoPending");
+            Boolean createMomPending = pm.getBoolean("createMomPending");
 
-            if(createPoPending)
+            if(createMomPending)
             {
                 Toast.makeText(AllMom.this, "Already a MOM creation is in progress. Please try after sometime.", Toast.LENGTH_LONG).show();
             }
@@ -449,7 +523,7 @@ public class AllMom extends NewActivity implements View.OnClickListener  {
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(AllMom.this, ViewPurchaseOrders.class);
+        Intent intent = new Intent(AllMom.this, SiteProjectDelivery.class);
         intent.putExtra("projectNo","1");
         startActivity(intent);
     }

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.example.sadashivsinha.mprosmart.Activities.ResourcesViewAddRemoveActivity">
+
+    <com.example.sadashivsinha.mprosmart.font.RobotoTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="@dimen/activity_vertical_margin"
+        android:textColor="#FFFFFF"
+        android:id="@+id/text_title"
+        android:background="@color/colorPrimary"
+        android:text="Activity Resources"/>
+
+    <ListView
+        android:id="@+id/list_view"
+        android:layout_marginTop="@dimen/very_small_margin"
+        android:layout_below="@+id/text_title"
+        android:layout_above="@+id/btn_add_more"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#FFFFFF"
+        android:text="ADD MORE"
+        android:id="@+id/btn_add_more"
+        android:backgroundTint="@color/colorPrimary"
+        android:layout_alignParentBottom="true"/>
+
+</RelativeLayout>

@@ -74,7 +74,7 @@
                                         android:textSize="25sp"
                                         android:text="Create Material Issue Item"
                                         android:textColor="@color/colorPrimary"
-                                        android:layout_marginBottom="50dp"
+                                        android:layout_marginBottom="@dimen/activity_vertical_margin"
                                         android:gravity="center"
                                         android:id="@+id/title" />
 
@@ -115,6 +115,18 @@
                                         android:textSize="15sp"
                                         android:id="@+id/text_uom"
                                         android:layout_gravity="center_horizontal" />
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:padding="10dp"
+                                        android:hint="Max. Issue Quantity"
+                                        android:textColorHint="#000000"
+                                        android:textColor="#000000"
+                                        android:background="@drawable/edittext_states_red"
+                                        android:layout_marginBottom="@dimen/activity_vertical_margin"
+                                        android:textSize="15sp"
+                                        android:id="@+id/text_max_quantity" />
 
                                     <EditText
                                         android:layout_width="match_parent"

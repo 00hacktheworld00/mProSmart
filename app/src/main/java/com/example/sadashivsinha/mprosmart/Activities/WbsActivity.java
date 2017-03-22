@@ -10,7 +10,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -28,16 +27,19 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Cache;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.Adapters.WbsAdapter;
 import com.example.sadashivsinha.mprosmart.ModelLists.WbsList;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
+import com.example.sadashivsinha.mprosmart.Utils.AppController;
 import com.example.sadashivsinha.mprosmart.Utils.ConnectionDetector;
 import com.example.sadashivsinha.mprosmart.Utils.FilePath;
 import com.example.sadashivsinha.mprosmart.font.HelveticaBold;
@@ -52,11 +54,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 
 public class WbsActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -73,7 +79,8 @@ public class WbsActivity extends AppCompatActivity implements View.OnClickListen
     private String selectedFilePath;
     ProgressDialog dialog;
     HelveticaBold btn_upload;
-
+    String url;
+    String searchText;
     String SERVER_URL;
 
     WbsList items;
@@ -95,9 +102,9 @@ public class WbsActivity extends AppCompatActivity implements View.OnClickListen
 
         setSupportActionBar(toolbar);
 
-        SERVER_URL = getResources().getString(R.string.server_upload_url) + "/upload/file-upload";
-
         pm = new PreferenceManager(getApplicationContext());
+        SERVER_URL = pm.getString("SERVER_UPLOAD_URL") + "/upload/file-upload";
+
         currentProjectNo = pm.getString("projectId");
         currentProjectName = pm.getString("projectName");
         current_user_id = pm.getString("userId");
@@ -105,96 +112,122 @@ public class WbsActivity extends AppCompatActivity implements View.OnClickListen
         cd = new ConnectionDetector(getApplicationContext());
         isInternetPresent = cd.isConnectingToInternet();
 
-        // check for Internet status
-        if (!isInternetPresent) {
-            // Internet connection is not present
-            // Ask user to connect to Internet
-            RelativeLayout main_content = (RelativeLayout) findViewById(R.id.main_content);
-            Snackbar snackbar = Snackbar.make(main_content, getResources().getString(R.string.no_internet_error), Snackbar.LENGTH_LONG);
-            snackbar.show();
-        }
+        wbsAdapter = new WbsAdapter(wbsList);
+        recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(WbsActivity.this));
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setAdapter(wbsAdapter);
+
+        url = pm.getString("SERVER_URL") + "/getWbs?projectId=\"" + currentProjectNo + "\"";
 
         if (getIntent().hasExtra("search")) {
             if (getIntent().getStringExtra("search").equals("yes")) {
 
-                //searched values
-
-                final String searchText = getIntent().getStringExtra("searchText");
+                searchText = getIntent().getStringExtra("searchText");
 
                 getSupportActionBar().setTitle("WBS Search Results : " + searchText);
-
-                pDialog = new ProgressDialog(WbsActivity.this);
-                pDialog.setMessage("Preparing Data ...");
-                pDialog.setIndeterminate(false);
-                pDialog.setCancelable(true);
-                pDialog.show();
-
-                class MyTask extends AsyncTask<Void, Void, Void> {
-                    @Override
-                    protected void onPreExecute() {
-
-                        wbsAdapter = new WbsAdapter(wbsList);
-                        recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
-                        recyclerView.setLayoutManager(new LinearLayoutManager(WbsActivity.this));
-                        recyclerView.setHasFixedSize(true);
-                        recyclerView.setAdapter(wbsAdapter);
-
-                    }
-
-                    @Override
-                    protected Void doInBackground(Void... params) {
-                        prepareSearchedValues(searchText);
-                        return null;
-                    }
-
-                    @Override
-                    protected void onPostExecute(Void result) {
-                        wbsAdapter.notifyDataSetChanged();
-                    }
-
-                }
-                new MyTask().execute();
-
             }
-        } else {
-            //default values
-
-
-            pDialog = new ProgressDialog(WbsActivity.this);
-            pDialog.setMessage("Preparing Data ...");
-            pDialog.setIndeterminate(false);
-            pDialog.setCancelable(true);
-            pDialog.show();
-
-            class MyTask extends AsyncTask<Void, Void, Void> {
-                @Override
-                protected void onPreExecute() {
-
-                    wbsAdapter = new WbsAdapter(wbsList);
-                    recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
-                    recyclerView.setLayoutManager(new LinearLayoutManager(WbsActivity.this));
-                    recyclerView.setHasFixedSize(true);
-                    recyclerView.setAdapter(wbsAdapter);
-
-                }
-
-                @Override
-                protected Void doInBackground(Void... params) {
-                    prepareDefaultItems();
-                    return null;
-                }
-
-                @Override
-                protected void onPostExecute(Void result) {
-                    wbsAdapter.notifyDataSetChanged();
-                }
-
-            }
-            new MyTask().execute();
-
-
         }
 
+
+        if (!isInternetPresent) {
+            // Internet connection is not present
+            // Ask user to connect to Internet
+            RelativeLayout main_layout = (RelativeLayout) findViewById(R.id.main_layout);
+            Crouton.cancelAllCroutons();
+            Crouton.makeText(WbsActivity.this, R.string.no_internet_error, Style.ALERT, main_layout).show();
+
+            pDialog = new ProgressDialog(WbsActivity.this);
+            pDialog.setMessage("Getting cache data");
+            pDialog.show();
+
+            Cache cache = AppController.getInstance().getRequestQueue().getCache();
+            Cache.Entry entry = cache.get(url);
+            if (entry != null) {
+                //Cache data available.
+                try {
+                    String data = new String(entry.data, "UTF-8");
+                    Log.d("CACHE DATA", data);
+                    JSONObject jsonObject = new JSONObject(data);
+                    try {
+                        dataArray = jsonObject.getJSONArray("data");
+
+
+                        Boolean createWbsPending = pm.getBoolean("createWbsPending");
+
+                        if(createWbsPending)
+                        {
+                            String jsonObjectVal = pm.getString("objectWbs");
+                            Log.d("JSON WBS PENDING :", jsonObjectVal);
+
+                            JSONObject jsonObjectPending = new JSONObject(jsonObjectVal);
+                            Log.d("JSONObj WBS PENDING :", jsonObjectPending.toString());
+
+                            wbsName = jsonObjectPending.getString("wbsName");
+                            progress = jsonObjectPending.getString("progress");
+                            totalBudget = jsonObjectPending.getString("totalBudget");
+                            currencyCode = jsonObjectPending.getString("currencyCode");
+
+                            items = new WbsList("-1", wbsName, progress, currencyCode, totalBudget);
+                            wbsList.add(items);
+                            wbsAdapter.notifyDataSetChanged();
+                        }
+
+                        for (int i = 0; i < dataArray.length(); i++) {
+                            dataObject = dataArray.getJSONObject(i);
+                            wbsId = dataObject.getString("wbsId");
+                            wbsName = dataObject.getString("wbsName");
+                            progress = dataObject.getString("progress");
+                            totalBudget = dataObject.getString("totalBudget");
+                            currencyCode = dataObject.getString("currencyCode");
+
+                            if (getIntent().hasExtra("search"))
+                            {
+                                if (getIntent().getStringExtra("search").equals("yes")) {
+
+                                    if (wbsName.toLowerCase().contains(searchText.toLowerCase()) || wbsId.toLowerCase().contains(searchText.toLowerCase())) {
+                                        items = new WbsList(wbsId, wbsName, progress, currencyCode, totalBudget);
+                                        wbsList.add(items);
+                                        wbsAdapter.notifyDataSetChanged();
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                items = new WbsList(wbsId, wbsName, progress, currencyCode, totalBudget);
+                                wbsList.add(items);
+                                wbsAdapter.notifyDataSetChanged();
+                            }
+
+                            totalProjectBudget = totalProjectBudget + Integer.parseInt(totalBudget);
+                            pm.putInt("totalProjectBudget", totalProjectBudget);
+                            Log.d("TOTAL WBS BUDGET ID " + wbsId, String.valueOf(totalProjectBudget));
+                            pDialog.dismiss();
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
+                } catch (UnsupportedEncodingException | JSONException e) {
+                    e.printStackTrace();
+                }
+                if (pDialog != null)
+                    pDialog.dismiss();
+            }
+
+            else
+            {
+                Toast.makeText(WbsActivity.this, "Offline Data Not available for WBS", Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        }
+
+        else
+        {
+            // Cache data not exist.
+            callJsonArrayRequest();
+        }
 
         FloatingActionButton fab_add, fab_search, exportBtn;
 
@@ -208,7 +241,8 @@ public class WbsActivity extends AppCompatActivity implements View.OnClickListen
 
         if (getIntent().hasExtra("create")) {
             if (getIntent().getStringExtra("create").equals("yes")) {
-                createWbs();
+                Intent intent = new Intent(WbsActivity.this, WbsCreateActivity.class);
+                startActivity(intent);
             }
         }
     }
@@ -240,6 +274,9 @@ public class WbsActivity extends AppCompatActivity implements View.OnClickListen
                             Intent intent = new Intent(WbsActivity.this, WbsActivity.class);
                             intent.putExtra("search", "yes");
                             intent.putExtra("searchText", input.getText().toString());
+
+                            Log.d("SEARCH TEXT", input.getText().toString());
+
                             startActivity(intent);
                         }
                     }
@@ -261,72 +298,77 @@ public class WbsActivity extends AppCompatActivity implements View.OnClickListen
         }
     }
 
-    public void prepareDefaultItems() {
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
+    private void callJsonArrayRequest() {
+        // TODO Auto-generated method stub
 
-        String url = getResources().getString(R.string.server_url) + "/getWbs?projectId=\"" + currentProjectNo + "\"";
+        pDialog = new ProgressDialog(WbsActivity.this);
+        pDialog.setMessage("Getting server data");
+        pDialog.show();
 
-        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+                        try
+                        {
+//                            dataObject = response.getJSONObject(0);
+                            dataArray = response.getJSONArray("data");
+                            for(int i=0; i<dataArray.length();i++)
+                            {
+                                dataObject = dataArray.getJSONObject(i);
+                                wbsId = dataObject.getString("wbsId");
+                                wbsName = dataObject.getString("wbsName");
+                                progress = dataObject.getString("progress");
+                                totalBudget = dataObject.getString("totalBudget");
+                                currencyCode = dataObject.getString("currencyCode");
 
-                        try {
-                            String type = response.getString("type");
+                                if (getIntent().hasExtra("search"))
+                                {
+                                    if (getIntent().getStringExtra("search").equals("yes")) {
 
-                            if (type.equals("ERROR")) {
-                                pDialog.dismiss();
-                                Toast.makeText(WbsActivity.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
-                            }
-
-                            if (type.equals("INFO")) {
-
-                                Log.d("RESPONSE OF JSON :", response.toString());
-
-                                dataArray = response.getJSONArray("data");
-                                for (int i = 0; i < dataArray.length(); i++) {
-                                    dataObject = dataArray.getJSONObject(i);
-
-                                    wbsId = dataObject.getString("wbsId");
-                                    wbsName = dataObject.getString("wbsName");
-                                    progress = dataObject.getString("progress");
-                                    totalBudget = dataObject.getString("totalBudget");
-                                    currencyCode = dataObject.getString("currencyCode");
-
+                                        if (wbsName.toLowerCase().contains(searchText.toLowerCase()) || wbsId.toLowerCase().contains(searchText.toLowerCase())) {
+                                            items = new WbsList(wbsId, wbsName, progress, currencyCode, totalBudget);
+                                            wbsList.add(items);
+                                            wbsAdapter.notifyDataSetChanged();
+                                        }
+                                    }
+                                }
+                                else
+                                {
                                     items = new WbsList(wbsId, wbsName, progress, currencyCode, totalBudget);
                                     wbsList.add(items);
                                     wbsAdapter.notifyDataSetChanged();
-
-                                    totalProjectBudget = totalProjectBudget + Integer.parseInt(totalBudget);
-                                    pm.putInt("totalProjectBudget", totalProjectBudget);
-                                    Log.d("TOTAL WBS BUDGET ID " + wbsId, String.valueOf(totalProjectBudget));
                                 }
+
+                                totalProjectBudget = totalProjectBudget + Integer.parseInt(totalBudget);
+                                pm.putInt("totalProjectBudget", totalProjectBudget);
+                                Log.d("TOTAL WBS BUDGET ID " + wbsId, String.valueOf(totalProjectBudget));
                             }
-                            pDialog.dismiss();
                         } catch (JSONException e) {
-                            pDialog.dismiss();
                             e.printStackTrace();
                         }
+//                        setData(response,false);
                     }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        pDialog.dismiss();
-                        Log.e("Volley", "Error");
-                    }
-                }
-        );
-        requestQueue.add(jor);
-        wbsAdapter.notifyDataSetChanged();
-
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        });
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(jsonObjectRequest);
+        if(pDialog!=null)
+            pDialog.dismiss();
     }
 
     public void prepareSearchedValues(final String searchedText) {
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getWbs?projectId=\"" + currentProjectNo + "\"";
+        String url = pm.getString("SERVER_URL") + "/getWbs?projectId=\"" + currentProjectNo + "\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -401,7 +443,7 @@ public class WbsActivity extends AppCompatActivity implements View.OnClickListen
 
         RequestQueue requestQueue = Volley.newRequestQueue(WbsActivity.this);
 
-        String url = WbsActivity.this.getResources().getString(R.string.server_url) + "/postWbs";
+        String url = WbsActivity.this.pm.getString("SERVER_URL") + "/postWbs";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -448,7 +490,7 @@ public class WbsActivity extends AppCompatActivity implements View.OnClickListen
 
         RequestQueue requestQueue = Volley.newRequestQueue(WbsActivity.this);
 
-        String url = WbsActivity.this.getResources().getString(R.string.server_url) + "/postWbsFiles";
+        String url = WbsActivity.this.pm.getString("SERVER_URL") + "/postWbsFiles";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -495,7 +537,7 @@ public class WbsActivity extends AppCompatActivity implements View.OnClickListen
 
         RequestQueue requestQueue = Volley.newRequestQueue(WbsActivity.this);
 
-        String url = WbsActivity.this.getResources().getString(R.string.server_url) + "/putProjectTotalBudget?projectId=\"" + currentProjectNo + "\"";
+        String url = WbsActivity.this.pm.getString("SERVER_URL") + "/putProjectTotalBudget?projectId=\"" + currentProjectNo + "\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.PUT, url, object,
                 new Response.Listener<JSONObject>() {
@@ -845,7 +887,7 @@ public class WbsActivity extends AppCompatActivity implements View.OnClickListen
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(WbsActivity.this, ViewPurchaseOrders.class);
+        Intent intent = new Intent(WbsActivity.this, ProjectPlanningSchedulingActivity.class);
         startActivity(intent);
     }
 }

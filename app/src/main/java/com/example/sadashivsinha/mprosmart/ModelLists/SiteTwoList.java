@@ -5,9 +5,12 @@ package com.example.sadashivsinha.mprosmart.ModelLists;
  */
 public class SiteTwoList
 {
-        private String text_line_no, text_wbs, text_activities, text_res_name, text_total_hours,
+        private String text_line_no, text_wbs, text_activities, text_res_name,
                 text_receipt_no, text_po_number, text_vendor_id, text_item_code, text_status,
-                text_activity, text_quan_issued, text_rec_by;
+                text_activity, resourceTimesheetId, text_material_no,
+                text_item_id, text_item_desc, text_quan_issued,text_uom;
+
+    private float text_total_hours;
 
 
         public SiteTwoList(String text_line_no, String text_receipt_no, String text_po_number,
@@ -23,29 +26,48 @@ public class SiteTwoList
 
 
     //for 4th fragment
-    public SiteTwoList(int siteFour, String text_line_no, String text_activity, String text_item_code,
-                       String text_quan_issued, String text_rec_by, String text_wbs)
+    public SiteTwoList(String text_material_no, String text_item_id, String text_item_desc, String text_quan_issued,
+                       String text_uom )
     {
-        this.text_line_no = text_line_no;
-        this.text_activity = text_activity;
-        this.text_item_code = text_item_code;
+        this.text_material_no = text_material_no;
+        this.text_item_id = text_item_id;
+        this.text_item_desc = text_item_desc;
         this.text_quan_issued = text_quan_issued;
-        this.text_rec_by = text_rec_by;
-        this.text_wbs = text_wbs;
+        this.text_uom = text_uom;
     }
 
 
-    public SiteTwoList(String text_line_no, String text_wbs, String text_activities,
-                       String text_res_name, String text_total_hours)
+    public SiteTwoList(String resourceTimesheetId, String text_wbs, String text_activity,
+                       String text_res_name, Float text_total_hours)
             {
-                this.text_line_no = text_line_no;
                 this.text_wbs = text_wbs;
-                this.text_activities = text_activities;
+                this.text_activity = text_activity;
                 this.text_res_name = text_res_name;
                 this.text_total_hours = text_total_hours;
+                this.resourceTimesheetId = resourceTimesheetId;
             }
 
-        public String getText_line_no() {
+    public String getText_material_no() {
+        return text_material_no;
+    }
+
+    public String getText_item_id() {
+        return text_item_id;
+    }
+
+    public String getText_item_desc() {
+        return text_item_desc;
+    }
+
+    public String getText_uom() {
+        return text_uom;
+    }
+
+    public String getResourceTimesheetId() {
+        return resourceTimesheetId;
+    }
+
+    public String getText_line_no() {
             return text_line_no;
         }
 
@@ -61,7 +83,7 @@ public class SiteTwoList
             return text_res_name;
         }
 
-        public String getText_total_hours() {
+        public float getText_total_hours() {
             return text_total_hours;
         }
 
@@ -93,11 +115,6 @@ public class SiteTwoList
         public String getText_quan_issued()
         {
             return text_quan_issued;
-        }
-
-        public String getText_rec_by()
-        {
-            return text_rec_by;
         }
 
 }

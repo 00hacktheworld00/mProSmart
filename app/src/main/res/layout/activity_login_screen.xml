@@ -124,10 +124,124 @@
                 android:background="@android:color/white" />
         </LinearLayout>
 
-        <RelativeLayout
+
+        <com.example.sadashivsinha.mprosmart.font.RobotoTextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp" >
+            android:background="@drawable/transparent_button_selector"
+            android:minHeight="36dp"
+            android:minWidth="64dp"
+            android:padding="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:text="Configure Server"
+            android:gravity="center"
+            android:id="@+id/btn_config_server"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            app:typeface="robotoMedium"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="@dimen/small_margin"
+            android:layout_marginBottom="@dimen/small_margin"
+            android:id="@+id/layout_ip_address"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:gravity="center_vertical"
+                android:orientation="vertical" >
+
+                <com.example.sadashivsinha.mprosmart.font.RobotoTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:text="Enter IP Address"
+                    android:textColor="@android:color/white"
+                    android:textSize="10sp"
+                    app:typeface="robotoLight" />
+
+                <EditText
+                    android:id="@+id/text_ip"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:backgroundTint="@android:color/transparent"
+                    android:backgroundTintMode="@android:color/transparent"
+                    android:cursorVisible="true"
+                    android:drawableBottom="@android:color/transparent"
+                    android:hint="IP Address"
+                    android:inputType="textNoSuggestions"
+                    android:maxLines="1"
+                    android:imeOptions="actionNext"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@android:color/white"
+                    android:textSize="24sp" >
+
+                    <requestFocus />
+                </EditText>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/white" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="vertical" >
+
+                <com.example.sadashivsinha.mprosmart.font.RobotoTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:text="Enter Port No."
+                    android:textColor="@android:color/white"
+                    android:textSize="10sp"
+                    app:typeface="robotoLight" />
+
+                <EditText
+                    android:id="@+id/text_port"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:backgroundTint="@android:color/transparent"
+                    android:backgroundTintMode="@android:color/transparent"
+                    android:drawableBottom="@android:color/transparent"
+                    android:ems="5"
+                    android:hint="Port No."
+                    android:inputType="number"
+                    android:maxLines="1"
+                    android:imeOptions="actionDone"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@android:color/white"
+                    android:textSize="24sp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/white" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
 
             <CheckBox
                 android:layout_width="wrap_content"
@@ -157,20 +271,19 @@
                 android:layout_alignParentEnd="true" />
 
             <!--<com.example.sadashivsinha.fileupload.font.RobotoTextView-->
-                <!--android:id="@+id/register"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:background="@drawable/transparent_button_selector"-->
-                <!--android:minHeight="36dp"-->
-                <!--android:minWidth="64dp"-->
-                <!--android:padding="8dp"-->
-                <!--android:text="Register"-->
-                <!--android:gravity="center"-->
-                <!--android:textColor="@android:color/white"-->
-                <!--android:textSize="14sp"-->
-                <!--app:typeface="robotoMedium" />-->
+            <!--android:id="@+id/register"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:background="@drawable/transparent_button_selector"-->
+            <!--android:minHeight="36dp"-->
+            <!--android:minWidth="64dp"-->
+            <!--android:padding="8dp"-->
+            <!--android:text="Register"-->
+            <!--android:gravity="center"-->
+            <!--android:textColor="@android:color/white"-->
+            <!--android:textSize="14sp"-->
+            <!--app:typeface="robotoMedium" />-->
         </RelativeLayout>
-
     </LinearLayout>
 
 </LinearLayout>

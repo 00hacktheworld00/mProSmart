@@ -12,6 +12,9 @@ public class MomList {
     private String slNo, submittalId, currentProjectNo, projectName, createdDate, createdBy, submittalRegisterId, submittalsType, dueDate,
             status, description;
     private String submittal_no, sl_no, title, start_date, end_date;
+    private int original_line_no;
+    int approved;
+
 
     //for invoice list
     private String invoice_index, invoice_no, ven_invoice_no, vendor_code, po_number, priority;
@@ -48,7 +51,8 @@ public class MomList {
     }
 
     //for submittal register
-    public MomList(String submittal_no, String sl_no, String project_id, String project_name, String date, String created_by, String status, String priority, String start_date, String end_date)
+    public MomList(String submittal_no, String sl_no, String project_id, String project_name, String date, String created_by, String status, String priority, String start_date, String end_date,
+                   int approved)
     {
         this.submittal_no = submittal_no;
         this.sl_no = sl_no;
@@ -60,6 +64,7 @@ public class MomList {
         this.status = status;
         this.start_date = start_date;
         this.end_date = end_date;
+        this.approved = approved;
     }
 
 
@@ -88,6 +93,12 @@ public class MomList {
     public MomList(String text_line_no, String description) {
         this.text_line_no = text_line_no;
         this.description = description;
+    }
+
+    public MomList(String text_line_no, int original_line_no, String description) {
+        this.text_line_no = text_line_no;
+        this.description = description;
+        this.original_line_no = original_line_no;
     }
 
     //for all Quality Control
@@ -121,6 +132,24 @@ public class MomList {
         this.text_responsible = text_responsible;
         this.text_attachments = text_attachments;
         this.text_date = text_date;
+    }
+
+    //for MOM
+    public MomList(String text_line_no, int original_line_no, String text_matter, String text_responsible, String text_attachments, String text_date) {
+        this.text_line_no = text_line_no;
+        this.text_matter = text_matter;
+        this.text_responsible = text_responsible;
+        this.text_attachments = text_attachments;
+        this.text_date = text_date;
+        this.original_line_no = original_line_no;
+    }
+
+    public int getApproved() {
+        return approved;
+    }
+
+    public int getOriginal_line_no() {
+        return original_line_no;
     }
 
     public String getSubmittal_no() {

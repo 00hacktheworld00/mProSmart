@@ -131,7 +131,7 @@ public class QualityControlCreate extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(QualityControlCreate.this);
 
-        String url = QualityControlCreate.this.getResources().getString(R.string.server_url) + "/postQualityInspection";
+        String url = QualityControlCreate.this.pm.getString("SERVER_URL") + "/postQualityInspection";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -175,7 +175,7 @@ public class QualityControlCreate extends AppCompatActivity {
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getPurchaseOrders?projectId='"+currentProjectNo+"'";
+        String url = pm.getString("SERVER_URL") + "/getPurchaseOrders?projectId='"+currentProjectNo+"'";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -232,7 +232,7 @@ public class QualityControlCreate extends AppCompatActivity {
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getVendors";
+        String url = pm.getString("SERVER_URL") + "/getVendors";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -289,7 +289,7 @@ public class QualityControlCreate extends AppCompatActivity {
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getPurchaseReceipts?projectId=\""+currentProjectNo+"\"";
+        String url = pm.getString("SERVER_URL") + "/getPurchaseReceipts?projectId=\""+currentProjectNo+"\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {

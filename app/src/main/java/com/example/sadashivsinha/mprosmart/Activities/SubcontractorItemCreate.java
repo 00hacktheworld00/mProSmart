@@ -60,7 +60,7 @@ public class SubcontractorItemCreate extends AppCompatActivity implements DatePi
     public static final String TAG = SubcontractorItemCreate.class.getSimpleName();
     Boolean isInternetPresent = false;
     String dateTOSendServer;
-    String wbs_url, resource_url;
+    String wbs_url, resource_url, resourceTypeId;
     PreferenceManager pm;
 
     @Override
@@ -82,8 +82,8 @@ public class SubcontractorItemCreate extends AppCompatActivity implements DatePi
 
         text_total_hours = (EditText) findViewById(R.id.text_total_hours);
 
-        wbs_url = getResources().getString(R.string.server_url) + "/getWbs?projectId=\""+currentProjectNo+"\"";
-        resource_url = getResources().getString(R.string.server_url) + "/getResource";
+        wbs_url = pm.getString("SERVER_URL") + "/getWbs?projectId=\""+currentProjectNo+"\"";
+        resource_url = pm.getString("SERVER_URL") + "/getResource";
 
         TextWatcher watch = new TextWatcher(){
 
@@ -131,14 +131,13 @@ public class SubcontractorItemCreate extends AppCompatActivity implements DatePi
                         now.get(Calendar.MONTH),
                         now.get(Calendar.DAY_OF_MONTH)
                 );
+
+                dpd.setMaxDate(now);
                 dpd.show(getFragmentManager(), "Datepickerdialog");
             }
         });
 
         spinner_activity.setVisibility(View.GONE);
-
-
-
 
         cd = new ConnectionDetector(getApplicationContext());
         isInternetPresent = cd.isConnectingToInternet();
@@ -185,6 +184,11 @@ public class SubcontractorItemCreate extends AppCompatActivity implements DatePi
                 {
                     Toast.makeText(SubcontractorItemCreate.this, "Select Activity", Toast.LENGTH_SHORT).show();
                 }
+                else if(spinner_activity.getSelectedItem().toString().equals("No Activity Found") ||
+                        spinner_activity.getSelectedItem().toString().equals("") )
+                {
+                    Toast.makeText(SubcontractorItemCreate.this, "No Activity in this WBS", Toast.LENGTH_SHORT).show();
+                }
                 else if(spinner_resource.getSelectedItem().toString().equals("Select Resource"))
                 {
                     Toast.makeText(SubcontractorItemCreate.this, "Select Resource", Toast.LENGTH_SHORT).show();
@@ -225,7 +229,7 @@ public class SubcontractorItemCreate extends AppCompatActivity implements DatePi
 
         RequestQueue requestQueue = Volley.newRequestQueue(SubcontractorItemCreate.this);
 
-        String url = SubcontractorItemCreate.this.getResources().getString(R.string.server_url) + "/postSubContractorLineItems";
+        String url = SubcontractorItemCreate.this.pm.getString("SERVER_URL") + "/postSubContractorLineItems";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -234,7 +238,12 @@ public class SubcontractorItemCreate extends AppCompatActivity implements DatePi
                         try {
 
                             if(response.getString("msg").equals("success"))
+                            {
                                 Toast.makeText(SubcontractorItemCreate.this, "Subcontractor Timesheet Line Item has been created", Toast.LENGTH_SHORT).show();
+
+                                Intent intent = new Intent(SubcontractorItemCreate.this, SubcontractorActivity.class);
+                                startActivity(intent);
+                            }
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -249,8 +258,6 @@ public class SubcontractorItemCreate extends AppCompatActivity implements DatePi
                     }
                 }
         );
-        cd = new ConnectionDetector(getApplicationContext());
-        isInternetPresent = cd.isConnectingToInternet();
 
         if (!isInternetPresent)
         {
@@ -273,6 +280,9 @@ public class SubcontractorItemCreate extends AppCompatActivity implements DatePi
                 pm.putString("urlSubcontractorLineItem", url);
                 pm.putString("toastMessageSubcontractorLineItem", "Subcontractor Line Item Created");
                 pm.putBoolean("createSubcontractorLineItem", true);
+
+                Intent intent = new Intent(SubcontractorItemCreate.this, SubcontractorActivity.class);
+                startActivity(intent);
             }
         }
         else
@@ -280,8 +290,6 @@ public class SubcontractorItemCreate extends AppCompatActivity implements DatePi
             requestQueue.add(jor);
         }
 
-        Intent intent = new Intent(SubcontractorItemCreate.this, SubcontractorActivity.class);
-        startActivity(intent);
     }
 
 
@@ -337,10 +345,7 @@ public class SubcontractorItemCreate extends AppCompatActivity implements DatePi
                         e.printStackTrace();
                     }
 //                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    // TODO Auto-generated catch block
+                } catch (UnsupportedEncodingException | JSONException e) {
                     e.printStackTrace();
                 }
                 if (pDialog != null)
@@ -440,27 +445,46 @@ public class SubcontractorItemCreate extends AppCompatActivity implements DatePi
             if (entry != null) {
                 //Cache data available.
                 try {
+
+                    int noOfRes = 0;
+
                     String data = new String(entry.data, "UTF-8");
                     Log.d("CACHE DATA", data);
                     JSONObject jsonObject = new JSONObject(data);
                     try {
                         dataArray = jsonObject.getJSONArray("data");
-                        resourceArray = new String[dataArray.length()+1];
-                        resourceIdArray = new String[dataArray.length()+1];
+                        for(int i=0; i<dataArray.length(); i++)
+                        {
+                            //counting no of resource who are contractor
+                            dataObject = dataArray.getJSONObject(i);
+                            resourceTypeId = dataObject.getString("resourceTypeId");
+                            if(resourceTypeId.equals("2"))
+                                noOfRes++;
+                        }
+
+                        resourceArray = new String[noOfRes+1];
+                        resourceIdArray = new String[noOfRes+1];
                         resourceArray[0]= "Select Resource";
                         resourceIdArray[0] = "Select Resource";
+
+                        int j = 0;
 
                         for(int i=0; i<dataArray.length();i++)
                         {
                             dataObject = dataArray.getJSONObject(i);
-                            resId = dataObject.getString("id");
-                            firstName = dataObject.getString("firstName");
-                            lastName = dataObject.getString("lastName");
+                            resourceTypeId = dataObject.getString("resourceTypeId");
+                            if(resourceTypeId.equals("2"))
+                            {
+                                resId = dataObject.getString("id");
+                                firstName = dataObject.getString("firstName");
+                                lastName = dataObject.getString("lastName");
 
-                            fullName = firstName + " " + lastName;
+                                fullName = firstName + " " + lastName;
 
-                            resourceArray[i+1]=fullName;
-                            resourceIdArray[i+1] = resId;
+                                resourceArray[j + 1] = fullName;
+                                resourceIdArray[j + 1] = resId;
+                                j++;
+                            }
                         }
 
                         ArrayAdapter<String> adapter;
@@ -477,10 +501,7 @@ public class SubcontractorItemCreate extends AppCompatActivity implements DatePi
                         e.printStackTrace();
                     }
 //                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    // TODO Auto-generated catch block
+                } catch (UnsupportedEncodingException | JSONException e) {
                     e.printStackTrace();
                 }
                 if (pDialog != null)
@@ -509,25 +530,46 @@ public class SubcontractorItemCreate extends AppCompatActivity implements DatePi
                         public void onResponse(JSONObject response) {
                             try
                             {
+                                int noOfRes = 0;
+
                                 Log.d("RESPONSE RESOURCE :", response.toString());
 //                            dataObject = response.getJSONObject(0);
                                 dataArray = response.getJSONArray("data");
-                                resourceArray = new String[dataArray.length()+1];
-                                resourceIdArray = new String[dataArray.length()+1];
+                                for(int i=0; i<dataArray.length(); i++)
+                                {
+                                    //counting no of resource who are contractor
+                                    dataObject = dataArray.getJSONObject(i);
+                                    resourceTypeId = dataObject.getString("resourceTypeId");
+                                    if(resourceTypeId.equals("2"))
+                                        noOfRes++;
+                                }
+
+                                Log.d("no of RESOURCES", String.valueOf(noOfRes));
+
+                                resourceArray = new String[noOfRes+1];
+                                resourceIdArray = new String[noOfRes+1];
                                 resourceArray[0]= "Select Resource";
                                 resourceIdArray[0] = "Select Resource";
 
-                                for(int i=0; i<dataArray.length();i++)
-                                {
+                                int j = 0;
+
+                                for(int i=0; i<dataArray.length();i++) {
                                     dataObject = dataArray.getJSONObject(i);
-                                    resId = dataObject.getString("id");
-                                    firstName = dataObject.getString("firstName");
-                                    lastName = dataObject.getString("lastName");
+                                    resourceTypeId = dataObject.getString("resourceTypeId");
 
-                                    fullName = firstName + " " + lastName;
+                                    if (resourceTypeId.equals("2")) {
+                                        resId = dataObject.getString("id");
+                                        firstName = dataObject.getString("firstName");
+                                        lastName = dataObject.getString("lastName");
 
-                                    resourceArray[i+1]=fullName;
-                                    resourceIdArray[i+1] = resId;
+                                        fullName = firstName + " " + lastName;
+
+                                        resourceArray[j+1] = fullName;
+                                        resourceIdArray[j+1] = resId;
+                                        j++;
+
+                                        Log.d("no of RESOURCES Loop", String.valueOf(i));
+                                    }
                                 }
 
                                 ArrayAdapter<String> adapter;
@@ -566,7 +608,7 @@ public class SubcontractorItemCreate extends AppCompatActivity implements DatePi
         final ProgressDialog pDialog = new ProgressDialog(SubcontractorItemCreate.this);
 
 
-        String activity_url = getString(R.string.server_url) + "/getWbsActivity?wbsId=\"" + currentWbsId + "\"";
+        String activity_url = pm.getString("SERVER_URL") + "/getWbsActivity?wbsId=\"" + currentWbsId + "\"";
 
 
         if (!isInternetPresent) {
@@ -620,14 +662,10 @@ public class SubcontractorItemCreate extends AppCompatActivity implements DatePi
                         e.printStackTrace();
                     }
 //                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    // TODO Auto-generated catch block
+                } catch (UnsupportedEncodingException | JSONException e) {
                     e.printStackTrace();
                 }
-                if (pDialog != null)
-                    pDialog.dismiss();
+                pDialog.dismiss();
             } else {
                 Toast.makeText(SubcontractorItemCreate.this, "Offline Data Not available for Resources", Toast.LENGTH_SHORT).show();
                 pDialog.dismiss();
@@ -646,33 +684,42 @@ public class SubcontractorItemCreate extends AppCompatActivity implements DatePi
                         public void onResponse(JSONObject response) {
                             try {
 //                            dataObject = response.getJSONObject(0);
-                                dataArray = response.getJSONArray("data");
-                                activityIdArray = new String[dataArray.length() + 1];
-                                activitiesNameArray = new String[dataArray.length() + 1];
-                                activityIdArray[0] = "Select Activity";
-                                activitiesNameArray[0] = "Select Activity";
 
-                                for (int i = 0; i < dataArray.length(); i++) {
-                                    dataObject = dataArray.getJSONObject(i);
+                                String type = response.getString("type");
 
-                                    activityId = dataObject.getString("id");
-                                    activityName = dataObject.getString("activityName");
+                                if(type.equals("INFO"))
+                                {
+                                    dataArray = response.getJSONArray("data");
+                                    activityIdArray = new String[dataArray.length() + 1];
+                                    activitiesNameArray = new String[dataArray.length() + 1];
+                                    activityIdArray[0] = "Select Activity";
+                                    activitiesNameArray[0] = "Select Activity";
 
-                                    activityIdArray[i + 1] = activityId;
-                                    activitiesNameArray[i + 1] = activityName;
+                                    for (int i = 0; i < dataArray.length(); i++) {
+                                        dataObject = dataArray.getJSONObject(i);
+
+                                        activityId = dataObject.getString("id");
+                                        activityName = dataObject.getString("activityName");
+
+                                        activityIdArray[i + 1] = activityId;
+                                        activitiesNameArray[i + 1] = activityName;
+                                    }
+
+                                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(SubcontractorItemCreate.this,
+                                                android.R.layout.simple_dropdown_item_1line, activitiesNameArray);
+
+
+                                    spinner_activity.setAdapter(adapter);
+
                                 }
 
-                                ArrayAdapter<String> adapter;
-
-                                if (activitiesNameArray == null) {
-                                    adapter = new ArrayAdapter<String>(SubcontractorItemCreate.this,
+                                else
+                                {
+                                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(SubcontractorItemCreate.this,
                                             android.R.layout.simple_dropdown_item_1line, new String[]{"No Activity Found"});
-                                } else {
-                                    adapter = new ArrayAdapter<String>(SubcontractorItemCreate.this,
-                                            android.R.layout.simple_dropdown_item_1line, activitiesNameArray);
-                                }
+                                    spinner_activity.setAdapter(adapter);
 
-                                spinner_activity.setAdapter(adapter);
+                                }
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -689,11 +736,9 @@ public class SubcontractorItemCreate extends AppCompatActivity implements DatePi
             });
             // Adding request to request queue
             AppController.getInstance().addToRequestQueue(jsonObjectRequest);
-            if (progressDialog != null)
-                progressDialog.dismiss();
+            progressDialog.dismiss();
 
-            if (pDialog != null)
-                pDialog.dismiss();
+            pDialog.dismiss();
 
         }
     }

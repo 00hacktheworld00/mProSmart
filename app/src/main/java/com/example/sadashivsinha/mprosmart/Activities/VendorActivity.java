@@ -43,7 +43,7 @@ public class VendorActivity extends AppCompatActivity implements View.OnClickLis
     VendorList items;
     ConnectionDetector cd;
     ProgressDialog pDialog;
-
+    PreferenceManager pm;
     String currentProjectNo, currentProjectName;
 
     @Override
@@ -51,17 +51,12 @@ public class VendorActivity extends AppCompatActivity implements View.OnClickLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vendor);
 
-        PreferenceManager pm = new PreferenceManager(this);
+        pm = new PreferenceManager(this);
 
         currentProjectNo = pm.getString("projectId");
         currentProjectName = pm.getString("projectName");
 
         recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
-
-        String vendorId = pm.getString("vendor_id");
-        String vendorName = pm.getString("vendor_name");
-        String vendorType = pm.getString("vendor_type");
-        String disciplineText = pm.getString("discipline");
 
         vendor_id = (TextView) findViewById(R.id.vendor_id);
         vendor_name = (TextView) findViewById(R.id.vendor_name);
@@ -71,15 +66,7 @@ public class VendorActivity extends AppCompatActivity implements View.OnClickLis
         licence_no = (TextView) findViewById(R.id.licence_no);
         company_name = (TextView) findViewById(R.id.company_name);
 
-        vendor_id.setText(vendorId);
-        vendor_name.setText(vendorName);
-        vendor_type.setText(vendorType);
-        discipline.setText(disciplineText);
-
-        tax_id.setText("T0001414787");
-        licence_no.setText("L-1585978457");
-        company_name.setText("ABC Company");
-
+        prepareHeader();
 
         final LinearLayout hiddenLayout = (LinearLayout) findViewById(R.id.hiddenLayout);
         hiddenLayout.setVisibility(View.GONE);
@@ -149,6 +136,25 @@ public class VendorActivity extends AppCompatActivity implements View.OnClickLis
                 startActivity(intent);
             }
         }
+    }
+
+    public void prepareHeader()
+    {
+        String vendorId = pm.getString("vendorId");
+        String vendorName = pm.getString("vendorName");
+        String vendorType = pm.getString("vendorType");
+        String disciplineText = pm.getString("vendorDiscipline");
+        String vendorTaxId = pm.getString("vendorTaxId");
+        String vendorLicenceNo = pm.getString("vendorLicenceNo");
+        String vendorCompanyName = pm.getString("vendorCompanyName");
+
+        vendor_id.setText(vendorId);
+        vendor_name.setText(vendorName);
+        vendor_type.setText(vendorType);
+        discipline.setText(disciplineText);
+        tax_id.setText(vendorTaxId);
+        licence_no.setText(vendorLicenceNo);
+        company_name.setText(vendorCompanyName);
     }
 
     public void prepareItems()

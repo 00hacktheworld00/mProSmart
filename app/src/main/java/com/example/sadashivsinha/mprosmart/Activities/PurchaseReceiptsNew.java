@@ -89,7 +89,7 @@ public class PurchaseReceiptsNew extends NewActivity implements View.OnClickList
         currentPurchaseOrderNo=pm.getString("poNumber");
         currentProjectNo = pm.getString("projectId");
 
-        url = getResources().getString(R.string.server_url) + "/getPurchaseReceipts?projectId=\""+currentProjectNo+"\"";
+        url = pm.getString("SERVER_URL") + "/getPurchaseReceipts?projectId=\""+currentProjectNo+"\"";
 
 
         po_number = (TextView) findViewById(R.id.po_number);
@@ -145,41 +145,35 @@ public class PurchaseReceiptsNew extends NewActivity implements View.OnClickList
                                 PurchaseOrdersList.add(items);
 
                                 PurchaseReceiptsNewAdapter.notifyDataSetChanged();
-
                             }
-                            pDialog.dismiss();
-
-
-                            //check if is offline mode and data creation is pending
-                            Boolean createPrPending = pm.getBoolean("createPrPending");
-
-                            if(createPrPending)
-                            {
-                                String jsonObjectVal = pm.getString("objectPR");
-                                Log.d("JSON PR PENDING :", jsonObjectVal);
-
-                                JSONObject jsonObjectPending = new JSONObject(jsonObjectVal);
-                                Log.d("JSONObj PRLine :", jsonObjectPending.toString());
-
-                                purchaseOrderId = jsonObjectPending.getString("purchaseOrderId");
-
-                                Log.d("JSONObj pOrderId :", purchaseOrderId);
-                                Log.d("JSONObj ProjectNo :", currentProjectNo);
-
-                                items = new PurchaseOrdersList(getResources().getString(R.string.waiting_to_connect) , purchaseOrderId,
-                                        currentProjectNo, "", String.valueOf(i+1),0);
-
-
-                                //DATE HAS TO BE ADDED ON PR CREATION JSON TO BE SENT TO SERVER
-
-
-
-                                PurchaseOrdersList.add(items);
-
-                                PurchaseReceiptsNewAdapter.notifyDataSetChanged();
-                            }
-
                         }
+
+                        Boolean createPrPending = pm.getBoolean("createPrPending");
+
+                        if(createPrPending)
+                        {
+
+                            String jsonObjectVal = pm.getString("objectPR");
+                            Log.d("JSON PR PENDING :", jsonObjectVal);
+
+                            JSONObject jsonObjectPending = new JSONObject(jsonObjectVal);
+                            Log.d("JSONObj PR PENDING :", jsonObjectPending.toString());
+
+                            purchaseOrderId = jsonObjectPending.getString("purchaseOrderId");
+                            date = jsonObjectPending.getString("date");
+
+                            Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(date);
+                            date = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+
+                            items = new PurchaseOrdersList(getResources().getString(R.string.waiting_to_connect),
+                                    purchaseOrderId, currentProjectNo, date, String.valueOf(dataArray.length()),0);
+
+                            PurchaseOrdersList.add(items);
+
+                            PurchaseReceiptsNewAdapter.notifyDataSetChanged();
+                        }
+
+                        pDialog.dismiss();
                     } catch (ParseException | JSONException e) {
                         e.printStackTrace();
                     }
@@ -372,7 +366,6 @@ public class PurchaseReceiptsNew extends NewActivity implements View.OnClickList
 //    {
 //        RequestQueue requestQueue = Volley.newRequestQueue(this);
 //
-//        String url = getResources().getString(R.string.server_url) + "/getPurchaseOrders?projectId='"+currentProjectNo+"'";
 //
 //        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
 //                new Response.Listener<JSONObject>() {

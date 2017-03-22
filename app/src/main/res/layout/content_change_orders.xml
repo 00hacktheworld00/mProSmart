@@ -126,25 +126,6 @@
                     </LinearLayout>
 
                     <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:text="Created By : "
-                            android:textStyle="bold"
-                            android:layout_marginTop="@dimen/very_small_margin"
-                            android:textColor="@color/new_grey" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_marginTop="@dimen/very_small_margin"
-                            android:textColor="@color/new_grey"
-                            android:id="@+id/created_by" />
-                    </LinearLayout> <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -164,7 +145,11 @@
                         android:layout_marginTop="@dimen/very_small_margin"
                         android:textColor="@color/new_grey"
                         android:id="@+id/date_created" />
-                </LinearLayout> <LinearLayout
+                </LinearLayout>
+
+
+
+                    <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -216,6 +201,7 @@
                 android:layout_width="@dimen/_30sdp"
                 android:layout_height="@dimen/_30sdp"
                 android:layout_margin="@dimen/small_margin"
+                android:visibility="gone"
                 android:layout_alignParentEnd="true"
                 android:background="@drawable/ic_attach_green"
                 android:layout_alignBottom="@+id/linearLayout3"/>

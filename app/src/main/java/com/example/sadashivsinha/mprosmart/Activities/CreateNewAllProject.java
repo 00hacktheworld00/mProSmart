@@ -15,25 +15,38 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.android.volley.Cache;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.sadashivsinha.mprosmart.ModelLists.MomList;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
+import com.example.sadashivsinha.mprosmart.Utils.AppController;
 import com.example.sadashivsinha.mprosmart.Utils.Communicator;
 import com.example.sadashivsinha.mprosmart.Utils.ConnectionDetector;
 import com.weiwangcn.betterspinner.library.BetterSpinner;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 
 public class CreateNewAllProject extends AppCompatActivity {
 
@@ -51,6 +64,13 @@ public class CreateNewAllProject extends AppCompatActivity {
     public static final String TAG = CreateNewAllProject.class.getSimpleName();
     Boolean isInternetPresent = false;
     PreferenceManager pm;
+    String currencyUrl;
+
+
+    JSONArray dataArray;
+    JSONObject dataObject;
+    String currencyCode;
+    String[] allCurrencies;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,15 +118,7 @@ public class CreateNewAllProject extends AppCompatActivity {
 
         spinner_currency = (BetterSpinner) findViewById(R.id.spinner_currency);
 
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(CreateNewAllProject.this,
-                android.R.layout.simple_dropdown_item_1line, new String[] {"INR", "$", "EURO"});
-        spinner_currency.setAdapter(adapter);
-
         createBtn = (Button) findViewById(R.id.createBtn);
-
-
-
 
 
         card_project_details.setOnClickListener(new View.OnClickListener() {
@@ -267,13 +279,13 @@ public class CreateNewAllProject extends AppCompatActivity {
                     pDialog.setIndeterminate(false);
                     pDialog.setCancelable(true);
                     pDialog.show();
-                    prepareItems();
+                    saveProjectOnServer();
 
 //                    class MyTask extends AsyncTask<Void, Void, Void> {
 //
 //                        @Override
 //                        protected Void doInBackground(Void... params) {
-//                            prepareItems();
+//                            saveProjectOnServer();
 //                            return null;
 //                        }
 //                    }
@@ -283,9 +295,133 @@ public class CreateNewAllProject extends AppCompatActivity {
                 }
                   }
         });
+
+
+        cd = new ConnectionDetector(getApplicationContext());
+        isInternetPresent = cd.isConnectingToInternet();
+
+        currencyUrl = pm.getString("SERVER_URL") + "/getCurrencies";
+
+        if (!isInternetPresent) {
+            // Internet connection is not present
+            // Ask user to connect to Internet
+            LinearLayout main_layout = (LinearLayout) findViewById(R.id.main_layout);
+            Crouton.cancelAllCroutons();
+            Crouton.makeText(CreateNewAllProject.this, R.string.no_internet_error, Style.ALERT, main_layout).show();
+
+            pDialog = new ProgressDialog(CreateNewAllProject.this);
+            pDialog.setMessage("Getting cache data");
+            pDialog.show();
+
+            Cache cache = AppController.getInstance().getRequestQueue().getCache();
+            Cache.Entry entry = cache.get(currencyUrl);
+            if (entry != null) {
+                //Cache data available.
+                try {
+                    String data = new String(entry.data, "UTF-8");
+                    Log.d("CACHE DATA", data);
+                    JSONObject jsonObject = new JSONObject(data);
+                    try {
+                        dataArray = jsonObject.getJSONArray("data");
+
+                        allCurrencies = new String[dataArray.length()];
+
+                        for (int i = 0; i < dataArray.length(); i++) {
+                            dataObject = dataArray.getJSONObject(i);
+                            currencyCode = dataObject.getString("currencyCode");
+                            allCurrencies[i] = currencyCode;
+
+                        }
+
+
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(CreateNewAllProject.this,
+                                android.R.layout.simple_dropdown_item_1line, allCurrencies);
+                        spinner_currency.setAdapter(adapter);
+
+                        pDialog.dismiss();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
+                } catch (UnsupportedEncodingException | JSONException e) {
+                    e.printStackTrace();
+                }
+
+                if (pDialog != null)
+                    pDialog.dismiss();
+            }
+
+            else
+            {
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(CreateNewAllProject.this,
+                        android.R.layout.simple_dropdown_item_1line, new String[] {"N.A"});
+                spinner_currency.setAdapter(adapter);
+
+                Toast.makeText(CreateNewAllProject.this, "Offline Data Not available for currencies", Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        }
+
+        else
+        {
+            // Cache data not exist.
+            callJsonArrayRequest();
+        }
     }
 
-    public void prepareItems() {
+    private void callJsonArrayRequest() {
+        // TODO Auto-generated method stub
+
+        pDialog = new ProgressDialog(CreateNewAllProject.this);
+        pDialog.setMessage("Getting server data");
+        pDialog.show();
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, currencyUrl, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try
+                        {
+//                            dataObject = response.getJSONObject(0);
+                            dataArray = response.getJSONArray("data");
+                            allCurrencies = new String[dataArray.length()];
+
+                            for (int i = 0; i < dataArray.length(); i++) {
+                                dataObject = dataArray.getJSONObject(i);
+                                currencyCode = dataObject.getString("currencyCode");
+                                allCurrencies[i] = currencyCode;
+
+                            }
+
+
+                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(CreateNewAllProject.this,
+                                    android.R.layout.simple_dropdown_item_1line, allCurrencies);
+                            spinner_currency.setAdapter(adapter);
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+//                        setData(response,false);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        });
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(jsonObjectRequest);
+        if(pDialog!=null)
+            pDialog.dismiss();
+    }
+
+
+
+
+    public void saveProjectOnServer() {
         JSONObject object = new JSONObject();
 
         try {
@@ -312,7 +448,7 @@ public class CreateNewAllProject extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(CreateNewAllProject.this);
 
-        String url = CreateNewAllProject.this.getResources().getString(R.string.server_url) + "/postProject";
+        String url = CreateNewAllProject.this.pm.getString("SERVER_URL") + "/postProject";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -349,8 +485,6 @@ public class CreateNewAllProject extends AppCompatActivity {
         if(pDialog!=null)
             pDialog.dismiss();
 
-        cd = new ConnectionDetector(getApplicationContext());
-        isInternetPresent = cd.isConnectingToInternet();
 
         if (!isInternetPresent)
         {

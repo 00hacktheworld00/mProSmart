@@ -2,7 +2,7 @@
 <RelativeLayout android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/main_content"
+    android:id="@+id/main_layout"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:fab="http://schemas.android.com/apk/res-auto">
 
@@ -61,6 +61,26 @@
                 fab:fab_size="mini"
                 fab:fab_label="Add New Vendor" />
 
+
+            <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/fab_search"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_search"
+                app:fab_colorNormal="@color/colorAccent"
+                app:fab_colorPressed="@color/colorAccentDark"
+                fab:fab_size="mini"
+                fab:fab_label="Search a Vendor" />
+
+            <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/exportBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_export"
+                app:fab_colorNormal="@color/colorAccent"
+                app:fab_colorPressed="@color/colorAccentDark"
+                fab:fab_size="mini"
+                fab:fab_label="Export data to CSV" />
         </com.github.clans.fab.FloatingActionMenu>
 
         <android.support.v7.widget.RecyclerView

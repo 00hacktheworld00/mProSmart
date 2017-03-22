@@ -35,13 +35,14 @@ public class QualityStandardCreate extends AppCompatActivity {
     JSONArray dataArray;
     JSONObject dataObject;
     String currentProjectNo, currentProjectName, currentUserId;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quality_standard_create);
 
-        final PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
         currentProjectName = pm.getString("projectName");
         currentUserId = pm.getString("userId");
@@ -107,7 +108,7 @@ public class QualityStandardCreate extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(QualityStandardCreate.this);
 
-        String url = QualityStandardCreate.this.getResources().getString(R.string.server_url) + "/postQualityStandard";
+        String url = QualityStandardCreate.this.pm.getString("SERVER_URL") + "/postQualityStandard";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {

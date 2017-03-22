@@ -28,6 +28,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.ModelLists.SubcontractorList;
 import com.example.sadashivsinha.mprosmart.R;
+import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
 import com.example.sadashivsinha.mprosmart.Utils.DatePickerFragment;
 
 import org.json.JSONException;
@@ -48,6 +49,7 @@ public class ResourceTimesheetAdapter extends RecyclerView.Adapter<ResourceTimes
     public List<SubcontractorList> subcontractorList;
     TextView textViewDate;
     Context mContext;
+    PreferenceManager pm;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView text_line_no;
@@ -61,6 +63,9 @@ public class ResourceTimesheetAdapter extends RecyclerView.Adapter<ResourceTimes
 
         public MyViewHolder(final View view) {
             super(view);
+
+            pm = new PreferenceManager(view.getContext());
+
             text_line_no = (TextView) view.findViewById(R.id.text_line_no);
             text_wbs = (EditText) view.findViewById(R.id.text_wbs);
             text_activities = (EditText) view.findViewById(R.id.text_activities);
@@ -99,7 +104,7 @@ public class ResourceTimesheetAdapter extends RecyclerView.Adapter<ResourceTimes
 
                             @Override
                             protected Void doInBackground(Void... params) {
-                                prepareItems();
+                                savingData();
                                 return null;
                             }
                         }
@@ -123,25 +128,29 @@ public class ResourceTimesheetAdapter extends RecyclerView.Adapter<ResourceTimes
                     }
                 }
 
-                public void prepareItems()
+                public void savingData()
                 {
                     JSONObject object = new JSONObject();
 
                     try {
-                        object.put("name",text_res_name.getText().toString());
-                        object.put("date",text_date.getText().toString());
+
+                        Date tradeDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).parse(text_date.getText().toString());
+                        String dateToSend = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).format(tradeDate);
+
+                        object.put("name","");
+                        object.put("date",dateToSend);
                         object.put("totalHours",text_total_hours.getText().toString());
 
                         Log.d("resource object", object.toString());
 
-                    } catch (JSONException e) {
+                    } catch (JSONException | ParseException e) {
                         e.printStackTrace();
                     }
 
                     RequestQueue requestQueue = Volley.newRequestQueue(view.getContext());
 
                     lineNo = text_line_no.getText().toString();
-                    String url = view.getContext().getResources().getString(R.string.server_url) + "/putResourceLineItem?resourceLineItemsId="+lineNo;
+                    String url =pm.getString("SERVER_URL")  + "/putResourceLineItem?resourceLineItemsId=\""+lineNo + "\"";
 
                     JsonObjectRequest jor = new JsonObjectRequest(Request.Method.PUT, url, object,
                             new Response.Listener<JSONObject>() {
@@ -178,7 +187,7 @@ public class ResourceTimesheetAdapter extends RecyclerView.Adapter<ResourceTimes
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.card_subcontractor, parent, false);
+                .inflate(R.layout.card_resource_timesheet, parent, false);
         return new MyViewHolder(itemView);
     }
 

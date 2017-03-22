@@ -40,13 +40,14 @@ public class NewPurchaseReceipts extends NewActivity {
     JSONArray dataArray;
     JSONObject dataObject;
     String currentProjectNo, currentPoNumber, vendorId, itemNames, itemId, textQuantity;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_purchase_receipts);
 
-        PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
         currentPoNumber = pm.getString("poNumber");
 
@@ -140,7 +141,7 @@ public class NewPurchaseReceipts extends NewActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getVendors";
+        String url = pm.getString("SERVER_URL") + "/getVendors";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -189,7 +190,7 @@ public class NewPurchaseReceipts extends NewActivity {
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getPurchaseLineItems?purchaseOrderId=\""+currentPoNumber+"\"";
+        String url = pm.getString("SERVER_URL") + "/getPurchaseLineItems?purchaseOrderId=\""+currentPoNumber+"\"";
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -277,7 +278,7 @@ public class NewPurchaseReceipts extends NewActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(NewPurchaseReceipts.this);
 
-        String url = NewPurchaseReceipts.this.getResources().getString(R.string.server_url) + "/postPurchaseReceipts";
+        String url = NewPurchaseReceipts.this.pm.getString("SERVER_URL") + "/postPurchaseReceipts";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {

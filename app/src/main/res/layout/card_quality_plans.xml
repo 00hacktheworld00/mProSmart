@@ -247,6 +247,34 @@
                                         android:textSize="15sp"
                                         android:enabled="false" />
 
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content">
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="match_parent"
+                                            android:layout_marginRight="@dimen/small_margin"
+                                            android:text="Attachments : "
+                                            android:gravity="center" />
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="match_parent"
+                                            android:text="0"
+                                            android:id="@+id/no_of_attachments"
+                                            android:gravity="center" />
+
+                                        <ImageButton
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:layout_gravity="center"
+                                            android:layout_marginLeft="@dimen/small_margin"
+                                            android:background="@drawable/add_new_button"
+                                            android:id="@+id/attachBtn" />
+                                    </LinearLayout>
+
+
                                 </LinearLayout>
                             </RelativeLayout>
                         </RelativeLayout>

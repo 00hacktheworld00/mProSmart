@@ -18,6 +18,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.R;
+import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,11 +27,15 @@ public class CustomerSupport extends AppCompatActivity {
 
     ProgressDialog pDialog;
     EditText text_acc_no, text_id, text_desc, text_type;
+    PreferenceManager pm;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_customer_support);
         Button send_btn;
+
+        pm = new PreferenceManager(getApplicationContext());
 
         text_acc_no = (EditText) findViewById(R.id.text_acc_no);
         text_id = (EditText) findViewById(R.id.text_id);
@@ -76,14 +81,14 @@ public class CustomerSupport extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(CustomerSupport.this);
 
-        String url = CustomerSupport.this.getResources().getString(R.string.server_url) + "/postCustomerSupport";
+        String url = CustomerSupport.this.pm.getString("SERVER_URL") + "/postCustomerSupport";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            Toast.makeText(CustomerSupport.this, response.getString("msg").toString(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(CustomerSupport.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
                             pDialog.dismiss();
                         } catch (JSONException e) {
                             e.printStackTrace();

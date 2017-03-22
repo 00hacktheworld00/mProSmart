@@ -2,7 +2,6 @@ package com.example.sadashivsinha.mprosmart.Activities;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -12,11 +11,13 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Cache;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -25,6 +26,9 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
+import com.example.sadashivsinha.mprosmart.Utils.AppController;
+import com.example.sadashivsinha.mprosmart.Utils.Communicator;
+import com.example.sadashivsinha.mprosmart.Utils.ConnectionDetector;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 import com.weiwangcn.betterspinner.library.BetterSpinner;
 
@@ -32,7 +36,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
+
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 
 public class PunchItemCreate extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
 
@@ -52,16 +60,23 @@ public class PunchItemCreate extends AppCompatActivity implements DatePickerDial
     JSONObject dataObject;
     BetterSpinner spinner_status;
     Button createBtn;
+    PreferenceManager pm;
+    ConnectionDetector cd;
+    public static final String TAG = PunchItemCreate.class.getSimpleName();
+    Boolean isInternetPresent = false;
+    String item_url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_punch_item_create);
 
-
-        final PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
         currentPunchListNo = pm.getString("punchListNo");
         currentProjectNo = pm.getString("projectId");
+
+        cd = new ConnectionDetector(getApplicationContext());
+        isInternetPresent = cd.isConnectingToInternet();
 
         text_location = (EditText) findViewById(R.id.text_location);
         text_item_desc = (TextView) findViewById(R.id.text_item_desc);
@@ -81,6 +96,92 @@ public class PunchItemCreate extends AppCompatActivity implements DatePickerDial
 
         btn_date_complete = (TextView) findViewById(R.id.btn_date_complete);
         btn_date_due = (TextView) findViewById(R.id.btn_date_due);
+
+        item_url = pm.getString("SERVER_URL") + "/getItems?projectId='"+currentProjectNo+"'";
+
+        if (!isInternetPresent) {
+            // Internet connection is not present
+            // Ask user to connect to Internet
+            LinearLayout main_layout = (LinearLayout) findViewById(R.id.main_layout);
+            Crouton.cancelAllCroutons();
+            Crouton.makeText(PunchItemCreate.this, R.string.no_internet_error, Style.ALERT, main_layout).show();
+
+            pDialog = new ProgressDialog(PunchItemCreate.this);
+            pDialog.setMessage("Getting cache data");
+            pDialog.show();
+
+            Cache cache = AppController.getInstance().getRequestQueue().getCache();
+            Cache.Entry entry = cache.get(item_url);
+            if (entry != null) {
+                //Cache data available.
+                try {
+                    String data = new String(entry.data, "UTF-8");
+                    Log.d("CACHE DATA", data);
+                    JSONObject jsonObject = new JSONObject(data);
+                    try {
+                        dataArray = jsonObject.getJSONArray("data");
+
+                        itemIdArray = new String[dataArray.length()+1];
+                        itemDescArray = new String[dataArray.length()+1];
+                        itemNameArray = new String[dataArray.length()+1];
+
+                            itemIdArray[0]="Select Item";
+                            itemDescArray[0]="Select Item to view description";
+                            itemNameArray[0]="Select Item";
+
+                            for(int i=0; i<dataArray.length();i++)
+                            {
+                                dataObject = dataArray.getJSONObject(i);
+                                itemId = dataObject.getString("itemId");
+                                itemDesc = dataObject.getString("itemDescription");
+                                itemName = dataObject.getString("itemName");
+
+                                itemIdArray[i+1]=itemId;
+                                itemDescArray[i+1]=itemDesc;
+                                itemNameArray[i+1]=itemName;
+                            }
+                            if(dataArray.length()==0)
+                            {
+                                ArrayAdapter<String> itemAdapter = new ArrayAdapter<String>(PunchItemCreate.this,
+                                        android.R.layout.simple_dropdown_item_1line,new String[] {"No Data"});
+                                spinner_item.setAdapter(itemAdapter);
+                            }
+                            else
+                            {
+                                ArrayAdapter<String> itemAdapter = new ArrayAdapter<String>(PunchItemCreate.this,
+                                        android.R.layout.simple_dropdown_item_1line,itemNameArray);
+                                spinner_item.setAdapter(itemAdapter);
+                            }
+
+                        ArrayAdapter<String> itemAdapter;
+
+                        if (itemIdArray == null) {
+                            itemAdapter = new ArrayAdapter<String>(PunchItemCreate.this,
+                                    android.R.layout.simple_dropdown_item_1line, new String[]{"No Items Found"});
+                        } else {
+                            itemAdapter = new ArrayAdapter<String>(PunchItemCreate.this,
+                                    android.R.layout.simple_dropdown_item_1line, itemIdArray);
+                        }
+                        spinner_item.setAdapter(itemAdapter);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
+                } catch (UnsupportedEncodingException | JSONException e) {
+                    e.printStackTrace();
+                }
+                if (pDialog != null)
+                    pDialog.dismiss();
+            } else {
+                Toast.makeText(PunchItemCreate.this, "Offline Data Not available for Items", Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        }
+
+        else
+        {
+            prepareItemList();
+        }
 
         btn_date_complete.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -125,39 +226,24 @@ public class PunchItemCreate extends AppCompatActivity implements DatePickerDial
 
         createBtn = (Button) findViewById(R.id.createBtn);
 
-
-        pDialog = new ProgressDialog(PunchItemCreate.this);
-        pDialog.setMessage("Preparing Items...");
-        pDialog.setIndeterminate(false);
-        pDialog.setCancelable(true);
-        pDialog.show();
-
-        class MyTask extends AsyncTask<Void, Void, Void>
-        {
-
-            @Override
-            protected Void doInBackground(Void... params)
-            {
-                prepareItemList();
-                return null;
-            }
-        }
-
-        new MyTask().execute();
-
         spinner_item.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-                if(itemDescArray[position].isEmpty())
+                if(itemIdArray.length!=1)
                 {
-                    text_item_desc.setText("No Description");
+                    if(itemDescArray[position].isEmpty())
+                    {
+                        text_item_desc.setText("No Description");
+                    }
+                    else
+                    {
+                        text_item_desc.setText(itemDescArray[position]);
+                    }
+                    currentItemId = itemIdArray[position];
+
                 }
-                else
-                {
-                    text_item_desc.setText(itemDescArray[position]);
-                }
-                currentItemId = itemIdArray[position];
+
             }
 
             @Override
@@ -173,6 +259,10 @@ public class PunchItemCreate extends AppCompatActivity implements DatePickerDial
                 if(text_location.getText().toString().isEmpty())
                 {
                     text_location.setError("Field cannot be empty");
+                }
+                else if (spinner_item.getSelectedItem().toString().equals("No Data"))
+                {
+                    Toast.makeText(PunchItemCreate.this, "No Items available in this project", Toast.LENGTH_SHORT).show();
                 }
                 else if(text_item_desc.getText().toString().isEmpty())
                 {
@@ -212,32 +302,21 @@ public class PunchItemCreate extends AppCompatActivity implements DatePickerDial
                 }
                 else
                 {
-                    pDialog = new ProgressDialog(PunchItemCreate.this);
-                    pDialog.setMessage("Sending Data ...");
-                    pDialog.setIndeterminate(false);
-                    pDialog.setCancelable(true);
-                    pDialog.show();
-
-                    class MyTask extends AsyncTask<Void, Void, Void> {
-
-                        @Override
-                        protected Void doInBackground(Void... params) {
-                            saveData();
-                            return null;
-                        }
-                    }
-                    new MyTask().execute();
+                    saveData();
                 }
             }
         });
     }
     public void prepareItemList()
     {
+        pDialog = new ProgressDialog(PunchItemCreate.this);
+        pDialog.setMessage("Getting server data");
+        pDialog.show();
+
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getItems?projectId='"+currentProjectNo+"'";
 
-        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
+        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, item_url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -249,6 +328,16 @@ public class PunchItemCreate extends AppCompatActivity implements DatePickerDial
                             if(type.equals("ERROR"))
                             {
                                 Toast.makeText(PunchItemCreate.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
+                            }
+
+                            if(type.equals("WARN"))
+                            {
+                                itemIdArray = new String[1];
+                                itemIdArray[0]="No Items";
+                                ArrayAdapter<String> adapter = new ArrayAdapter<String>(PunchItemCreate.this,
+                                        android.R.layout.simple_dropdown_item_1line,itemIdArray);
+                                spinner_item.setAdapter(adapter);
+                                Log.d("Punch List", "ARRAY EMPTY");
                             }
 
                             if(type.equals("INFO"))
@@ -273,10 +362,18 @@ public class PunchItemCreate extends AppCompatActivity implements DatePickerDial
                                     itemDescArray[i+1]=itemDesc;
                                     itemNameArray[i+1]=itemName;
                                 }
-
-                                ArrayAdapter<String> adapter = new ArrayAdapter<String>(PunchItemCreate.this,
-                                        android.R.layout.simple_dropdown_item_1line,itemNameArray);
-                                spinner_item.setAdapter(adapter);
+                                if(dataArray.length()==0)
+                                {
+                                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(PunchItemCreate.this,
+                                            android.R.layout.simple_dropdown_item_1line,new String[] {"No Data"});
+                                    spinner_item.setAdapter(adapter);
+                                }
+                                else
+                                {
+                                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(PunchItemCreate.this,
+                                            android.R.layout.simple_dropdown_item_1line,itemNameArray);
+                                    spinner_item.setAdapter(adapter);
+                                }
                             }
 
                             pDialog.dismiss();
@@ -330,15 +427,18 @@ public class PunchItemCreate extends AppCompatActivity implements DatePickerDial
 
         RequestQueue requestQueue = Volley.newRequestQueue(PunchItemCreate.this);
 
-        String url = PunchItemCreate.this.getResources().getString(R.string.server_url) + "/postPunchListLines";
+        String url = PunchItemCreate.this.pm.getString("SERVER_URL") + "/postPunchListLines";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            Toast.makeText(PunchItemCreate.this, response.getString("msg").toString(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(PunchItemCreate.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
                             pDialog.dismiss();
+
+                            Intent intent = new Intent(PunchItemCreate.this, PunchListActivity.class);
+                            startActivity(intent);
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -354,9 +454,40 @@ public class PunchItemCreate extends AppCompatActivity implements DatePickerDial
                     }
                 }
         );
-        requestQueue.add(jor);
-        Intent intent = new Intent(PunchItemCreate.this,PunchListActivity.class);
-        startActivity(intent);
+
+        cd = new ConnectionDetector(getApplicationContext());
+        isInternetPresent = cd.isConnectingToInternet();
+
+        if (!isInternetPresent)
+        {
+            // Internet connection is not present
+
+            Communicator communicator = new Communicator();
+            Log.d("object", object.toString());
+
+            Boolean createPunchListItem = pm.getBoolean("createPunchListItem");
+
+            if(createPunchListItem)
+            {
+                Toast.makeText(PunchItemCreate.this, "Already a Punch List Item creation is in progress. Please try after sometime.", Toast.LENGTH_LONG).show();
+            }
+            else
+            {
+                Toast.makeText(PunchItemCreate.this, "Internet not currently available. Punch List Item will automatically get created on internet connection.", Toast.LENGTH_SHORT).show();
+
+                pm.putString("objectPunchListItem", object.toString());
+                pm.putString("urlPunchListItem", url);
+                pm.putString("toastMessagePunchListItem", "Punch List Item Created");
+                pm.putBoolean("createPunchListItem", true);
+
+                Intent intent = new Intent(PunchItemCreate.this, PunchListActivity.class);
+                startActivity(intent);
+            }
+        }
+        else
+        {
+            requestQueue.add(jor);
+        }
     }
 
     @Override

@@ -38,6 +38,7 @@ import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.ModelLists.PurchaseReceiptCreateNewList;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
+import com.example.sadashivsinha.mprosmart.Utils.Communicator;
 import com.example.sadashivsinha.mprosmart.Utils.ConnectionDetector;
 import com.example.sadashivsinha.mprosmart.Utils.DatePickerFragment;
 import com.example.sadashivsinha.mprosmart.font.HelveticaBold;
@@ -48,25 +49,29 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class SelectPurchaseRequisitionItems extends AppCompatActivity {
 
     String currentPoNo, purchaseLineItemsId, quantity, currentProjectId, itemId;
     ProgressDialog pDialog;
-    String[] itemIdArray, quantityArray;
+    String[] itemIdArray, quantityArray, neededByDateArray;
     JSONArray dataArray;
     JSONObject dataObject, poJsonObject, itemsJsonObject;
     Boolean isInternetPresent = false;
     JSONArray jsonArray;
     Button createBtn;
-    String currentPr, itemDescription, itemName, uomId;
+    String currentPr, itemDescription, itemName, uomId, needByDate;
     HelveticaBold textViewDate;
     String newDate, currentVendorId;
     PreferenceManager pm;
+    float sumTotalAmount=0;
 
     private List<PurchaseReceiptCreateNewList> purchaseList = new ArrayList<>();
     private RecyclerView recyclerView;
@@ -158,9 +163,25 @@ public class SelectPurchaseRequisitionItems extends AppCompatActivity {
 
                     Log.d("JSON ARRAY OF ITEMS", jsonArray.toString());
 
-                        sendJsonObject(jsonArray);
 
 
+                    pDialog = new ProgressDialog(SelectPurchaseRequisitionItems.this);
+                    pDialog.setMessage("Getting Data ...");
+                    pDialog.setIndeterminate(false);
+                    pDialog.setCancelable(true);
+                    pDialog.show();
+
+                    class MyTask extends AsyncTask<Void, Void, Void> {
+
+                        @Override
+                        protected Void doInBackground(Void... params) {
+                            sendJsonObject(jsonArray);
+                            return null;
+                        }
+
+                    }
+
+                    new MyTask().execute();
                 }
             }
         });
@@ -170,7 +191,7 @@ public class SelectPurchaseRequisitionItems extends AppCompatActivity {
     {
         RequestQueue requestQueue = Volley.newRequestQueue(SelectPurchaseRequisitionItems.this);
 
-        String url = getResources().getString(R.string.server_url) + "/postPurchaseLineItems";
+        String url = pm.getString("SERVER_URL") + "/postPurchaseLineItems";
 
         JSONObject tempJsonObj = new JSONObject();
         Boolean moveToNextActivity = false;
@@ -207,14 +228,6 @@ public class SelectPurchaseRequisitionItems extends AppCompatActivity {
                                 Toast.makeText(SelectPurchaseRequisitionItems.this, "Purchase Order Line Items have been added ", Toast.LENGTH_SHORT).show();
                                 if(moveToNext)
                                 {
-
-                                    Intent intent = new Intent(SelectPurchaseRequisitionItems.this, PurchaseOrderLineItems.class);
-                                    pm.putString("poNumber",currentPoNo);
-                                    pm.putString("createdOn",currentDate);
-                                    pm.putString("vendorCode",currentVendorId);
-                                    startActivity(intent);
-
-
                                     //update that pr is converted to po with line items
 
 
@@ -249,10 +262,6 @@ public class SelectPurchaseRequisitionItems extends AppCompatActivity {
     {
         JSONObject object = new JSONObject();
 
-        Calendar c = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String currentDate = sdf.format(c.getTime());
-
         try {
             object.put("isPo", "1");
 
@@ -262,7 +271,7 @@ public class SelectPurchaseRequisitionItems extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(context);
 
-        String url = context.getResources().getString(R.string.server_url) + "/putIsPo?id="+ purReqId;
+        String url = pm.getString("SERVER_URL") + "/putIsPo?id="+ purReqId;
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.PUT, url, object,
                 new Response.Listener<JSONObject>() {
@@ -271,7 +280,7 @@ public class SelectPurchaseRequisitionItems extends AppCompatActivity {
                         try {
                             if(response.getString("msg").equals("success"))
                             {
-
+                                updatePoTotalAmount(sumTotalAmount);
                             }
 
                         } catch (JSONException e) {
@@ -291,12 +300,96 @@ public class SelectPurchaseRequisitionItems extends AppCompatActivity {
     }
 
 
+    public void updatePoTotalAmount(float sumTotalAmount)
+    {
+        pm.putString("poNumber",currentPoNo);
+        pm.putString("createdOn",currentDate);
+        pm.putString("vendorCode",currentVendorId);
+        pm.putString("totalAmount", String.valueOf(sumTotalAmount));
+
+        JSONObject object = new JSONObject();
+
+        try {
+            object.put("totalAmount", sumTotalAmount);
+
+            Log.d("tag", String.valueOf(object));
+
+        }
+        catch (JSONException e)
+        {
+            e.printStackTrace();
+        }
+
+        RequestQueue requestQueue = Volley.newRequestQueue(SelectPurchaseRequisitionItems.this);
+
+        String url = SelectPurchaseRequisitionItems.this.pm.getString("SERVER_URL") + "/putPurchaseOrderTotal?purchaseOrderId=\""+ currentPoNo + "\"";
+
+        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.PUT, url, object,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            if(response.getString("msg").equals("success"))
+                            {
+                                pDialog.dismiss();
+                                Intent intent = new Intent(SelectPurchaseRequisitionItems.this, PurchaseOrderLineItems.class);
+                                startActivity(intent);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("Volley", "Error");
+                        Toast.makeText(SelectPurchaseRequisitionItems.this, error.toString(), Toast.LENGTH_SHORT).show();
+
+                    }
+                }
+        );
+        if (!isInternetPresent)
+        {
+            // Internet connection is not present
+
+            Communicator communicator = new Communicator();
+            Log.d("object budget :", object.toString());
+
+            Boolean createPoPendingUpdateBudget = pm.getBoolean("createPoPendingUpdateBudget");
+
+            if(createPoPendingUpdateBudget)
+            {
+                Toast.makeText(SelectPurchaseRequisitionItems.this, "Already a PO Line Item creation is in progress. Please try after sometime.", Toast.LENGTH_LONG).show();
+            }
+            else
+            {
+                Toast.makeText(SelectPurchaseRequisitionItems.this, "Internet not currently available. PO Line Item will automatically get created on internet connection.", Toast.LENGTH_SHORT).show();
+
+                pm.putString("objectPOUpdateBudget", object.toString());
+                pm.putString("urlPOUpdateBudget", url);
+                pm.putString("toastMessageUpdateBudget", "PO Budget Updated on PO Line Item creation");
+                pm.putBoolean("createPoPendingUpdateBudget", true);
+                pDialog.dismiss();
+
+                Intent intent = new Intent(SelectPurchaseRequisitionItems.this, PurchaseOrderLineItems.class);
+                startActivity(intent);
+            }
+        }
+        else
+        {
+            requestQueue.add(jor);
+        }
+
+        if(pDialog!=null)
+            pDialog.dismiss();
+    }
 
     public void prepareLineItems()
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getItems?projectId='"+currentProjectId+"'";
+        String url = pm.getString("SERVER_URL") + "/getItems?projectId='"+currentProjectId+"'";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -333,7 +426,7 @@ public class SelectPurchaseRequisitionItems extends AppCompatActivity {
                                             if(itemId.equals(itemIdArray[j]))
                                             {
                                                 items = new PurchaseReceiptCreateNewList(itemId, itemName, itemDescription,
-                                                        uomId, quantityArray[j]);
+                                                        uomId, quantityArray[j], neededByDateArray[j], 0);
                                                 purchaseList.add(items);
 
                                                 purchaseAdapter.notifyDataSetChanged();
@@ -466,8 +559,12 @@ public class SelectPurchaseRequisitionItems extends AppCompatActivity {
                                 jsonObject.put("uomId", uom_id.getText().toString());
                                 jsonObject.put("unitCost", text_unit_cost.getText().toString().isEmpty()? "0" : text_unit_cost.getText().toString());
                                 jsonObject.put("totalAmount", text_total_cost.getText().toString().isEmpty()? "0" : text_total_cost.getText().toString());
-                                jsonObject.put("needByDate", need_by_date.getText().toString());
                                 jsonObject.put("purchaseOrderId", currentPoNo);
+
+                                Date tradeDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).parse(need_by_date.getText().toString());
+                                needByDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).format(tradeDate);
+
+                                jsonObject.put("needByDate", needByDate);
 
                                 jsonArray.put(jsonObject);
 
@@ -477,6 +574,12 @@ public class SelectPurchaseRequisitionItems extends AppCompatActivity {
 
                                 need_by_date.setEnabled(false);
                                 need_by_date.setTextColor(getResources().getColor(R.color.new_grey));
+
+                                String amountOfItem = text_total_cost.getText().toString().isEmpty()? "0" : text_total_cost.getText().toString();
+                                sumTotalAmount = sumTotalAmount + Float.parseFloat(amountOfItem);
+
+                                Log.d("ADDED ITEM AMOUNT", amountOfItem);
+                                Log.d("CURRENT TOTAL AMOUNT", String.valueOf(sumTotalAmount));
 
                             }
 
@@ -491,6 +594,13 @@ public class SelectPurchaseRequisitionItems extends AppCompatActivity {
 
                                     if(item_name.getText().toString().equals(checkForRemovalObject.getString("itemName")))
                                     {
+
+                                        String amountOfItem = checkForRemovalObject.getString("totalAmount").isEmpty()? "0" : checkForRemovalObject.getString("totalAmount");
+                                        sumTotalAmount = sumTotalAmount - Float.parseFloat(amountOfItem);
+
+                                        Log.d("REMOVED ITEM AMOUNT", amountOfItem);
+                                        Log.d("CURRENT TOTAL AMOUNT", String.valueOf(sumTotalAmount));
+
                                         jsonArray.remove(i);
                                         break;
                                     }
@@ -507,6 +617,8 @@ public class SelectPurchaseRequisitionItems extends AppCompatActivity {
 
                         catch (JSONException e)
                         {
+                            e.printStackTrace();
+                        } catch (ParseException e) {
                             e.printStackTrace();
                         }
                     }
@@ -535,6 +647,7 @@ public class SelectPurchaseRequisitionItems extends AppCompatActivity {
             holder.uom_id.setText(String.valueOf(items.getUom_id()));
             holder.text_unit_cost.setText("0");
             holder.item_desc.setText(items.getItem_desc());
+            holder.need_by_date.setText(items.getNeedByDate());
 
             int newQuantityVal = 0, unitCostVal = 0;
 
@@ -579,8 +692,8 @@ public class SelectPurchaseRequisitionItems extends AppCompatActivity {
         public void onDateSet(DatePicker view, int year, int monthOfYear,
                               int dayOfMonth) {
 
-            newDate = String.valueOf(year) + "-" + String.valueOf(monthOfYear+1)
-                    + "-" + String.valueOf(dayOfMonth);
+            newDate = String.valueOf(dayOfMonth) + "-" + String.valueOf(monthOfYear+1)
+                    + "-" + String.valueOf(year);
 
             textViewDate.setText(newDate);
         }
@@ -590,7 +703,7 @@ public class SelectPurchaseRequisitionItems extends AppCompatActivity {
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getPurchaseRequisitionItem?purchaseRequisitionId=\""+currentPr+"\"";
+        String url = pm.getString("SERVER_URL") + "/getPurchaseRequisitionItem?purchaseRequisitionId=\""+currentPr+"\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -606,15 +719,21 @@ public class SelectPurchaseRequisitionItems extends AppCompatActivity {
                                 dataArray = response.getJSONArray("data");
                                 itemIdArray = new String[dataArray.length()];
                                 quantityArray = new String[dataArray.length()];
+                                neededByDateArray = new String[dataArray.length()];
 
                                 for(int i=0; i<dataArray.length();i++)
                                 {
                                     dataObject = dataArray.getJSONObject(i);
                                     itemId = dataObject.getString("itemId");
                                     quantity = dataObject.getString("quantity");
+                                    needByDate = dataObject.getString("neededBy");
+
+                                    Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(needByDate);
+                                    needByDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
 
                                     itemIdArray[i] = itemId;
                                     quantityArray[i] = quantity;
+                                    neededByDateArray[i] = needByDate;
                                 }
 
                                 prepareLineItems();
@@ -641,7 +760,9 @@ public class SelectPurchaseRequisitionItems extends AppCompatActivity {
                             pDialog.dismiss();
 
 
-                        }catch(JSONException e){e.printStackTrace();;}
+                        }catch(JSONException e){e.printStackTrace();;} catch (ParseException e) {
+                            e.printStackTrace();
+                        }
                     }
                 },
                 new Response.ErrorListener() {

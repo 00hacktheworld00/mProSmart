@@ -99,7 +99,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="Item Description"
                                 android:textColor="@color/colorPrimary"
-                                android:id="@+id/item_desc_label" />
+                                android:id="@+id/text_desc_label" />
 
                             <TextView
                                 android:layout_width="match_parent"

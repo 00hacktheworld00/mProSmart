@@ -52,6 +52,7 @@ public class BudgetApproval extends AppCompatActivity {
     String currentBudgetId, budgetApprovalLineId, currencyCode, itemId, itemDescription, quantity, uomId, ammount, createdBy, dateCreated, budgetApprovalId;
     String contractRefNo, projectId, amount, description;
     TextView budget_id, project_id, project_name, date, desc, created_by;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +85,7 @@ public class BudgetApproval extends AppCompatActivity {
 
 
 
-        PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
         currentProjectName = pm.getString("projectName");
         currentCreatedBy = pm.getString("userId");
@@ -184,7 +185,7 @@ public class BudgetApproval extends AppCompatActivity {
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getBudgetApprovalLine?budgetApprovalId=\""+currentApproval+"\"";
+        String url = pm.getString("SERVER_URL") + "/getBudgetApprovalLine?budgetApprovalId=\""+currentApproval+"\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -248,7 +249,6 @@ public class BudgetApproval extends AppCompatActivity {
 //    {
 //        RequestQueue requestQueue = Volley.newRequestQueue(this);
 //
-//        String url = getResources().getString(R.string.server_url) + "/getBudgetApproval?projectId=\""+currentProjectNo+"\"";
 //
 //        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
 //                new Response.Listener<JSONObject>() {

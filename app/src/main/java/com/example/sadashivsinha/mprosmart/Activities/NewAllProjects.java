@@ -92,7 +92,7 @@ public class NewAllProjects extends NewActivity {
         currentCompanyId = pm.getString("companyId");
         currentUserId = pm.getString("userId");
 
-        url = getResources().getString(R.string.server_url) + "/getProjects?companyId=\""+currentCompanyId+"\"";
+        url = pm.getString("SERVER_URL") + "/getProjects?companyId=\""+currentCompanyId+"\"";
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -436,8 +436,10 @@ public class NewAllProjects extends NewActivity {
                                     Toast.makeText(NewAllProjects.this, "Search didn't match any data", Toast.LENGTH_SHORT).show();
                                 }
                             }
+                            pDialog.dismiss();
                         } catch (ParseException | JSONException e) {
                             e.printStackTrace();
+                            pDialog.dismiss();
                         }
 //                        setData(response,false);
                     }
@@ -452,8 +454,6 @@ public class NewAllProjects extends NewActivity {
         });
         // Adding request to request queue
         AppController.getInstance().addToRequestQueue(jsonObjectRequest);
-        if(pDialog!=null)
-            pDialog.dismiss();
     }
 
     @Override

@@ -41,13 +41,14 @@ public class InventoryNew extends AppCompatActivity implements DatePickerDialog.
     String[] itemArray, itemDescArray;
     String whichDate;
     Button createBtn;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_inventory_new);
 
-        PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
 
         spinner_item = (Spinner) findViewById(R.id.spinner_item);
@@ -133,7 +134,7 @@ public class InventoryNew extends AppCompatActivity implements DatePickerDialog.
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getItems?projectId='"+currentProjectNo+"'";
+        String url = pm.getString("SERVER_URL") + "/getItems?projectId='"+currentProjectNo+"'";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {

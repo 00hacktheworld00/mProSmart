@@ -47,7 +47,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         RobotoTextView Name;
 //        RobotoTextView list_text1, list_text2, list_text3, list_text03;
         RobotoTextView email;
-        LinearLayout all_projects, change_password, dashboard, settings, my_profile, cus_support;
+        LinearLayout all_projects, change_password, settings, my_profile, cus_support;
 
         RecyclerView recyclerview;
 
@@ -61,7 +61,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
                 all_projects = (LinearLayout) itemView.findViewById(R.id.all_projects);
                 change_password = (LinearLayout) itemView.findViewById(R.id.change_password);
-                dashboard = (LinearLayout) itemView.findViewById(R.id.dashboard);
                 settings = (LinearLayout) itemView.findViewById(R.id.settings);
                 my_profile = (LinearLayout) itemView.findViewById(R.id.my_profile);
                 cus_support = (LinearLayout) itemView.findViewById(R.id.cus_support);

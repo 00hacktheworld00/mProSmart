@@ -61,6 +61,25 @@
                 fab:fab_size="mini"
                 fab:fab_label="Add New Resource" />
 
+            <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/fab_search"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_search"
+                app:fab_colorNormal="@color/colorAccent"
+                app:fab_colorPressed="@color/colorAccentDark"
+                fab:fab_size="mini"
+                fab:fab_label="Search an item" />
+
+            <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/fab_export"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_search"
+                app:fab_colorNormal="@color/colorAccent"
+                app:fab_colorPressed="@color/colorAccentDark"
+                fab:fab_size="mini"
+                fab:fab_label="Export CSV" />
         </com.github.clans.fab.FloatingActionMenu>
 
         <android.support.v7.widget.RecyclerView

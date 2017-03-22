@@ -58,7 +58,7 @@
                     android:orientation="vertical"
                     android:padding="@dimen/activity_vertical_margin">
 
-                    <EditText
+                    <com.weiwangcn.betterspinner.library.BetterSpinner
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:padding="10dp"
@@ -70,7 +70,7 @@
                         android:background="@drawable/edittext_states_red"
                         android:layout_marginBottom="@dimen/activity_vertical_margin"
                         android:textSize="15sp"
-                        android:id="@+id/text_department"
+                        android:id="@+id/spinner_department"
                         android:inputType="textCapSentences" />
                 </LinearLayout>
 

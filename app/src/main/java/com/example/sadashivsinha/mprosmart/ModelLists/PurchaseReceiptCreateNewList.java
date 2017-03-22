@@ -5,7 +5,7 @@ package com.example.sadashivsinha.mprosmart.ModelLists;
  */
 public class PurchaseReceiptCreateNewList {
     String item_id, new_quantity, purchaseLineItemsId, purchaseReceiptItemsId, quantity, poQuantity, unit_cost,
-            acceptedQuantity, rejectedQuantity, item_name, item_desc, uom_id;
+            acceptedQuantity, rejectedQuantity, item_name, item_desc, uom_id, needByDate, purId;
 
     public PurchaseReceiptCreateNewList(int val, String item_id, String quantity, String unit_cost) {
         this.item_id = item_id;
@@ -28,12 +28,32 @@ public class PurchaseReceiptCreateNewList {
         this.unit_cost = unit_cost;
     }
 
-    public PurchaseReceiptCreateNewList(String item_id, String item_name, String item_desc, String uom_id, String quantity) {
+    public PurchaseReceiptCreateNewList(String item_id, String item_name, String item_desc, String uom_id, String quantity,
+                                        String needByDate, int a) {
         this.item_id = item_id;
         this.item_name = item_name;
         this.item_desc = item_desc;
         this.uom_id = uom_id;
         this.quantity = quantity;
+        this.needByDate = needByDate;
+    }
+
+    public PurchaseReceiptCreateNewList(String purId, String purchaseReceiptItemsId, String quantity, String poQuantity, String unit_cost, String acceptedQuantity, String rejectedQuantity) {
+        this.purchaseReceiptItemsId = purchaseReceiptItemsId;
+        this.quantity = quantity;
+        this.poQuantity = poQuantity;
+        this.unit_cost = unit_cost;
+        this.acceptedQuantity = acceptedQuantity;
+        this.rejectedQuantity = rejectedQuantity;
+        this.purId = purId;
+    }
+
+    public String getPurId() {
+        return purId;
+    }
+
+    public String getNeedByDate() {
+        return needByDate;
     }
 
     public String getItem_name() {

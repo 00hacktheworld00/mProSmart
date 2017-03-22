@@ -72,122 +72,50 @@
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
                                         android:textSize="25sp"
-                                        android:text="Create new Daily Progress"
+                                        android:text="View Daily Field Progress"
                                         android:textColor="@color/colorPrimary"
                                         android:layout_marginBottom="50dp"
                                         android:gravity="center"
                                         android:id="@+id/title" />
 
-                                    <EditText
+                                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
-                                        android:padding="10dp"
-                                        android:hint="Weather"
-                                        android:inputType="textCapSentences"
-                                        android:imeOptions="actionNext"
-                                        android:textColorHint="#000000"
-                                        android:textColor="#000000"
-                                        android:background="@drawable/edittext_states_red"
-                                        android:layout_marginBottom="@dimen/activity_vertical_margin"
-                                        android:textSize="15sp"
-                                        android:id="@+id/weather"
-                                        android:gravity="top" />
-
-                                    <EditText
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:padding="10dp"
-                                        android:hint="Progress"
-                                        android:maxLines="1"
-                                        android:imeOptions="actionNext"
-                                        android:textColorHint="#000000"
-                                        android:textColor="#000000"
-                                        android:background="@drawable/edittext_states_red"
-                                        android:layout_marginBottom="@dimen/activity_vertical_margin"
-                                        android:textSize="15sp"
-                                        android:id="@+id/progress"
-                                        android:layout_gravity="center_horizontal"
-                                        android:inputType="numberDecimal" />
+                                        android:textColor="@color/colorPrimary"
+                                        android:text="Select WBS"
+                                        android:layout_marginBottom="@dimen/very_small_margin"/>
 
                                     <Spinner
                                         android:layout_width="match_parent"
-                                        android:layout_height="@dimen/_40sdp"
-                                        android:padding="10dp"
+                                        android:layout_height="@dimen/_35sdp"
                                         android:textColorHint="#000000"
                                         android:textColor="#000000"
                                         android:background="@drawable/edittext_states_red"
                                         android:layout_marginBottom="@dimen/activity_vertical_margin"
-                                        android:textSize="15sp"
+                                        android:textSize="13sp"
                                         android:id="@+id/spinner_wbs"
                                         android:text="WBS" />
 
-                                    <Spinner
+                                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
                                         android:layout_width="match_parent"
-                                        android:layout_height="@dimen/_40sdp"
-                                        android:padding="10dp"
-                                        android:textColorHint="#000000"
-                                        android:textColor="#000000"
-                                        android:background="@drawable/edittext_states_red"
-                                        android:layout_marginBottom="@dimen/activity_vertical_margin"
-                                        android:textSize="15sp"
-                                        android:gravity="top"
-                                        android:id="@+id/spinner_activity"
-                                        android:text="Activities" />
+                                        android:layout_height="wrap_content"
+                                        android:textColor="@color/colorPrimary"
+                                        android:id="@+id/title_activity"
+                                        android:text="Select Date for Report"
+                                        android:layout_marginBottom="@dimen/very_small_margin"/>
 
                                     <TextView
                                         android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:padding="10dp"
-                                        android:hint="Target Date"
+                                        android:layout_height="@dimen/_35sdp"
                                         android:textColorHint="#000000"
                                         android:textColor="#000000"
                                         android:background="@drawable/edittext_states_red"
                                         android:layout_marginBottom="@dimen/activity_vertical_margin"
-                                        android:textSize="15sp"
-                                        android:gravity="top"
-                                        android:id="@+id/target_date" />
-
-                                    <EditText
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
                                         android:padding="10dp"
-                                        android:hint="% completion"
-                                        android:inputType="numberDecimal"
-                                        android:imeOptions="actionNext"
-                                        android:textColorHint="#000000"
-                                        android:textColor="#000000"
-                                        android:background="@drawable/edittext_states_red"
-                                        android:layout_marginBottom="@dimen/activity_vertical_margin"
-                                        android:textSize="15sp"
                                         android:gravity="top"
-                                        android:id="@+id/percent_completed" />
-
-
-                                    <com.thomashaertel.widget.MultiSpinner
-                                        android:id="@+id/spinner_resource"
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:padding="10dp"
-                                        android:layout_marginBottom="@dimen/activity_vertical_margin"
-                                        android:background="@drawable/edittext_states_red"
-                                        android:text="Select Resources"
-                                        android:hint="Select Resources" />
-
-                                    <EditText
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:padding="10dp"
-                                        android:hint="Completed"
-                                        android:inputType="numberDecimal"
-                                        android:imeOptions="actionDone"
-                                        android:textColorHint="#000000"
-                                        android:textColor="#000000"
-                                        android:background="@drawable/edittext_states_red"
-                                        android:layout_marginBottom="@dimen/activity_vertical_margin"
                                         android:textSize="15sp"
-                                        android:gravity="top"
-                                        android:id="@+id/completed" />
-
+                                        android:id="@+id/text_date"
+                                        android:text="Date" />
 
                                 </LinearLayout>
                             </RelativeLayout>
@@ -201,7 +129,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#ffffff"
-                android:text="CREATE"
+                android:text="VIEW REPORT"
                 android:padding="@dimen/activity_vertical_margin"
                 android:layout_marginTop="@dimen/activity_vertical_margin"
                 android:gravity="center"

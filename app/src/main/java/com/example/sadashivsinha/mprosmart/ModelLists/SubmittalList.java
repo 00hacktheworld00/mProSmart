@@ -5,12 +5,13 @@ package com.example.sadashivsinha.mprosmart.ModelLists;
  */
 public class SubmittalList {
     private String line_no, text_sub_title, text_sub_type, text_status, text_contract_id, attachments;
-    private String text_doc_type, text_short_desc, text_variation, text_variation_desc, text_attachment;
+    private String text_doc_type, text_short_desc, text_variation, text_variation_desc, text_attachment, sub_reg_type, original_line_no;
+    private int noOfAttachments;
 
     //for Submittal
 
     public SubmittalList(String line_no, String text_doc_type, String text_short_desc, String text_variation,
-                         String text_variation_desc, String text_status, String text_attachment)
+                         String text_variation_desc, String text_status, String sub_reg_type, String text_attachment)
     {
         this.line_no = line_no;
         this.text_doc_type = text_doc_type;
@@ -19,20 +20,80 @@ public class SubmittalList {
         this.text_variation_desc = text_variation_desc;
         this.text_status = text_status;
         this.text_attachment = text_attachment;
+        this.sub_reg_type = sub_reg_type;
+    }
+    public SubmittalList(String line_no,String original_line_no, String text_doc_type, String text_short_desc, String text_variation,
+                         String text_variation_desc, String text_status, String sub_reg_type, String text_attachment)
+    {
+        this.line_no = line_no;
+        this.text_doc_type = text_doc_type;
+        this.text_short_desc = text_short_desc;
+        this.text_variation = text_variation;
+        this.text_variation_desc = text_variation_desc;
+        this.text_status = text_status;
+        this.text_attachment = text_attachment;
+        this.sub_reg_type = sub_reg_type;
+        this.original_line_no = original_line_no;
     }
 
+//    public SubmittalList(String line_no, String text_doc_type, String text_short_desc, String text_variation,
+//                         String text_variation_desc, String text_status, String text_attachment)
+//    {
+//        this.line_no = line_no;
+//        this.text_doc_type = text_doc_type;
+//        this.text_short_desc = text_short_desc;
+//        this.text_variation = text_variation;
+//        this.text_variation_desc = text_variation_desc;
+//        this.text_status = text_status;
+//        this.text_attachment = text_attachment;
+//    }
+//
+//
+//    //for Submittal Register
+//    public SubmittalList(String line_no, String text_sub_title, String text_sub_type,
+//                         String text_status, String text_contract_id, String attachments)
+//    {
+//        this.line_no = line_no;
+//        this.text_sub_title = text_sub_title;
+//        this.text_sub_type = text_sub_type;
+//        this.text_status = text_status;
+//        this.text_contract_id = text_contract_id;
+//        this.attachments = attachments;
+//
+//    }
 
-    //for Submittal Register
-    public SubmittalList(String line_no, String text_sub_title, String text_sub_type,
-                         String text_status, String text_contract_id, String attachments)
+    public SubmittalList(String line_no, String original_line_no, String text_sub_title, String text_sub_type, String text_status,
+                         String text_contract_id)
     {
         this.line_no = line_no;
         this.text_sub_title = text_sub_title;
         this.text_sub_type = text_sub_type;
         this.text_status = text_status;
+        this.original_line_no = original_line_no;
         this.text_contract_id = text_contract_id;
-        this.attachments = attachments;
+    }
+    public SubmittalList(String line_no, String original_line_no, String text_sub_title, String text_sub_type, String text_status,
+                         String text_contract_id, int noOfAttachments)
+    {
+        this.line_no = line_no;
+        this.text_sub_title = text_sub_title;
+        this.text_sub_type = text_sub_type;
+        this.text_status = text_status;
+        this.original_line_no = original_line_no;
+        this.noOfAttachments = noOfAttachments;
+        this.text_contract_id = text_contract_id;
+    }
 
+    public int getNoOfAttachments() {
+        return noOfAttachments;
+    }
+
+    public String getSub_reg_type() {
+        return sub_reg_type;
+    }
+
+    public String getOriginal_line_no() {
+        return original_line_no;
     }
 
     public String getAttachments() {

@@ -26,6 +26,7 @@ import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.Activities.AttachmentActivity;
 import com.example.sadashivsinha.mprosmart.ModelLists.QualityList;
 import com.example.sadashivsinha.mprosmart.R;
+import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,6 +44,7 @@ public class QualityAdapter extends RecyclerView.Adapter<QualityAdapter.MyViewHo
     String acceptedQuantity;
     String line_id;
     View currentView;
+    PreferenceManager pm;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -53,6 +55,9 @@ public class QualityAdapter extends RecyclerView.Adapter<QualityAdapter.MyViewHo
 
         public MyViewHolder(final View view) {
             super(view);
+
+            pm = new PreferenceManager(view.getContext());
+
             currentView = view;
             item_id = (TextView) view.findViewById(R.id.item_id);
             item_desc = (EditText) view.findViewById(R.id.item_desc);;
@@ -155,7 +160,7 @@ public class QualityAdapter extends RecyclerView.Adapter<QualityAdapter.MyViewHo
 
         RequestQueue requestQueue = Volley.newRequestQueue(context);
 
-        String url = context.getResources().getString(R.string.server_url) + "/updateQirItem?itemId=\""+line_id+"\"";
+        String url = pm.getString("SERVER_URL")  + "/updateQirItem?itemId=\""+line_id+"\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.PUT, url, object,
                 new Response.Listener<JSONObject>() {

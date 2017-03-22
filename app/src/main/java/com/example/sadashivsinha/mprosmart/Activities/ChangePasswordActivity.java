@@ -94,7 +94,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(ChangePasswordActivity.this);
 
-        String url = ChangePasswordActivity.this.getResources().getString(R.string.server_url) + "/changePassword?userId=\""+userId+"\"&password=\""+current_password.getText().toString()+"\"";
+        String url = ChangePasswordActivity.this.pm.getString("SERVER_URL") + "/changePassword?userId=\""+userId+"\"&password=\""+current_password.getText().toString()+"\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.PUT, url, object,
                 new Response.Listener<JSONObject>() {

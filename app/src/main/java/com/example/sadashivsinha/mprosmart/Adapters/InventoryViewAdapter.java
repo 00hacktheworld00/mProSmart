@@ -23,21 +23,19 @@ public class InventoryViewAdapter extends RecyclerView.Adapter<InventoryViewAdap
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
-        private HelveticaBold pr_no, title;
-        private HelveticaRegular inventory_total, item_added_issued_title, item_added_issued;
-        private TextView text_date;
+        private HelveticaBold title;
+        private HelveticaRegular item_added_issued_title, item_added_issued;
+        private TextView text_date, title_date;
         private ImageButton icon;
 
         public MyViewHolder(final View view) {
             super(view);
-            pr_no = (HelveticaBold) view.findViewById(R.id.pr_no);
             title = (HelveticaBold) view.findViewById(R.id.title);
-
-            inventory_total = (HelveticaRegular) view.findViewById(R.id.inventory_total);
             item_added_issued_title = (HelveticaRegular) view.findViewById(R.id.item_added_issued_title);
             item_added_issued = (HelveticaRegular) view.findViewById(R.id.item_added_issued);
 
             text_date = (TextView) view.findViewById(R.id.text_date);
+            title_date = (TextView) view.findViewById(R.id.title_date);
 
             icon = (ImageButton) view.findViewById(R.id.icon);
 
@@ -58,16 +56,22 @@ public class InventoryViewAdapter extends RecyclerView.Adapter<InventoryViewAdap
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
         InventoryViewList items = inventoryList.get(position);
-        holder.pr_no.setText(String.valueOf(items.getPr_no()));
-        holder.inventory_total.setText(String.valueOf(items.getInventory_total()));
         holder.text_date.setText(String.valueOf(items.getText_date()));
         holder.item_added_issued.setText(items.getItem_added_issued());
 
         if(items.getTitle().equals("1"))
         {
-            holder.title.setText("Material Issue No. ");
+            holder.title.setText("Material Issued");
             holder.icon.setImageResource(R.drawable.ic_minus_square);
             holder.item_added_issued_title.setText("Item Issued - ");
+            holder.title_date.setText("Issued Date - ");
+        }
+        else
+        {
+            holder.title.setText("Purchase Ordered");
+            holder.icon.setImageResource(R.drawable.ic_plus_square);
+            holder.item_added_issued_title.setText("Item Added - ");
+            holder.title_date.setText("Added Date - ");
         }
 
     }

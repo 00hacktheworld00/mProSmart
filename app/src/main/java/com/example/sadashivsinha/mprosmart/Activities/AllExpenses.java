@@ -1,9 +1,14 @@
 package com.example.sadashivsinha.mprosmart.Activities;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -26,8 +31,10 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.Adapters.AllExpensesAdapter;
 import com.example.sadashivsinha.mprosmart.ModelLists.AllExpensesList;
+import com.example.sadashivsinha.mprosmart.ModelLists.MomList;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
+import com.example.sadashivsinha.mprosmart.Utils.CsvCreateUtility;
 import com.github.clans.fab.FloatingActionButton;
 
 import org.json.JSONArray;
@@ -54,8 +61,8 @@ public class AllExpenses extends AppCompatActivity implements View.OnClickListen
     JSONObject dataObject;
     ProgressDialog pDialog;
     String expenseManagementId, expenseType, totalExpense, expenseDescription, createdBy, createdDate;
-
     AllExpensesList qualityItem;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +71,7 @@ public class AllExpenses extends AppCompatActivity implements View.OnClickListen
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
         currentProjectName = pm.getString("projectName");
         currentUser = pm.getString("userId");
@@ -108,16 +115,99 @@ public class AllExpenses extends AppCompatActivity implements View.OnClickListen
         }
         new MyTask().execute();
 
-        FloatingActionButton fab_add;
+        FloatingActionButton fab_add, exportBtn;
 
         fab_add = (FloatingActionButton) findViewById(R.id.fab_add);
+        exportBtn = (FloatingActionButton) findViewById(R.id.exportBtn);
 
         fab_add.setOnClickListener(this);
+        exportBtn.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+
+            case R.id.exportBtn:
+            {
+                //csv export
+                int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+                if (currentapiVersion > android.os.Build.VERSION_CODES.LOLLIPOP) {
+                    if (ContextCompat.checkSelfPermission(AllExpenses.this,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                            != PackageManager.PERMISSION_GRANTED) {
+
+                        ActivityCompat.requestPermissions(AllExpenses.this,
+                                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+
+                    }
+                    Environment.getExternalStorageState();
+
+                    String expenseManagementId = null, expenseType = null, totalExpense = null, expenseDescription = null, date = null, createdDate = null;
+                    int listSize = expenseList.size();
+                    String cvsValues = "Expense Management ID" + ","+ "Expense Type" + ","+ "Total Expense"  + ","+
+                            "Expense Description" + ","+ "Created By"  + ","+ "Created Date" + "\n";
+
+                    for(int i=0; i<listSize;i++)
+                    {
+                        AllExpensesList items = expenseList.get(i);
+                        expenseManagementId = items.getExpense_no();
+                        expenseType = items.getExpense_type();
+                        totalExpense = items.getTotal_expense();
+                        expenseDescription = items.getExpense_desc();
+                        createdBy = items.getCreated_by();
+                        createdDate = items.getDate_created();
+
+                        if(expenseType.equals("1"))
+                            expenseType = "Personal";
+                        else
+                            expenseType = "Project";
+
+
+                        cvsValues = cvsValues +  expenseManagementId + ","+ expenseType + ","+ totalExpense +","+ expenseDescription
+                                +","+ createdBy +","+ createdDate + "\n";
+                    }
+
+                    CsvCreateUtility.generateNoteOnSD(getApplicationContext(), "Expenses-data.csv", cvsValues);
+                }
+
+                else
+
+                {
+                    Environment.getExternalStorageState();
+
+                    String expenseManagementId = null, expenseType = null, totalExpense = null, expenseDescription = null, date = null, createdDate = null;
+                    int listSize = expenseList.size();
+                    String cvsValues = "Expense Management ID" + ","+ "Expense Type" + ","+ "Total Expense"  + ","+
+                            "Expense Description" + ","+ "Created By"  + ","+ "Created Date" + "\n";
+
+                    for(int i=0; i<listSize;i++)
+                    {
+                        AllExpensesList items = expenseList.get(i);
+                        expenseManagementId = items.getExpense_no();
+                        expenseType = items.getExpense_type();
+                        totalExpense = items.getTotal_expense();
+                        expenseDescription = items.getExpense_desc();
+                        createdBy = items.getCreated_by();
+                        createdDate = items.getDate_created();
+
+                        if(expenseType.equals("1"))
+                            expenseType = "Personal";
+                        else
+                            expenseType = "Project";
+
+
+                        cvsValues = cvsValues +  expenseManagementId + ","+ expenseType + ","+ totalExpense +","+ expenseDescription
+                                +","+ createdBy +","+ createdDate + "\n";
+                    }
+
+                    CsvCreateUtility.generateNoteOnSD(getApplicationContext(), "Expenses-data.csv", cvsValues);
+                }
+
+            }
+            break;
+
+
             case R.id.fab_add:
             {
                 final AlertDialog.Builder alert = new AlertDialog.Builder(AllExpenses.this,android.R.style.Theme_Translucent_NoTitleBar);
@@ -130,25 +220,20 @@ public class AllExpenses extends AppCompatActivity implements View.OnClickListen
 
                 final Spinner spinner_expense = (Spinner) dialogView.findViewById(R.id.spinner_expense);
 
-                final EditText expense_desc;
-                expense_desc = (EditText) dialogView.findViewById(R.id.expense_desc);
+                final EditText expense_desc = (EditText) dialogView.findViewById(R.id.expense_desc);
+
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(AllExpenses.this,
+                        android.R.layout.simple_dropdown_item_1line, new String[] {"Personal", "Project"});
+                spinner_expense.setAdapter(adapter);
 
                 Button createBtn = (Button) dialogView.findViewById(R.id.createBtn);
 
-
-                ArrayAdapter<String> adapter = new ArrayAdapter<String>(AllExpenses.this,
-                        android.R.layout.simple_dropdown_item_1line, new String[] {"Select Expense Type" ,"Personal", "Project"});
-                spinner_expense.setAdapter(adapter);
 
                 createBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
 
-                        if(spinner_expense.getSelectedItem().toString().equals("Select Expense Type"))
-                        {
-                            Toast.makeText(AllExpenses.this, "Select Expense Type First", Toast.LENGTH_SHORT).show();
-                        }
-                        else if(expense_desc.getText().toString().isEmpty())
+                        if(expense_desc.getText().toString().isEmpty())
                         {
                             expense_desc.setError("Field cannot be empty.");
                         }
@@ -190,7 +275,7 @@ public class AllExpenses extends AppCompatActivity implements View.OnClickListen
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getExpenseManagement?projectId='"+currentProjectNo+"'";
+        String url = pm.getString("SERVER_URL") + "/getExpenseManagement?projectId='"+currentProjectNo+"'";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -236,9 +321,7 @@ public class AllExpenses extends AppCompatActivity implements View.OnClickListen
                                 }
                             }
                             pDialog.dismiss();
-                        }catch(JSONException e){e.printStackTrace();} catch (ParseException e) {
-                            e.printStackTrace();
-                        }
+                        }catch(JSONException | ParseException e){e.printStackTrace();}
                     }
                 },
                 new Response.ErrorListener() {
@@ -276,7 +359,7 @@ public class AllExpenses extends AppCompatActivity implements View.OnClickListen
 
         RequestQueue requestQueue = Volley.newRequestQueue(AllExpenses.this);
 
-        String url = AllExpenses.this.getResources().getString(R.string.server_url) + "/postExpenseManagement";
+        String url = AllExpenses.this.pm.getString("SERVER_URL") + "/postExpenseManagement";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -312,7 +395,7 @@ public class AllExpenses extends AppCompatActivity implements View.OnClickListen
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(AllExpenses.this, ViewPurchaseOrders.class);
+        Intent intent = new Intent(AllExpenses.this, BudgetMainActivity.class);
         startActivity(intent);
     }
 

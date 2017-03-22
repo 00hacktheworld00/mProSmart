@@ -68,14 +68,15 @@ public class QualityControlNew extends NewActivity {
     public static final String TAG = PurchaseOrders.class.getSimpleName();
     Boolean isInternetPresent = false;
     private ProgressDialog pDialog;
-    String currentQualityPoNo, purchaseLineItemsId, purchaseReceiptItemsId, quantity, poQuantity, unitCost, rejectedQuantityString, acceptedQuantityString;
+    String currentQualityPoNo, itemName, purchaseLineItemsId, purchaseReceiptItemsId, quantity, poQuantity, unitCost, rejectedQuantityString, acceptedQuantityString;
     String currentQirNo,currentProjectNo, currentReceiptNo;
     int totalQuantity, rejectedQuantity, acceptedQuantity;
     private List<PurchaseReceiptCreateNewList> purchaseList = new ArrayList<>();
     private RecyclerView recyclerView;
     private QualityControlNewItemAdapter qualityAdapter;
     PreferenceManager pm;
-    String url;
+    String url, po_url;
+    String[] itemIdArray, poItemIdArray;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,11 +100,12 @@ public class QualityControlNew extends NewActivity {
         currentReceiptNo = pm.getString("receiptNo");
 
 
-        url = getResources().getString(R.string.server_url) + "/getPurchaseReceiptItems?purchaseReceiptId=\""+currentReceiptNo+"\"";
+        url = pm.getString("SERVER_URL") + "/getPurchaseReceiptItems?purchaseReceiptId=\""+currentReceiptNo+"\"";
+        po_url = pm.getString("SERVER_URL") + "/getPurchaseLineItems?purchaseOrderId=\"" + currentQualityPoNo + "\"";
+
 
         cd = new ConnectionDetector(getApplicationContext());
         isInternetPresent = cd.isConnectingToInternet();
-
 
         qualityAdapter = new QualityControlNewItemAdapter(purchaseList);
         recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
@@ -124,7 +126,44 @@ public class QualityControlNew extends NewActivity {
             pDialog.show();
 
             Cache cache = AppController.getInstance().getRequestQueue().getCache();
-            Cache.Entry entry = cache.get(url);
+            Cache.Entry entry = cache.get(po_url);
+            if (entry != null) {
+                //Cache data available.
+                try {
+                    String data = new String(entry.data, "UTF-8");
+                    Log.d("CACHE DATA", data);
+                    JSONObject jsonObject = new JSONObject(data);
+                    try {
+                        dataArray = jsonObject.getJSONArray("data");
+
+                        itemIdArray = new String[dataArray.length()];
+                        poItemIdArray = new String[dataArray.length()];
+
+                        for (int i = 0; i < dataArray.length(); i++) {
+                            dataObject = dataArray.getJSONObject(i);
+                            purchaseLineItemsId =  dataObject.getString("purchaseLineItemsId");
+                            itemName =  dataObject.getString("itemName");
+
+                            poItemIdArray[i] = purchaseLineItemsId;
+                            itemIdArray[i] = itemName;
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
+                } catch (UnsupportedEncodingException | JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            else
+            {
+                Toast.makeText(QualityControlNew.this, "Offline Data Not available for this PO Items in this QIR", Toast.LENGTH_SHORT).show();
+            }
+
+
+            entry = cache.get(url);
             if (entry != null) {
                 //Cache data available.
                 try {
@@ -141,9 +180,16 @@ public class QualityControlNew extends NewActivity {
                             unitCost =  dataObject.getString("unitCost");
                             acceptedQuantityString = dataObject.getString("acceptedQuantity");
                             rejectedQuantityString = dataObject.getString("rejectedQuantity");
+                            itemId = dataObject.getString("itemId");
 
+                            for(int j=0; j<itemIdArray.length; j++)
+                            {
+                                if(itemId.equals(poItemIdArray[j]))
+                                    itemId = itemIdArray[j];
+                            }
 
-                            LineItems = new PurchaseReceiptCreateNewList(purchaseReceiptItemsId, quantity, poQuantity, unitCost, acceptedQuantityString, rejectedQuantityString);
+                            LineItems = new PurchaseReceiptCreateNewList(itemId, quantity, poQuantity,
+                                    unitCost, acceptedQuantityString, rejectedQuantityString);
                             purchaseList.add(LineItems);
 
                             qualityAdapter.notifyDataSetChanged();
@@ -153,10 +199,7 @@ public class QualityControlNew extends NewActivity {
                         e.printStackTrace();
                     }
 //                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    // TODO Auto-generated catch block
+                } catch (UnsupportedEncodingException | JSONException e) {
                     e.printStackTrace();
                 }
                 if (pDialog != null)
@@ -173,7 +216,7 @@ public class QualityControlNew extends NewActivity {
         else
         {
             // Cache data not exist.
-            callJsonArrayRequest();
+            callGetItemsIdFromPo();
         }
 
         prepareHeader();
@@ -209,6 +252,56 @@ public class QualityControlNew extends NewActivity {
         mDrawerToggle.syncState();               // Finally we set the drawer toggle sync State
     }
 
+    public void callGetItemsIdFromPo()
+    {
+        pDialog = new ProgressDialog(QualityControlNew.this);
+        pDialog.setMessage("Getting server data");
+        pDialog.show();
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, po_url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try
+                        {
+//                            dataObject = response.getJSONObject(0);
+                            dataArray = response.getJSONArray("data");
+
+                            poItemIdArray = new String[dataArray.length()];
+                            itemIdArray = new String[dataArray.length()];
+
+                            for(int i=0; i<dataArray.length();i++)
+                            {
+                                dataObject = dataArray.getJSONObject(i);
+                                purchaseLineItemsId =  dataObject.getString("purchaseLineItemsId");
+                                itemName =  dataObject.getString("itemName");
+
+                                poItemIdArray[i] = purchaseLineItemsId;
+                                itemIdArray[i] = itemName;
+                            }
+
+                            callJsonArrayRequest();
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+//                        setData(response,false);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        });
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(jsonObjectRequest);
+        if(pDialog!=null)
+            pDialog.dismiss();
+    }
+
     public void prepareHeader()
     {
         qirNo.setText(pm.getString("qirNo"));
@@ -241,9 +334,15 @@ public class QualityControlNew extends NewActivity {
                                 unitCost =  dataObject.getString("unitCost");
                                 acceptedQuantityString = dataObject.getString("acceptedQuantity");
                                 rejectedQuantityString = dataObject.getString("rejectedQuantity");
+                                itemId = dataObject.getString("itemId");
 
+                                for(int j=0; j<itemIdArray.length; j++)
+                                {
+                                    if(itemId.equals(poItemIdArray[j]))
+                                        itemId = itemIdArray[j];
+                                }
 
-                                LineItems = new PurchaseReceiptCreateNewList(purchaseReceiptItemsId, quantity, poQuantity, unitCost, acceptedQuantityString, rejectedQuantityString);
+                                LineItems = new PurchaseReceiptCreateNewList(purchaseReceiptItemsId, itemId, quantity, poQuantity, unitCost, acceptedQuantityString, rejectedQuantityString);
                                 purchaseList.add(LineItems);
 
                                 qualityAdapter.notifyDataSetChanged();
@@ -293,11 +392,14 @@ public class QualityControlNew extends NewActivity {
             public HelveticaRegular item_id, text_rejected, new_quantity, unit_cost, po_quantity, text_accepted;
             CardView cardview;
             HelveticaBold btn_update_quantity;
+            TextView pur_id;
 
             public MyViewHolder(final View view) {
                 super(view);
                 item_id = (HelveticaRegular) view.findViewById(R.id.item_id);
                 text_accepted = (HelveticaRegular) view.findViewById(R.id.text_accepted);
+
+                pur_id = (TextView) view.findViewById(R.id.pur_id);
 
                 unit_cost = (HelveticaRegular) view.findViewById(R.id.unit_cost);
                 po_quantity = (HelveticaRegular) view.findViewById(R.id.po_quantity);
@@ -328,7 +430,7 @@ public class QualityControlNew extends NewActivity {
                                 }
                                 else if(Integer.parseInt(input.getText().toString()) > Integer.parseInt(new_quantity.getText().toString()))
                                 {
-                                    Toast.makeText(view.getContext(), "Accepted Quantity cannot be more than PO Quantity", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(view.getContext(), "Accepted Quantity cannot be more than Received Quantity", Toast.LENGTH_SHORT).show();
                                 }
                                 else if(Integer.parseInt(input.getText().toString()) < Integer.parseInt(text_accepted.getText().toString()))
                                 {
@@ -345,7 +447,7 @@ public class QualityControlNew extends NewActivity {
 
                                     int rejectedQuantityVal = newQuantityVal - acceptedQuantityVal;
 
-                                    updateQuantity(view.getContext(), item_id.getText().toString(), input.getText().toString(), String.valueOf(rejectedQuantityVal), newQuantityVal, text_accepted, text_rejected, btn_update_quantity);
+                                    updateQuantity(view.getContext(), pur_id.getText().toString(), input.getText().toString(), String.valueOf(rejectedQuantityVal), newQuantityVal, text_accepted, text_rejected, btn_update_quantity);
 
                                 }
                             }
@@ -380,6 +482,7 @@ public class QualityControlNew extends NewActivity {
             PurchaseReceiptCreateNewList items = list.get(position);
 
             holder.item_id.setText(String.valueOf(items.getPurchaseReceiptItemsId()));
+            holder.pur_id.setText(String.valueOf(items.getPurId()));
             holder.new_quantity.setText(items.getQuantity());
             holder.unit_cost.setText(String.valueOf(items.getUnit_cost()));
             holder.po_quantity.setText(items.getPoQuantity());
@@ -389,6 +492,10 @@ public class QualityControlNew extends NewActivity {
             if(Integer.parseInt(holder.new_quantity.getText().toString()) == Integer.parseInt(holder.text_accepted.getText().toString()))
             {
                 holder.btn_update_quantity.setVisibility(View.GONE);
+            }
+            else
+            {
+                holder.btn_update_quantity.setVisibility(View.VISIBLE);
             }
 
         }
@@ -416,7 +523,7 @@ public class QualityControlNew extends NewActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(context);
 
-        String url = context.getResources().getString(R.string.server_url) + "/putPurchaseReceiptItemsAcc?purchaseReceiptItemsId=\"" + itemId + "\"";
+        String url = pm.getString("SERVER_URL") + "/putPurchaseReceiptItemsAcc?purchaseReceiptItemsId=\"" + itemId + "\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.PUT, url, object,
                 new Response.Listener<JSONObject>() {

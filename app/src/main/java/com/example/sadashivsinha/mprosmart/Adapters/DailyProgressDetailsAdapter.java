@@ -4,7 +4,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.example.sadashivsinha.mprosmart.ModelLists.DailyProgressDetailsList;
 import com.example.sadashivsinha.mprosmart.R;
@@ -22,21 +22,21 @@ public class DailyProgressDetailsAdapter extends RecyclerView.Adapter<DailyProgr
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         HelveticaBold wbs_name, activity;
-        HelveticaRegular target_date, completed, percent_completed, res_worked, weather_title;
-        ImageView weather_icon;
+        HelveticaRegular completed, res_worked, percent_completed_today, percent_completed_total;
+        ProgressBar progress_bar_total, progress_bar_today;
 
         public MyViewHolder(final View view) {
             super(view);
             wbs_name = (HelveticaBold) view.findViewById(R.id.wbs_name);
             activity = (HelveticaBold) view.findViewById(R.id.activity);
 
-            target_date = (HelveticaRegular) view.findViewById(R.id.target_date);
             completed = (HelveticaRegular) view.findViewById(R.id.completed);
-            percent_completed = (HelveticaRegular) view.findViewById(R.id.percent_completed);
             res_worked = (HelveticaRegular) view.findViewById(R.id.res_worked);
-            weather_title = (HelveticaRegular) view.findViewById(R.id.weather_title);
+            percent_completed_today = (HelveticaRegular) view.findViewById(R.id.percent_completed_today);
+            percent_completed_total = (HelveticaRegular) view.findViewById(R.id.percent_completed_total);
 
-            weather_icon = (ImageView) view.findViewById(R.id.weather_icon);
+            progress_bar_total = (ProgressBar) view.findViewById(R.id.progress_bar_total);
+            progress_bar_today = (ProgressBar) view.findViewById(R.id.progress_bar_today);
         }
 
     }
@@ -56,27 +56,16 @@ public class DailyProgressDetailsAdapter extends RecyclerView.Adapter<DailyProgr
         DailyProgressDetailsList items = daily_list.get(position);
         holder.wbs_name.setText(String.valueOf(items.getWbs_name()));
         holder.activity.setText(String.valueOf(items.getActivity()));
-        holder.target_date.setText(String.valueOf(items.getTarget_date()));
         holder.completed.setText(String.valueOf(items.getCompleted()));
-        holder.percent_completed.setText(String.valueOf(items.getPercent_completed()));
         holder.res_worked.setText(String.valueOf(items.getRes_worked()));
-        holder.weather_title.setText(String.valueOf(items.getWeather_title()));
+        holder.percent_completed_today.setText(String.valueOf(items.getPercent_completed_today()));
+        holder.percent_completed_total.setText(String.valueOf(items.getPercent_completed_total()));
 
-        switch (items.getWeather_title()) {
-            case "Cloudy weather with high speed wind":
-                holder.weather_icon.setBackgroundResource(R.drawable.weather_sunny_cloudy);
-                break;
-            case "Sunny weather":
-                holder.weather_icon.setBackgroundResource(R.drawable.weather_sunny);
-                break;
-            case "Raining weather with wind":
-                holder.weather_icon.setBackgroundResource(R.drawable.weather_raining);
-                break;
-            case "Thunderstorms":
-                holder.weather_icon.setBackgroundResource(R.drawable.weather_thunder);
-                break;
-        }
+        holder.progress_bar_total.setProgress(Integer.parseInt(items.getPercent_completed_total()));
 
+        int progressToShow = Integer.parseInt(items.getPercent_completed_total()) - Integer.parseInt(items.getPercent_completed_today());
+
+        holder.progress_bar_today.setProgress(progressToShow);
     }
 
     @Override

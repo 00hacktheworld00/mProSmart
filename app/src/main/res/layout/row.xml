@@ -74,40 +74,40 @@
 
 
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:id="@+id/dashboard">
+    <!--<LinearLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:gravity="center_vertical"-->
+        <!--android:orientation="horizontal"-->
+        <!--android:id="@+id/dashboard">-->
 
 
 
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/dashboard"
-            android:layout_marginLeft="@dimen/activity_vertical_margin"/>
+        <!--<ImageButton-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:background="@drawable/dashboard"-->
+            <!--android:layout_marginLeft="@dimen/activity_vertical_margin"/>-->
 
-        <com.example.sadashivsinha.mprosmart.font.RobotoTextView
-            style="@style/TextViewAppearance.Title1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_weight="0"
-            android:gravity="center_vertical"
-            android:text="Dashboard"
-            android:textColor="@color/main_color_grey_800"
-            android:textSize="14sp"
-            app:typeface="robotoRegular" />
-    </LinearLayout>
+        <!--<com.example.sadashivsinha.mprosmartstandard.font.RobotoTextView-->
+            <!--style="@style/TextViewAppearance.Title1"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginBottom="16dp"-->
+            <!--android:layout_marginTop="16dp"-->
+            <!--android:layout_weight="0"-->
+            <!--android:gravity="center_vertical"-->
+            <!--android:text="Dashboard"-->
+            <!--android:textColor="@color/main_color_grey_800"-->
+            <!--android:textSize="14sp"-->
+            <!--app:typeface="robotoRegular" />-->
+    <!--</LinearLayout>-->
 
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/new_grey"/>
+    <!--<View-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="1dp"-->
+        <!--android:background="@color/new_grey"/>-->
 
 
 
@@ -227,13 +227,11 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="2"/>
+            android:layout_height="wrap_content"/>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/activity_vertical_margin"
             android:gravity="center">
             <ImageButton
@@ -248,12 +246,11 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="2"
+            android:layout_height="wrap_content"
             android:gravity="center|top">
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:textColor="@color/white"
                 android:text="ABHARTECH.COM"
                 android:gravity="center|top" />

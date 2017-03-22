@@ -2,19 +2,26 @@ package com.example.sadashivsinha.mprosmart.Activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.webkit.WebView;
 
 import com.example.sadashivsinha.mprosmart.R;
+import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
 
 public class WebViewWbsGantt extends AppCompatActivity {
-
-    String urlLink = "http://52.76.152.185/ganttchart/samples/01_initialization/06_touch_forced.html";
-    String localhostAddress = "http://192.168.0.4/ganttchart/samples/01_initialization/06_touch_forced.html";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web_view_wbs_gantt);
+
+        PreferenceManager pm = new PreferenceManager(this);
+        String currentProjectId = pm.getString("projectId");
+
+        String urlLink = "http://52.76.152.185/ganttchart/samples/01_initialization/06_touch_forced.html?projectId="
+                + currentProjectId;
+
+        Log.d("URL :", urlLink);
 
         final WebView browser = (WebView) findViewById(R.id.webview);
 

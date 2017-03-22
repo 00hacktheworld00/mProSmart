@@ -58,18 +58,31 @@
                     android:orientation="vertical"
                     android:padding="@dimen/activity_vertical_margin">
 
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/colorPrimary"
+                        android:text="Select Expense Type"
+                        android:layout_marginBottom="@dimen/very_very_small_margin"/>
+
                     <Spinner
                         android:layout_width="match_parent"
-                        android:layout_height="@dimen/_40sdp"
+                        android:layout_height="@dimen/_35sdp"
                         android:padding="10dp"
-                        android:text="Select Expense Type"
+                        android:text="Enter Expense Type"
                         android:textColorHint="#000000"
                         android:textColor="#000000"
                         android:background="@drawable/edittext_states_red"
                         android:layout_marginBottom="@dimen/activity_vertical_margin"
-                        android:layout_marginRight="@dimen/_5sdp"
                         android:textSize="15sp"
                         android:id="@+id/spinner_expense" />
+
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/colorPrimary"
+                        android:text="Enter Expense Description"
+                        android:layout_marginBottom="@dimen/very_very_small_margin"/>
 
                     <EditText
                         android:layout_width="match_parent"

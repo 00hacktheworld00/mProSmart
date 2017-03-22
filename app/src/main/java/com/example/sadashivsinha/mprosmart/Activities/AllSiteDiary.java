@@ -1,11 +1,14 @@
 package com.example.sadashivsinha.mprosmart.Activities;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
+import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
@@ -15,24 +18,33 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Cache;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.Adapters.AllSiteDiaryAdapter;
 import com.example.sadashivsinha.mprosmart.Adapters.MyAdapter;
+import com.example.sadashivsinha.mprosmart.ModelLists.AllBoqList;
 import com.example.sadashivsinha.mprosmart.ModelLists.AllSiteDiaryList;
+import com.example.sadashivsinha.mprosmart.ModelLists.BoqList;
+import com.example.sadashivsinha.mprosmart.ModelLists.SiteList;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
+import com.example.sadashivsinha.mprosmart.Utils.AppController;
+import com.example.sadashivsinha.mprosmart.Utils.Communicator;
 import com.example.sadashivsinha.mprosmart.Utils.ConnectionDetector;
+import com.example.sadashivsinha.mprosmart.Utils.CsvCreateUtility;
 import com.github.clans.fab.FloatingActionButton;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
@@ -40,13 +52,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 
 public class AllSiteDiary extends NewActivity implements View.OnClickListener, DatePickerDialog.OnDateSetListener {
 
@@ -65,6 +82,9 @@ public class AllSiteDiary extends NewActivity implements View.OnClickListener, D
     AlertDialog show;
     TextView text_date;
     String id,date,createdBy;
+    String[] datesSiteDiary;
+    String url, searchText;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,21 +95,23 @@ public class AllSiteDiary extends NewActivity implements View.OnClickListener, D
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        if (getIntent().hasExtra("search")) {
+            if (getIntent().getStringExtra("search").equals("yes")) {
+
+                searchText = getIntent().getStringExtra("searchText");
+
+                getSupportActionBar().setTitle("Site Diary Search Results : " + searchText);
+            }
+        }
+
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
         currentUserId = pm.getString("userId");
 
+        url = pm.getString("SERVER_URL") + "/getSiteDiary?projectId='"+currentProjectNo+"'";
+
         cd = new ConnectionDetector(getApplicationContext());
         isInternetPresent = cd.isConnectingToInternet();
-
-        // check for Internet status
-        if (!isInternetPresent) {
-            // Internet connection is not present
-            // Ask user to connect to Internet
-            RelativeLayout main_content = (RelativeLayout) findViewById(R.id.main_content);
-            Snackbar snackbar = Snackbar.make(main_content,getResources().getString(R.string.no_internet_error), Snackbar.LENGTH_LONG);
-            snackbar.show();
-        }
 
         siteDiaryAdapter = new AllSiteDiaryAdapter(siteList);
         recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
@@ -97,25 +119,117 @@ public class AllSiteDiary extends NewActivity implements View.OnClickListener, D
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(siteDiaryAdapter);
 
-        pDialog = new ProgressDialog(AllSiteDiary.this);
-        pDialog.setMessage("Getting Data ...");
-        pDialog.setIndeterminate(false);
-        pDialog.setCancelable(true);
-        pDialog.show();
+        // check for Internet status
+        if (!isInternetPresent) {
+            // Internet connection is not present
+            // Ask user to connect to Internet
+            RelativeLayout main_layout = (RelativeLayout) findViewById(R.id.main_layout);
+            Crouton.cancelAllCroutons();
+            Crouton.makeText(AllSiteDiary.this, R.string.no_internet_error, Style.ALERT, main_layout).show();
 
-        class MyTask extends AsyncTask<Void, Void, Void>
-        {
+            pDialog = new ProgressDialog(AllSiteDiary.this);
+            pDialog.setMessage("Getting cache data");
+            pDialog.show();
 
-            @Override
-            protected Void doInBackground(Void... params)
-            {
-                prepareItems();
-                return null;
+
+            Cache cache = AppController.getInstance().getRequestQueue().getCache();
+            Cache.Entry entry = cache.get(url);
+            if (entry != null) {
+                //Cache data available.
+                try {
+                    String data = new String(entry.data, "UTF-8");
+                    Log.d("CACHE DATA", data);
+                    JSONObject jsonObject = new JSONObject(data);
+                    try {
+                        dataArray = jsonObject.getJSONArray("data");
+                        datesSiteDiary = new String[dataArray.length()];
+
+                        for(int i=0; i<dataArray.length();i++)
+                        {
+                            dataObject = dataArray.getJSONObject(i);
+
+                            id = dataObject.getString("id");
+                            date = dataObject.getString("date");
+                            createdBy = dataObject.getString("createdBy");
+
+                            Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(date);
+                            date = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+
+                            if (getIntent().hasExtra("search"))
+                            {
+                                if (getIntent().getStringExtra("search").equals("yes")) {
+
+                                    if (id.toLowerCase().contains(searchText.toLowerCase()) || date.toLowerCase().contains(searchText.toLowerCase())) {
+
+                                        items = new AllSiteDiaryList(String.valueOf(i+1) , date, id, currentProjectNo, createdBy);
+                                        siteList.add(items);
+
+                                        datesSiteDiary[i] = date;
+
+                                        siteDiaryAdapter.notifyDataSetChanged();
+                                    }
+                                }
+                            }
+                            else
+                            {
+
+                                items = new AllSiteDiaryList(String.valueOf(i+1) , date, id, currentProjectNo, createdBy);
+                                siteList.add(items);
+
+                                datesSiteDiary[i] = date;
+
+                                siteDiaryAdapter.notifyDataSetChanged();
+                            }
+                            pDialog.dismiss();
+                        }
+
+                        Boolean createSiteDiaryPending = pm.getBoolean("createSiteDiaryPending");
+
+                        if (createSiteDiaryPending) {
+
+                            String jsonObjectVal = pm.getString("objectSiteDiary");
+                            Log.d("JSON QIR PENDING :", jsonObjectVal);
+
+                            JSONObject jsonObjectPending = new JSONObject(jsonObjectVal);
+                            Log.d("JSONObj QIR PENDING :", jsonObjectPending.toString());
+
+                            date = dataObject.getString("date");
+                            createdBy = dataObject.getString("createdBy");
+
+                            Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(date);
+                            date = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+
+                            items = new AllSiteDiaryList(String.valueOf(dataArray.length()+1) , date, id, currentProjectNo, createdBy);
+                            siteList.add(items);
+
+                            datesSiteDiary[dataArray.length()-1] = date;
+
+                            siteDiaryAdapter.notifyDataSetChanged();
+                            pDialog.dismiss();
+                        }
+
+                    } catch (JSONException | ParseException e) {
+                        e.printStackTrace();
+                    }
+//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
+                } catch (UnsupportedEncodingException | JSONException e) {
+                    e.printStackTrace();
+                }
+                if (pDialog != null)
+                    pDialog.dismiss();
             }
-
+            else
+            {
+                Toast.makeText(AllSiteDiary.this, "Offline Data Not available for this SiteDiary", Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
         }
 
-        new MyTask().execute();
+        else
+        {
+            // Cache data not exist.
+            callJsonArrayRequest();
+        }
 
         mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView); // Assigning the RecyclerView Object to the xml View
         mRecyclerView.setHasFixedSize(true);                            // Letting the system know that the list objects are of fixed size
@@ -163,11 +277,65 @@ public class AllSiteDiary extends NewActivity implements View.OnClickListener, D
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+
             case R.id.exportBtn:
             {
+                int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+                if (currentapiVersion > android.os.Build.VERSION_CODES.LOLLIPOP) {
+                    if (ContextCompat.checkSelfPermission(AllSiteDiary.this,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                            != PackageManager.PERMISSION_GRANTED) {
+
+                        ActivityCompat.requestPermissions(AllSiteDiary.this,
+                                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+
+                    }
+                    Environment.getExternalStorageState();
+
+                    String date = null, id = null, currentProjectNo = null, createdBy = null;
+                    int listSize = siteList.size();
+                    String cvsValues = "Date" + ","+ "ID" + ","+ "Project No" + ","+ "Created By\n";
+
+                    for(int i=0; i<listSize;i++)
+                    {
+                        AllSiteDiaryList items = siteList.get(i);
+                        date = items.getText_site_date();
+                        id = items.getText_site_id();
+                        currentProjectNo = items.getProject_id();
+                        createdBy = items.getCreated_by();
+
+                        cvsValues = cvsValues +  date + ","+ id + ","+ currentProjectNo + ","+ createdBy + "\n";
+                    }
+
+                    CsvCreateUtility.generateNoteOnSD(getApplicationContext(), "SiteDiary-data.csv", cvsValues);
+                }
+
+                else
+
+                {
+                    Environment.getExternalStorageState();
+
+                    String date = null, id = null, currentProjectNo = null, createdBy = null;
+                    int listSize = siteList.size();
+                    String cvsValues = "Date" + ","+ "ID" + ","+ "Project No" + ","+ "Created By\n";
+
+                    for(int i=0; i<listSize;i++)
+                    {
+                        AllSiteDiaryList items = siteList.get(i);
+                        date = items.getText_site_date();
+                        id = items.getText_site_id();
+                        currentProjectNo = items.getProject_id();
+                        createdBy = items.getCreated_by();
+
+                        cvsValues = cvsValues +  date + ","+ id + ","+ currentProjectNo + ","+ createdBy + "\n";
+                    }
+                    CsvCreateUtility.generateNoteOnSD(getApplicationContext(), "SiteDiary-data.csv", cvsValues);
+
+                }
 
             }
             break;
+
             case R.id.fab_add:
             {
                 final AlertDialog.Builder alert = new AlertDialog.Builder(AllSiteDiary.this,android.R.style.Theme_Translucent_NoTitleBar);
@@ -197,7 +365,6 @@ public class AllSiteDiary extends NewActivity implements View.OnClickListener, D
                     }
                 });
 
-
                 Button createBtn = (Button) dialogView.findViewById(R.id.createBtn);
 
                 createBtn.setOnClickListener(new View.OnClickListener() {
@@ -208,30 +375,35 @@ public class AllSiteDiary extends NewActivity implements View.OnClickListener, D
                         {
                             text_date.setError("Select Date");
                         }
-
                         else
-
                         {
-                            pDialog = new ProgressDialog(AllSiteDiary.this);
-                            pDialog.setMessage("Sending Data ...");
-                            pDialog.setIndeterminate(false);
-                            pDialog.setCancelable(true);
-                            pDialog.show();
+                            Boolean dateAlreadyDone = false;
 
-                            final String selecteddate = text_date.getText().toString();
-
-                            class MyTask extends AsyncTask<Void, Void, Void> {
-
-                                @Override
-                                protected Void doInBackground(Void... params) {
-
-                                    saveSiteDiary(selecteddate);
-                                    return null;
+                            if(datesSiteDiary!=null)
+                            {
+                                for(int i=0; i<datesSiteDiary.length; i++)
+                                {
+                                    if(text_date.getText().toString().equals(datesSiteDiary[i]))
+                                        dateAlreadyDone = true;
                                 }
                             }
 
-                            new MyTask().execute();
+                            Log.d("ALL DATES ", Arrays.toString(datesSiteDiary));
+                            if(dateAlreadyDone)
+                            {
+                                Toast.makeText(AllSiteDiary.this, "Site Diary for this date already exist", Toast.LENGTH_SHORT).show();
+                            }
+                            else
+                            {
+                                pDialog = new ProgressDialog(AllSiteDiary.this);
+                                pDialog.setMessage("Sending Data ...");
+                                pDialog.setIndeterminate(false);
+                                pDialog.setCancelable(true);
+                                pDialog.show();
 
+                                final String selecteddate = text_date.getText().toString();
+                                saveSiteDiary(selecteddate);
+                            }
                         }
                     }
                 });
@@ -240,13 +412,26 @@ public class AllSiteDiary extends NewActivity implements View.OnClickListener, D
             case R.id.fab_search:
             {
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setTitle("Search Site Diary !");
+                alert.setTitle("Search Site Diary by Date or ID !");
                 // Set an EditText view to get user input
                 final EditText input = new EditText(this);
+                input.setMaxLines(1);
+                input.setImeOptions(EditorInfo.IME_ACTION_DONE);
                 alert.setView(input);
                 alert.setPositiveButton("Search", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        Toast.makeText(AllSiteDiary.this, "Search for it .", Toast.LENGTH_SHORT).show();
+
+                        if (input.getText().toString().isEmpty()) {
+                            input.setError("Enter Search Field");
+                        } else {
+                            Intent intent = new Intent(AllSiteDiary.this, AllSiteDiary.class);
+                            intent.putExtra("search", "yes");
+                            intent.putExtra("searchText", input.getText().toString());
+
+                            Log.d("SEARCH TEXT", input.getText().toString());
+
+                            startActivity(intent);
+                        }
                     }
                 });
                 alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -260,63 +445,80 @@ public class AllSiteDiary extends NewActivity implements View.OnClickListener, D
         }
     }
 
-    public void prepareItems()
-    {
+    private void callJsonArrayRequest() {
+        // TODO Auto-generated method stub
 
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        pDialog = new ProgressDialog(AllSiteDiary.this);
+        pDialog.setMessage("Getting server data");
+        pDialog.show();
 
-        String url = getResources().getString(R.string.server_url) + "/getSiteDiary?projectId='"+currentProjectNo+"'";
-
-        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+                        try
+                        {
+//                            dataObject = response.getJSONObject(0);
+                            dataArray = response.getJSONArray("data");
+                            datesSiteDiary = new String[dataArray.length()];
 
-                        try{
-
-                            String type = response.getString("type");
-
-                            if(type.equals("ERROR"))
+                            for(int i=0; i<dataArray.length();i++)
                             {
-                                Toast.makeText(AllSiteDiary.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
-                            }
+                                dataObject = dataArray.getJSONObject(i);
 
-                            if(type.equals("INFO"))
-                            {
-                                dataArray = response.getJSONArray("data");
-                                for(int i=0; i<dataArray.length();i++)
+                                id = dataObject.getString("id");
+                                date = dataObject.getString("date");
+                                createdBy = dataObject.getString("createdBy");
+
+                                Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(date);
+                                date = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+
+                                if (getIntent().hasExtra("search"))
                                 {
-                                    dataObject = dataArray.getJSONObject(i);
+                                    if (getIntent().getStringExtra("search").equals("yes")) {
 
-                                    id = dataObject.getString("id");
-                                    date = dataObject.getString("date");
-                                    createdBy = dataObject.getString("createdBy");
+                                        if (id.toLowerCase().contains(searchText.toLowerCase()) || date.toLowerCase().contains(searchText.toLowerCase())) {
 
-                                    Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(date);
-                                    date = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+                                            items = new AllSiteDiaryList(String.valueOf(i+1) , date, id, currentProjectNo, createdBy);
+                                            siteList.add(items);
+
+                                            datesSiteDiary[i] = date;
+
+                                            siteDiaryAdapter.notifyDataSetChanged();
+                                        }
+                                    }
+                                }
+                                else
+                                {
 
                                     items = new AllSiteDiaryList(String.valueOf(i+1) , date, id, currentProjectNo, createdBy);
                                     siteList.add(items);
 
+                                    datesSiteDiary[i] = date;
+
                                     siteDiaryAdapter.notifyDataSetChanged();
-                                    pDialog.dismiss();
                                 }
+
+                                pDialog.dismiss();
                             }
-                            pDialog.dismiss();
-                        }catch(JSONException e){e.printStackTrace();} catch (ParseException e) {
+                        } catch (JSONException | ParseException e) {
                             e.printStackTrace();
                         }
+//                        setData(response,false);
                     }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("Volley","Error");
-
-                    }
-                }
-        );
-        requestQueue.add(jor);
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        });
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(jsonObjectRequest);
+        if(pDialog!=null)
+            pDialog.dismiss();
     }
 
     public void saveSiteDiary(String date)
@@ -335,15 +537,13 @@ public class AllSiteDiary extends NewActivity implements View.OnClickListener, D
 
             Log.d("REQUEST SENT OF JSON :" , object.toString());
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
+        } catch (JSONException | ParseException e) {
             e.printStackTrace();
         }
 
         RequestQueue requestQueue = Volley.newRequestQueue(AllSiteDiary.this);
 
-        String url = AllSiteDiary.this.getResources().getString(R.string.server_url) + "/postSiteDiary";
+        String url = AllSiteDiary.this.pm.getString("SERVER_URL") + "/postSiteDiary";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -374,7 +574,39 @@ public class AllSiteDiary extends NewActivity implements View.OnClickListener, D
                     }
                 }
         );
-        requestQueue.add(jor);
+        if (!isInternetPresent)
+        {
+            pDialog.dismiss();
+            // Internet connection is not present
+
+            Communicator communicator = new Communicator();
+            Log.d("object", object.toString());
+
+            Boolean createSiteDiaryPending = pm.getBoolean("createSiteDiaryPending");
+
+            if(createSiteDiaryPending)
+            {
+                Toast.makeText(AllSiteDiary.this, "Already an Site Diary creation is in progress. Please try after sometime.", Toast.LENGTH_LONG).show();
+            }
+            else
+            {
+                Toast.makeText(AllSiteDiary.this, "Internet not currently available. Site Diary will automatically get created on internet connection.", Toast.LENGTH_SHORT).show();
+
+                pm.putString("objectSiteDiary", object.toString());
+                pm.putString("urlSiteDiary", url);
+                pm.putString("toastMessageSiteDiary", "Site Diary Created");
+                pm.putBoolean("createSiteDiaryPending", true);
+
+                pDialog.dismiss();
+                Intent intent = new Intent(AllSiteDiary.this, AllSiteDiary.class);
+                startActivity(intent);
+
+            }
+        }
+        else
+        {
+            requestQueue.add(jor);
+        }
     }
 
     @Override
@@ -396,5 +628,11 @@ public class AllSiteDiary extends NewActivity implements View.OnClickListener, D
         }
 
         text_date.setText(date);
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(AllSiteDiary.this, SiteProjectDelivery.class);
+        startActivity(intent);
     }
 }

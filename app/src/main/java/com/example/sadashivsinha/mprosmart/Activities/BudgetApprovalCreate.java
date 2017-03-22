@@ -43,13 +43,14 @@ public class BudgetApprovalCreate extends AppCompatActivity {
     JSONObject dataObject;
     String[] itemArray, itemDescArray;
     String currentApproval, currentUserId, currentDate;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_budget_approval_create);
 
-        PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
         currentApproval = pm.getString("currentApproval");
         currentUserId = pm.getString("userId");
@@ -183,7 +184,7 @@ public class BudgetApprovalCreate extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(BudgetApprovalCreate.this);
 
-        String url = BudgetApprovalCreate.this.getResources().getString(R.string.server_url) + "/postBudgetApprovalLines";
+        String url = BudgetApprovalCreate.this.pm.getString("SERVER_URL") + "/postBudgetApprovalLines";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -222,7 +223,7 @@ public class BudgetApprovalCreate extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getItems?projectId='"+currentProjectNo+"'";
+        String url = pm.getString("SERVER_URL") + "/getItems?projectId='"+currentProjectNo+"'";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {

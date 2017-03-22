@@ -20,17 +20,14 @@ private List<BoqList> boqList;
 
 public class MyViewHolder extends RecyclerView.ViewHolder {
 
-    public TextView text_item, text_quantity, text_uom, text_cost, text_currency, text_total_cost;
+    public TextView text_item, text_quantity, text_uom, text_item_name;
 
     public MyViewHolder(final View view) {
         super(view);
         text_item = (TextView) view.findViewById(R.id.text_item);
         text_quantity = (TextView) view.findViewById(R.id.text_quantity);
         text_uom = (TextView) view.findViewById(R.id.text_uom);
-        text_cost = (TextView) view.findViewById(R.id.text_cost);
-        text_currency = (TextView) view.findViewById(R.id.text_currency);
-        text_total_cost = (TextView) view.findViewById(R.id.text_total_cost);
-
+        text_item_name = (TextView) view.findViewById(R.id.text_item_name);
     }
 }
 
@@ -51,9 +48,7 @@ public class MyViewHolder extends RecyclerView.ViewHolder {
         holder.text_item.setText(items.getText_item());
         holder.text_quantity.setText(items.getText_quantity());
         holder.text_uom.setText(items.getText_uom());
-        holder.text_cost.setText(items.getText_cost());
-        holder.text_currency.setText(items.getText_currency());
-        holder.text_total_cost.setText(items.getText_total_cost());
+        holder.text_item_name.setText(items.getItemName());
     }
 
     @Override

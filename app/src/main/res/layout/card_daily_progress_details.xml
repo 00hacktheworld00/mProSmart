@@ -13,52 +13,17 @@
     android:layout_marginRight="@dimen/very_small_margin"
     android:transitionName="card"
     android:background="@color/white"
-    android:elevation="@dimen/_3sdp"
+    app:cardElevation="@dimen/_3sdp"
     tools:ignore="UnusedAttribute">
-
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:background="@color/baby_blue"
-            android:id="@+id/weather_layout">
-
-            <ImageView
-                android:layout_width="@dimen/_50sdp"
-                android:layout_height="@dimen/_50sdp"
-                android:id="@+id/weather_icon"
-                android:layout_margin="@dimen/very_very_small_margin"
-                android:background="@drawable/weather_sunny"/>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/_50sdp"
-                android:layout_margin="@dimen/very_very_small_margin"
-                android:layout_toRightOf="@+id/weather_icon"
-                android:orientation="vertical">
-
-                <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/_13sdp"
-                    android:gravity="center"
-                    android:text="Cloudy weather with high speed wind"
-                    android:id="@+id/weather_title" />
-
-            </LinearLayout>
-        </RelativeLayout>
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_below="@+id/weather_layout">
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -156,36 +121,7 @@
                         <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Target Date"
-                            android:layout_weight="1" />
-
-                        <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text=" : " />
-
-                        <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="16/March/2016"
-                            android:layout_weight="1"
-                            android:id="@+id/target_date"
-                            android:gravity="right" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:weightSum="2"
-                        android:layout_marginLeft="@dimen/activity_vertical_margin"
-                        android:layout_marginTop="@dimen/very_very_small_margin"
-                        android:orientation="horizontal"
-                        android:layout_marginRight="@dimen/activity_vertical_margin">
-
-                        <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Completed"
+                            android:text="Status"
                             android:layout_weight="1" />
 
                         <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
@@ -214,36 +150,7 @@
                         <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Percent Completed (%)"
-                            android:layout_weight="1" />
-
-                        <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text=" : " />
-
-                        <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="100"
-                            android:layout_weight="1"
-                            android:id="@+id/percent_completed"
-                            android:gravity="right" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:weightSum="2"
-                        android:layout_marginLeft="@dimen/activity_vertical_margin"
-                        android:layout_marginTop="@dimen/very_very_small_margin"
-                        android:orientation="horizontal"
-                        android:layout_marginRight="@dimen/activity_vertical_margin">
-
-                        <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Resources Worked"
+                            android:text="Resource Worked"
                             android:layout_weight="1" />
 
                         <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
@@ -259,6 +166,119 @@
                             android:id="@+id/res_worked"
                             android:gravity="right" />
                     </LinearLayout>
+
+
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:weightSum="2"
+                        android:layout_marginLeft="@dimen/activity_vertical_margin"
+                        android:layout_marginTop="@dimen/very_very_small_margin"
+                        android:orientation="horizontal"
+                        android:layout_marginRight="@dimen/activity_vertical_margin">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_weight="1">
+
+                            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Today's Progress (%)" />
+
+                        </LinearLayout>
+
+                        <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" : " />
+
+                        <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="20"
+                            android:layout_weight="1"
+                            android:id="@+id/percent_completed_today"
+                            android:gravity="right" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:weightSum="2"
+                        android:layout_marginLeft="@dimen/activity_vertical_margin"
+                        android:layout_marginTop="@dimen/very_very_small_margin"
+                        android:orientation="horizontal"
+                        android:layout_marginRight="@dimen/activity_vertical_margin">
+
+                        <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Total Progress (%)"
+                            android:layout_weight="1" />
+
+                        <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" : " />
+
+                        <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="80"
+                            android:layout_weight="1"
+                            android:id="@+id/percent_completed_total"
+                            android:gravity="right" />
+                    </LinearLayout>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginLeft="@dimen/activity_vertical_margin"
+                        android:layout_marginTop="@dimen/small_margin"
+                        android:layout_marginRight="@dimen/activity_vertical_margin">
+
+                        <ProgressBar style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="fill_parent"
+                            android:layout_height="7dip"
+                            android:id="@+id/progress_bar_total"
+                            android:max="100"
+                            android:progress="0"
+                            android:progressTint="@color/success_green"/>
+
+                        <ProgressBar style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="fill_parent"
+                            android:layout_height="7dip"
+                            android:id="@+id/progress_bar_today"
+                            android:max="100"
+                            android:progress="0"
+                            android:progressTint="@color/material_light_yellow_800"/>
+                    </RelativeLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/activity_vertical_margin"
+                        android:layout_marginTop="@dimen/very_small_margin"
+                        android:orientation="horizontal"
+                        android:layout_marginRight="@dimen/activity_vertical_margin">
+
+                        <ImageButton
+                            android:layout_width="@dimen/_13sdp"
+                            android:layout_height="@dimen/_13sdp"
+                            android:layout_marginRight="@dimen/small_margin"
+                            android:background="@color/success_green"/>
+
+                        <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Today's Progress"/>
+                    </LinearLayout>
+
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>

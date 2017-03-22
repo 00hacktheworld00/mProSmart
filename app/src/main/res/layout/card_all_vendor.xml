@@ -37,7 +37,7 @@
                     android:background="@drawable/ic_circle"
                     android:orientation="vertical">
 
-                    <TextView
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="1"
@@ -68,7 +68,7 @@
                     android:orientation="horizontal">
 
 
-                    <TextView
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:textColor="@color/main_color_grey_800"
@@ -77,7 +77,7 @@
                         android:textStyle="bold"
                         android:id="@+id/title" />
 
-                    <TextView
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:textSize="@dimen/_15sdp"
@@ -92,7 +92,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/very_very_small_margin"
                     android:orientation="horizontal">
-                    <TextView
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_marginLeft="@dimen/activity_vertical_margin"
@@ -101,7 +101,7 @@
                         android:text="Vendor Name : "
                         android:textStyle="bold" />
 
-                    <TextView
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaBold
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:textSize="@dimen/_10sdp"
@@ -117,7 +117,7 @@
                     android:layout_marginTop="@dimen/very_very_small_margin"
                     android:orientation="horizontal" >
 
-                    <TextView
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_marginLeft="@dimen/activity_vertical_margin"
@@ -125,7 +125,7 @@
                         android:text="Vendor Type : "
                         android:textStyle="bold" />
 
-                    <TextView
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:textSize="@dimen/_10sdp"
@@ -140,7 +140,7 @@
                     android:layout_marginTop="@dimen/very_very_small_margin"
                     android:orientation="horizontal" >
 
-                    <TextView
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_marginLeft="@dimen/activity_vertical_margin"
@@ -148,7 +148,7 @@
                         android:text="Discipline : "
                         android:textStyle="bold" />
 
-                    <TextView
+                    <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:textSize="@dimen/_10sdp"
@@ -170,6 +170,21 @@
                     android:layout_marginRight="@dimen/_10sdp" />
 
             </RelativeLayout>
+
+            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:id="@+id/text_tax_id"/>
+
+            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:id="@+id/text_licence_no"/>
+
+            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:id="@+id/text_company_name"/>
 
         </LinearLayout>
 

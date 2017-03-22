@@ -20,6 +20,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -38,6 +39,7 @@ import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.Adapters.PurchaseOrdersAdapter;
+import com.example.sadashivsinha.mprosmart.ModelLists.AllPurchaseRequisitionList;
 import com.example.sadashivsinha.mprosmart.ModelLists.PurchaseOrdersList;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
@@ -86,7 +88,7 @@ public class PurchaseOrders extends NewActivity implements View.OnClickListener 
     View dialogView;
     AlertDialog show;
     String email_send_to, email_send_from, text, email_username, email_password;
-    String url, vendor_url;
+    String url, vendor_url, approved, searchText;
     PreferenceManager pm;
 
     @Override
@@ -97,6 +99,15 @@ public class PurchaseOrders extends NewActivity implements View.OnClickListener 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        if (getIntent().hasExtra("search")) {
+            if (getIntent().getStringExtra("search").equals("yes")) {
+
+                searchText = getIntent().getStringExtra("searchText");
+
+                getSupportActionBar().setTitle("PO Search Results : " + searchText);
+            }
+        }
+
         pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
         currentUserId = pm.getString("userId");
@@ -106,8 +117,8 @@ public class PurchaseOrders extends NewActivity implements View.OnClickListener 
         cd = new ConnectionDetector(getApplicationContext());
         isInternetPresent = cd.isConnectingToInternet();
 
-        url = getResources().getString(R.string.server_url) + "/getPurchaseOrders?projectId='"+currentProjectNo+"'";
-        vendor_url = getResources().getString(R.string.server_url) + "/getVendors";
+        url = pm.getString("SERVER_URL") + "/getPurchaseOrders?projectId='"+currentProjectNo+"'";
+        vendor_url = pm.getString("SERVER_URL") + "/getVendors";
         // check for Internet status
 
         recyclerView.setLayoutManager(new LinearLayoutManager(PurchaseOrders.this));
@@ -145,53 +156,109 @@ public class PurchaseOrders extends NewActivity implements View.OnClickListener 
                             createdOn = dataObject.getString("createdDate");
                             createdBy = dataObject.getString("createdBy");
                             totalAmount = dataObject.getString("totalAmount");
+                            approved = dataObject.getString("approved");
 
                             Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(createdOn);
                             createdOn = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
 
-                            items = new PurchaseOrdersList(String.valueOf(i+1), poId,vendorCode,createdOn, createdBy, totalAmount);
-                            purchaseOrdersList.add(items);
 
-                            purchaseOrdersAdapter.notifyDataSetChanged();
+                            if (getIntent().hasExtra("search"))
+                            {
+                                if (getIntent().getStringExtra("search").equals("yes")) {
+
+                                    if (poId.toLowerCase().contains(searchText.toLowerCase())){
+                                        items = new PurchaseOrdersList(String.valueOf(i+1), poId,vendorCode,createdOn, createdBy, totalAmount, approved);
+                                        purchaseOrdersList.add(items);
+
+                                        purchaseOrdersAdapter.notifyDataSetChanged();
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                items = new PurchaseOrdersList(String.valueOf(i+1), poId,vendorCode,createdOn, createdBy, totalAmount, approved);
+                                purchaseOrdersList.add(items);
+
+                                purchaseOrdersAdapter.notifyDataSetChanged();
+                            }
+
                             pDialog.dismiss();
                         }
 
 
                         //check if is offline mode and data creation is pending
 
-                        Boolean createPoPending = pm.getBoolean("createPoPending");
-                        Log.d("create Po Pending :", createPoPending.toString());
+//                        Boolean createPoPending = pm.getBoolean("createPoPending");
+//                        Log.d("create Po Pending :", createPoPending.toString());
+//
+//                        if(createPoPending)
+//                        {
+//                            //if is in offline mode and data creation is pending, show the data in the list
+//
+//                            String jsonObjectVal = pm.getString("objectPO");
+//                            Log.d("JSON PO PENDING :", jsonObjectVal);
+//
+//                            JSONObject jsonObjectPending = new JSONObject(jsonObjectVal);
+//                            Log.d("JSONObj PO PENDING :", jsonObjectPending.toString());
+//
+//                            projectId = jsonObjectPending.getString("projectId");
+//
+//                            if(projectId.equals(currentProjectNo))
+//                            {
+//                                vendorCode = jsonObjectPending.getString("vendorId");
+//                                createdOn = jsonObjectPending.getString("createdDate");
+//                                createdBy = jsonObjectPending.getString("createdBy");
+//
+//                                Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(createdOn);
+//                                createdOn = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+//
+//                                Log.d("JSONObj vendorCode :", vendorCode);
+//                                Log.d("JSONObj createdOn :", createdOn);
+//                                Log.d("JSONObj createdBy :", createdBy);
+//                                Log.d("JSONObj createdOn :", createdOn);
+//
+//                                items = new PurchaseOrdersList(String.valueOf(dataArray.length() + 1), getResources().getString(R.string.waiting_to_connect) ,vendorCode,createdOn, createdBy, "0", "0");
+//                                purchaseOrdersList.add(items);
+//
+//                                purchaseOrdersAdapter.notifyDataSetChanged();
+//                            }
+//                        }
 
-                        if(createPoPending)
+                        int noOfPendingPo = pm.getInt("poPending");
+
+                        if(noOfPendingPo!=0)
                         {
-                            //if is in offline mode and data creation is pending, show the data in the list
-
-                            String jsonObjectVal = pm.getString("objectPO");
-                            Log.d("JSON PO PENDING :", jsonObjectVal);
-
-                            JSONObject jsonObjectPending = new JSONObject(jsonObjectVal);
-                            Log.d("JSONObj PO PENDING :", jsonObjectPending.toString());
-
-                            projectId = jsonObjectPending.getString("projectId");
-
-                            if(projectId.equals(currentProjectNo))
+                            for(int i=1; i<noOfPendingPo+1; i++)
                             {
-                                vendorCode = jsonObjectPending.getString("vendorId");
-                                createdOn = jsonObjectPending.getString("createdDate");
-                                createdBy = jsonObjectPending.getString("createdBy");
+                                Log.d("PO Pend Que", String.valueOf(noOfPendingPo));
 
-                                Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(createdOn);
-                                createdOn = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+                                String jsonObjectVal = pm.getString("objectPO" + String.valueOf(i));
+                                Log.d("JSON PO PENDING :", jsonObjectVal);
 
-                                Log.d("JSONObj vendorCode :", vendorCode);
-                                Log.d("JSONObj createdOn :", createdOn);
-                                Log.d("JSONObj createdBy :", createdBy);
-                                Log.d("JSONObj createdOn :", createdOn);
+                                JSONObject jsonObjectPending = new JSONObject(jsonObjectVal);
+                                Log.d("JSONObj PO PENDING :", jsonObjectPending.toString());
 
-                                items = new PurchaseOrdersList(String.valueOf(dataArray.length() + 1), getResources().getString(R.string.waiting_to_connect) ,vendorCode,createdOn, createdBy, "0");
-                                purchaseOrdersList.add(items);
+                                projectId = jsonObjectPending.getString("projectId");
 
-                                purchaseOrdersAdapter.notifyDataSetChanged();
+                                if(projectId.equals(currentProjectNo))
+                                {
+                                    vendorCode = jsonObjectPending.getString("vendorId");
+                                    createdOn = jsonObjectPending.getString("createdDate");
+                                    createdBy = jsonObjectPending.getString("createdBy");
+
+                                    Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(createdOn);
+                                    createdOn = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+
+                                    Log.d("JSONObj vendorCode :", vendorCode);
+                                    Log.d("JSONObj createdOn :", createdOn);
+                                    Log.d("JSONObj createdBy :", createdBy);
+                                    Log.d("JSONObj createdOn :", createdOn);
+
+                                    items = new PurchaseOrdersList(String.valueOf(dataArray.length() + i), getResources().getString(R.string.waiting_to_connect)+ " " + String.valueOf(i) ,vendorCode,createdOn, createdBy, "0", "0");
+                                    purchaseOrdersList.add(items);
+
+                                    purchaseOrdersAdapter.notifyDataSetChanged();
+                                }
                             }
                         }
 
@@ -313,13 +380,26 @@ public class PurchaseOrders extends NewActivity implements View.OnClickListener 
             case R.id.fab_search:
             {
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setTitle("Search Purchase Order !");
+                alert.setTitle("Search Purchase Orders by ID !");
                 // Set an EditText view to get user input
                 final EditText input = new EditText(this);
+                input.setMaxLines(1);
+                input.setImeOptions(EditorInfo.IME_ACTION_DONE);
                 alert.setView(input);
                 alert.setPositiveButton("Search", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        Toast.makeText(PurchaseOrders.this, "Search for it .", Toast.LENGTH_SHORT).show();
+
+                        if (input.getText().toString().isEmpty()) {
+                            input.setError("Enter Search Field");
+                        } else {
+                            Intent intent = new Intent(PurchaseOrders.this, PurchaseOrders.class);
+                            intent.putExtra("search", "yes");
+                            intent.putExtra("searchText", input.getText().toString());
+
+                            Log.d("SEARCH TEXT", input.getText().toString());
+
+                            startActivity(intent);
+                        }
                     }
                 });
                 alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -355,14 +435,31 @@ public class PurchaseOrders extends NewActivity implements View.OnClickListener 
                                 createdOn = dataObject.getString("createdDate");
                                 createdBy = dataObject.getString("createdBy");
                                 totalAmount = dataObject.getString("totalAmount");
+                                approved = dataObject.getString("approved");
 
                                 Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(createdOn);
                                 createdOn = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
 
-                                items = new PurchaseOrdersList(String.valueOf(i+1), poId,vendorCode,createdOn, createdBy, totalAmount);
-                                purchaseOrdersList.add(items);
+                                if (getIntent().hasExtra("search"))
+                                {
+                                    if (getIntent().getStringExtra("search").equals("yes")) {
 
-                                purchaseOrdersAdapter.notifyDataSetChanged();
+                                        if (poId.toLowerCase().contains(searchText.toLowerCase())){
+                                            items = new PurchaseOrdersList(String.valueOf(i+1), poId,vendorCode,createdOn, createdBy, totalAmount, approved);
+                                            purchaseOrdersList.add(items);
+
+                                            purchaseOrdersAdapter.notifyDataSetChanged();
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    items = new PurchaseOrdersList(String.valueOf(i+1), poId,vendorCode,createdOn, createdBy, totalAmount, approved);
+                                    purchaseOrdersList.add(items);
+
+                                    purchaseOrdersAdapter.notifyDataSetChanged();
+                                }
+
                             }
                         }
                         catch (ParseException | JSONException e)
@@ -488,7 +585,7 @@ public class PurchaseOrders extends NewActivity implements View.OnClickListener 
 
         RequestQueue requestQueue = Volley.newRequestQueue(PurchaseOrders.this);
 
-        String url = PurchaseOrders.this.getResources().getString(R.string.server_url) + "/postPurchaseOrder";
+        String url = PurchaseOrders.this.pm.getString("SERVER_URL") + "/postPurchaseOrder";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -512,6 +609,9 @@ public class PurchaseOrders extends NewActivity implements View.OnClickListener 
                             email_send_from = PurchaseOrders.this.getResources().getString(R.string.SENDGRID_EMAIL_SEND_FROM);
                             SendEmailASyncTask  task = new SendEmailASyncTask(getApplicationContext(), email_send_to, email_send_from, "New Purchase Order Creation", text, email_username, email_password);
                             task.execute();
+
+                            Intent intent = new Intent(PurchaseOrders.this, PurchaseOrders.class);
+                            startActivity(intent);
 
                         }
                         catch (JSONException e)
@@ -540,21 +640,22 @@ public class PurchaseOrders extends NewActivity implements View.OnClickListener 
             Communicator communicator = new Communicator();
             Log.d("object", object.toString());
 
-            Boolean createPoPending = pm.getBoolean("createPoPending");
+            Toast.makeText(PurchaseOrders.this, "Internet not currently available. PO will automatically get created on internet connection.", Toast.LENGTH_SHORT).show();
 
-            if(createPoPending)
-            {
-                Toast.makeText(PurchaseOrders.this, "Already a PO creation is in progress. Please try after sometime.", Toast.LENGTH_LONG).show();
-            }
-            else
-            {
-                Toast.makeText(PurchaseOrders.this, "Internet not currently available. PO will automatically get created on internet connection.", Toast.LENGTH_SHORT).show();
+            int noOfPendingPo = pm.getInt("poPending");
+            Log.d("PO Pending", String.valueOf(noOfPendingPo));
 
-                pm.putString("objectPO", object.toString());
-                pm.putString("urlPO", url);
-                pm.putString("toastMessagePO", "Purchase Order Created");
-                pm.putBoolean("createPoPending", true);
-            }
+            noOfPendingPo++;
+
+            pm.putString("objectPO" + String.valueOf(noOfPendingPo), object.toString());
+            pm.putString("urlPO" + String.valueOf(noOfPendingPo), url);
+            pm.putString("toastMessagePO" + String.valueOf(noOfPendingPo), "Purchase Order Created");
+            pm.putBoolean("createPoPending"+ String.valueOf(noOfPendingPo), true);
+
+            pm.putInt("poPending", noOfPendingPo);
+
+            Intent intent = new Intent(PurchaseOrders.this, PurchaseOrders.class);
+            startActivity(intent);
         }
         else
         {
@@ -562,9 +663,6 @@ public class PurchaseOrders extends NewActivity implements View.OnClickListener 
         }
         if(pDialog!=null)
             pDialog.dismiss();
-
-        Intent intent = new Intent(PurchaseOrders.this, PurchaseOrders.class);
-        startActivity(intent);
     }
 
 
@@ -644,6 +742,9 @@ public class PurchaseOrders extends NewActivity implements View.OnClickListener 
         spinner_vendor = (Spinner) dialogView.findViewById(R.id.spinner_vendor);
 
         Button createBtn = (Button) dialogView.findViewById(R.id.createBtn);
+
+        cd = new ConnectionDetector(getApplicationContext());
+        isInternetPresent = cd.isConnectingToInternet();
 
         if (!isInternetPresent)
         {
@@ -748,7 +849,7 @@ public class PurchaseOrders extends NewActivity implements View.OnClickListener 
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(PurchaseOrders.this, ViewPurchaseOrders.class);
+        Intent intent = new Intent(PurchaseOrders.this, SiteProcurementActivity.class);
         startActivity(intent);
     }
 

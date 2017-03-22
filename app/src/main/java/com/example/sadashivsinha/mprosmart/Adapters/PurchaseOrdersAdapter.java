@@ -22,6 +22,7 @@ import com.example.sadashivsinha.mprosmart.Activities.PurchaseReceiptsNew;
 import com.example.sadashivsinha.mprosmart.ModelLists.PurchaseOrdersList;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
+import com.example.sadashivsinha.mprosmart.font.HelveticaBold;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,9 +43,11 @@ public class PurchaseOrdersAdapter extends RecyclerView.Adapter<PurchaseOrdersAd
     JSONArray dataArray;
     JSONObject dataObject;
     String[] itemArray;
+    PreferenceManager pm;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView po_index, po_number, vendor_code, created_on, created_by, total_amount;
+        HelveticaBold text_not_approved;
         public FancyButton btn_items, btn_receipt;
 
         public MyViewHolder(final View view) {
@@ -56,23 +59,13 @@ public class PurchaseOrdersAdapter extends RecyclerView.Adapter<PurchaseOrdersAd
             created_by = (TextView) view.findViewById(R.id.created_by);
             total_amount = (TextView) view.findViewById(R.id.total_amount);
 
+            text_not_approved = (HelveticaBold) view.findViewById(R.id.text_not_approved);
+
             btn_items = (FancyButton) view.findViewById(R.id.btn_items);
             btn_receipt = (FancyButton) view.findViewById(R.id.btn_receipt);
 
-            final PreferenceManager pm = new PreferenceManager(view.getContext());
+            pm = new PreferenceManager(view.getContext());
             currentProjectNo = pm.getString("projectId");
-
-            btn_receipt.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(itemView.getContext(), PurchaseReceiptsNew.class);
-                    String poNumber = po_number.getText().toString();
-                    pm.putString("poNumber",poNumber);
-                    pm.putString("createdOn",created_on.getText().toString());
-                    pm.putString("vendorCode",vendor_code.getText().toString());
-                    itemView.getContext().startActivity(intent);
-                }
-            });
         }
     }
 
@@ -97,6 +90,34 @@ public class PurchaseOrdersAdapter extends RecyclerView.Adapter<PurchaseOrdersAd
         holder.created_on.setText(items.getCreated_on());
         holder.created_by.setText(items.getCreated_by());
         holder.total_amount.setText(items.getTotal_amount());
+
+        if(items.getApproved().equals("0"))
+        {
+            holder.text_not_approved.setVisibility(View.VISIBLE);
+
+            holder.btn_receipt.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(holder.itemView.getContext(), "Purchase Order is not APPROVED yet.", Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+        else
+        {
+            holder.text_not_approved.setVisibility(View.GONE);
+
+            holder.btn_receipt.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(holder.itemView.getContext(), PurchaseReceiptsNew.class);
+                    String poNumber = holder.po_number.getText().toString();
+                    pm.putString("poNumber",poNumber);
+                    pm.putString("createdOn",holder.created_on.getText().toString());
+                    pm.putString("vendorCode",holder.vendor_code.getText().toString());
+                    holder.itemView.getContext().startActivity(intent);
+                }
+            });
+        }
 
 //
 //        pDialog = new ProgressDialog(holder.itemView.getContext());
@@ -149,7 +170,10 @@ public class PurchaseOrdersAdapter extends RecyclerView.Adapter<PurchaseOrdersAd
                     pm.putString("totalAmount",holder.total_amount.getText().toString());
 
                     intent.putExtra("createItem", "yes");
-
+                    if(holder.po_number.getText().toString().contains(holder.itemView.getResources().getString(R.string.waiting_to_connect)))
+                    {
+                        intent.putExtra("OFFLINE", holder.po_number.getText().toString().substring(holder.po_number.getText().toString().lastIndexOf(",") + 1).trim());
+                    }
                     holder.itemView.getContext().startActivity(intent);
                 }
 
@@ -161,8 +185,18 @@ public class PurchaseOrdersAdapter extends RecyclerView.Adapter<PurchaseOrdersAd
                     pm.putString("vendorCode",holder.vendor_code.getText().toString());
                     pm.putString("createdBy",holder.created_by.getText().toString());
                     pm.putString("createdOn",holder.created_on.getText().toString());
-                    holder.itemView.getContext().startActivity(intent);
-                    pm.putString("totalAmount",holder.total_amount.getText().toString());
+
+                    if(holder.po_number.getText().toString().contains(holder.itemView.getResources().getString(R.string.waiting_to_connect)))
+                    {
+                        intent.putExtra("OFFLINE", holder.po_number.getText().toString().substring(holder.po_number.getText().toString().lastIndexOf(",") + 1).trim());
+                        Toast.makeText(holder.itemView.getContext(), "PO not approved", Toast.LENGTH_SHORT).show();
+                    }
+                    else
+                    {
+                        pm.putString("totalAmount",holder.total_amount.getText().toString());
+
+                        holder.itemView.getContext().startActivity(intent);
+                    }
                 }
             }
         });
@@ -181,7 +215,7 @@ public class PurchaseOrdersAdapter extends RecyclerView.Adapter<PurchaseOrdersAd
 
         RequestQueue requestQueue = Volley.newRequestQueue(context);
 
-        String url = context.getResources().getString(R.string.server_url) + "/getPurchaseLineItems?purchaseOrderId='"+currentPoNo+"'";
+        String url = pm.getString("SERVER_URL")  + "/getPurchaseLineItems?purchaseOrderId='"+currentPoNo+"'";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {

@@ -46,7 +46,7 @@
                     android:layout_width="@dimen/_141sdp"
                     android:layout_height="@dimen/_58sdp"
                     android:transitionName="profilePic"
-                    android:background="@drawable/one_image"
+                    android:src="@drawable/profile_picture"
                     android:layout_centerVertical="true"
                     android:layout_centerHorizontal="true" />
 
@@ -67,7 +67,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="admin@gaursonsindia.com"
+                    android:text="admin"
                     android:textSize="@dimen/heading_big"
                     android:textColor="@color/white"
                     android:typeface="normal"
@@ -127,7 +127,7 @@
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:background="?attr/selectableItemBackground"
-                            android:id="@+id/record_expense_layout">
+                            android:id="@+id/dashboard_layout">
 
                             <ImageView
                                 android:id="@+id/record_expense"
@@ -140,7 +140,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="SETTINGS"
+                                android:text="DASHBOARD"
                                 android:textSize="@dimen/subheading_main"
                                 android:textColor="@color/colorPrimary"
                                 android:typeface="normal"

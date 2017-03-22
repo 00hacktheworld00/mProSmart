@@ -169,7 +169,7 @@ public class InvoiceSeperateItems extends NewActivity {
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getInvoiceLineItems?lineNo=\""+current_line_no+"\"";
+        String url = pm.getString("SERVER_URL") + "/getInvoiceLineItems?lineNo=\""+current_line_no+"\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {

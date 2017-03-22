@@ -65,6 +65,7 @@ public class AllProjectsActivity extends NewActivity implements View.OnClickList
     AllProjectsList items;
     ProgressDialog pDialog;
     String currentProjectNo;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +73,7 @@ public class AllProjectsActivity extends NewActivity implements View.OnClickList
         setContentView(R.layout.activity_all_projects);
         circleView = (CircleImageView) findViewById(R.id.circleView);
 
-        PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -171,7 +172,7 @@ public class AllProjectsActivity extends NewActivity implements View.OnClickList
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getWbs?projectId='"+currentProjectNo+"'";
+        String url = pm.getString("SERVER_URL") + "/getWbs?projectId='"+currentProjectNo+"'";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {

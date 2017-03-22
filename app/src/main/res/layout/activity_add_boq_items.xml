@@ -183,7 +183,7 @@
                                                     android:layout_marginBottom="@dimen/_1sdp"
                                                     android:textColor="@color/colorPrimary" />
 
-                                                <Spinner
+                                                <EditText
                                                     android:layout_width="match_parent"
                                                     android:layout_height="@dimen/_33sdp"
                                                     android:padding="10dp"
@@ -192,40 +192,10 @@
                                                     android:textColor="#000000"
                                                     android:background="@drawable/edittext_states_red"
                                                     android:textSize="15sp"
-                                                    android:id="@+id/spinner_uom" />
+                                                    android:id="@+id/text_uom" />
                                             </LinearLayout>
 
 
-
-                                            <LinearLayout
-                                                android:layout_width="match_parent"
-                                                android:layout_height="wrap_content"
-                                                android:layout_weight="1"
-                                                android:layout_marginLeft="@dimen/_5sdp"
-                                                android:orientation="vertical">
-
-
-                                                <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
-                                                    android:layout_width="match_parent"
-                                                    android:layout_height="match_parent"
-                                                    android:text="Currency"
-                                                    android:layout_marginRight="@dimen/_5sdp"
-                                                    android:layout_marginBottom="@dimen/_1sdp"
-                                                    android:textColor="@color/colorPrimary" />
-
-                                                <TextView
-                                                    android:layout_width="match_parent"
-                                                    android:layout_height="wrap_content"
-                                                    android:padding="10dp"
-                                                    android:layout_weight="1"
-                                                    android:textColorHint="#000000"
-                                                    android:textColor="#000000"
-                                                    android:background="@drawable/edittext_states_red"
-                                                    android:layout_marginBottom="@dimen/activity_vertical_margin"
-                                                    android:textSize="15sp"
-                                                    android:id="@+id/text_currency"
-                                                    android:text="" />
-                                                </LinearLayout>
                                         </LinearLayout>
 
 
@@ -258,7 +228,7 @@
                                                     android:hint="Quantity"
                                                     android:maxLines="1"
                                                     android:inputType="numberDecimal"
-                                                    android:imeOptions="actionNext"
+                                                    android:imeOptions="actionDone"
                                                     android:textColorHint="#000000"
                                                     android:textColor="#000000"
                                                     android:background="@drawable/edittext_states_red"
@@ -267,67 +237,6 @@
                                                 </LinearLayout>
 
 
-                                            <LinearLayout
-                                                android:layout_width="match_parent"
-                                                android:layout_height="wrap_content"
-                                                android:layout_weight="1"
-                                                android:layout_marginLeft="@dimen/_5sdp"
-                                                android:layout_marginRight="@dimen/_5sdp"
-                                                android:orientation="vertical">
-
-
-                                                <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
-                                                    android:layout_width="match_parent"
-                                                    android:layout_height="match_parent"
-                                                    android:text="Unit Cost"
-                                                    android:layout_marginBottom="@dimen/_1sdp"
-                                                    android:textColor="@color/colorPrimary" />
-
-                                                <EditText
-                                                    android:layout_width="match_parent"
-                                                    android:layout_height="wrap_content"
-                                                    android:padding="10dp"
-                                                    android:hint="0"
-                                                    android:layout_weight="1"
-                                                    android:maxLines="1"
-                                                    android:inputType="numberDecimal"
-                                                    android:imeOptions="actionDone"
-                                                    android:textColorHint="#000000"
-                                                    android:textColor="#000000"
-                                                    android:background="@drawable/edittext_states_red"
-                                                    android:layout_marginBottom="@dimen/activity_vertical_margin"
-                                                    android:textSize="15sp"
-                                                    android:id="@+id/text_unit_cost" />
-                                                </LinearLayout>
-                                        </LinearLayout>
-
-                                        <LinearLayout
-                                            android:layout_width="match_parent"
-                                            android:layout_height="wrap_content"
-                                            android:orientation="horizontal"
-                                            android:layout_marginBottom="@dimen/activity_vertical_margin">
-
-
-                                            <com.example.sadashivsinha.mprosmart.font.HelveticaRegular
-                                                android:layout_width="wrap_content"
-                                                android:layout_height="match_parent"
-                                                android:text="Total Amount"
-                                                android:layout_marginRight="@dimen/activity_vertical_margin"
-                                                android:textColor="@color/colorPrimary"
-                                                android:gravity="center"
-                                                android:textSize="@dimen/_13sdp" />
-
-                                            <TextView
-                                                android:layout_width="match_parent"
-                                                android:layout_height="wrap_content"
-                                                android:padding="10dp"
-                                                android:hint="0"
-                                                android:textColorHint="#000000"
-                                                android:textColor="#000000"
-                                                android:background="@drawable/edittext_states_red"
-                                                android:textSize="15sp"
-                                                android:id="@+id/text_total_amount"
-                                                android:gravity="center" />
                                         </LinearLayout>
 
                                     </LinearLayout>

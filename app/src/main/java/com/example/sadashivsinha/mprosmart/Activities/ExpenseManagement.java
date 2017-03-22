@@ -54,6 +54,8 @@ public class ExpenseManagement extends AppCompatActivity implements View.OnClick
     PreferenceManager pm;
     TextView expense_id, date, created_by, expense_type, total_expense, expense_desc;
     String currentProjectNo, currentExpenseManagement;
+    String[] uomArray, uomNameArray;
+    String totalAttachments;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,7 +111,7 @@ public class ExpenseManagement extends AppCompatActivity implements View.OnClick
             @Override
             protected Void doInBackground(Void... params)
             {
-                prepareItems();
+                getAllUom();
                 return null;
             }
 
@@ -141,12 +143,66 @@ public class ExpenseManagement extends AppCompatActivity implements View.OnClick
         rotateAnim.setFillAfter(true);
         imageView.startAnimation(rotateAnim);
     }
+    public void getAllUom()
+    {
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+
+        String url = pm.getString("SERVER_URL") + "/getUom";
+
+        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        try{
+                            String type = response.getString("type");
+
+                            if(type.equals("ERROR"))
+                            {
+                                Toast.makeText(ExpenseManagement.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
+                            }
+
+                            if(type.equals("INFO"))
+                            {
+                                dataArray = response.getJSONArray("data");
+                                uomArray = new String[dataArray.length()+1];
+                                uomNameArray = new String[dataArray.length()+1];
+
+                                uomArray[0]="UOM";
+                                uomNameArray[0]="UOM";
+
+                                for(int i=0; i<dataArray.length();i++)
+                                {
+                                    dataObject = dataArray.getJSONObject(i);
+                                    uomArray[i+1] = dataObject.getString("uomCode");
+                                    uomNameArray[i+1] = dataObject.getString("uomName");
+                                }
+
+                                prepareItems();
+                            }
+
+                        }
+                        catch(JSONException e){
+                            e.printStackTrace();}
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("Volley","Error");
+                    }
+                }
+        );
+
+        requestQueue.add(jor);
+
+    }
 
     public void prepareItems()
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getExpenseManagementLine?expenseManagementId=\""+currentExpenseManagement+"\"";
+        String url = pm.getString("SERVER_URL") + "/getExpenseManagementLine?expenseManagementId=\""+currentExpenseManagement+"\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -166,10 +222,32 @@ public class ExpenseManagement extends AppCompatActivity implements View.OnClick
                             if(type.equals("INFO"))
                             {
                                 dataArray = response.getJSONArray("data");
-                                for(int i=0; i<dataArray.length();i++)
+                                if(pm.getString("expenseType").equals("Personal"))
                                 {
-                                    dataObject = dataArray.getJSONObject(i);
+                                    for(int i=0; i<dataArray.length();i++)
+                                    {
+                                        dataObject = dataArray.getJSONObject(i);
 
+                                        expenseManagementLineId = dataObject.getString("expenseManagementLineId");
+                                        itemDescription = dataObject.getString("itemDescription");
+                                        amount = dataObject.getString("amount");
+                                        createdBy = dataObject.getString("createdBy");
+                                        totalAttachments = dataObject.getString("totalAttachments");
+
+                                        items = new BudgetList("Personal", String.valueOf(i+1), expenseManagementLineId,"" , "", "", itemDescription, "", "", amount,
+                                                Integer.parseInt(totalAttachments));
+                                        budgetList.add(items);
+
+                                        expenseAdapter.notifyDataSetChanged();
+
+                                    }
+                                }
+                                else
+                                {
+                                    for(int i=0; i<dataArray.length();i++)
+                                    {
+
+                                    dataObject = dataArray.getJSONObject(i);
 
                                     expenseManagementLineId = dataObject.getString("expenseManagementLineId");
                                     expenseManagementId = dataObject.getString("expenseManagementId");
@@ -181,12 +259,20 @@ public class ExpenseManagement extends AppCompatActivity implements View.OnClick
                                     uomId = dataObject.getString("uomId");
                                     amount = dataObject.getString("amount");
                                     createdBy = dataObject.getString("createdBy");
+                                    totalAttachments = dataObject.getString("totalAttachments");
 
-                                    items = new BudgetList(pm.getString("expenseType"), String.valueOf(i+1), expenseManagementLineId,wbsId , wbsActivityId, itemId, itemDescription, quantity, uomId, amount);
+                                    for(int j=0; j<uomArray.length; j++) {
+                                        if (uomId.equals(uomArray[j]))
+                                            uomId = uomNameArray[j];
+                                    }
+
+                                    items = new BudgetList(pm.getString("expenseType"), String.valueOf(i+1), expenseManagementLineId,wbsId , wbsActivityId, itemId, itemDescription, quantity, uomId, amount,
+                                            Integer.parseInt(totalAttachments));
                                     budgetList.add(items);
 
                                     expenseAdapter.notifyDataSetChanged();
 
+                                }
                                 }
                             }
                             pDialog1.dismiss();
@@ -230,5 +316,11 @@ public class ExpenseManagement extends AppCompatActivity implements View.OnClick
             break;
         }
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(ExpenseManagement.this, AllExpenses.class);
+        startActivity(intent);
     }
 }

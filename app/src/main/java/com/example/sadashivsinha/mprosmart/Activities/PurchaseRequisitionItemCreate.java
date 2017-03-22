@@ -47,13 +47,14 @@ public class PurchaseRequisitionItemCreate extends AppCompatActivity implements 
     String currentProjectNo, currentPr, currentUser, currentDate;
     String itemNames, itemDesc, itemUom, itemsId, selectedUom;
     ProgressDialog pDialog;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_purchase_requisition_item_create);
 
-        PreferenceManager pm = new PreferenceManager(this);
+        pm = new PreferenceManager(this);
         currentProjectNo = pm.getString("projectId");
         currentPr = pm.getString("currentPr");
         currentUser = pm.getString("userId");
@@ -180,7 +181,7 @@ public class PurchaseRequisitionItemCreate extends AppCompatActivity implements 
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getUom";
+        String url = pm.getString("SERVER_URL") + "/getUom";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -234,7 +235,7 @@ public class PurchaseRequisitionItemCreate extends AppCompatActivity implements 
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getItems?projectId='"+currentProjectNo+"'";
+        String url = pm.getString("SERVER_URL") + "/getItems?projectId='"+currentProjectNo+"'";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -338,7 +339,7 @@ public class PurchaseRequisitionItemCreate extends AppCompatActivity implements 
 
         RequestQueue requestQueue = Volley.newRequestQueue(PurchaseRequisitionItemCreate.this);
 
-        String url = PurchaseRequisitionItemCreate.this.getResources().getString(R.string.server_url) + "/postPurchaseRequisitionItem";
+        String url = PurchaseRequisitionItemCreate.this.pm.getString("SERVER_URL") + "/postPurchaseRequisitionItem";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {

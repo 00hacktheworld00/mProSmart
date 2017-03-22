@@ -39,13 +39,14 @@ public class BudgetTransferCreate extends AppCompatActivity {
     JSONArray dataArray;
     JSONObject dataObject;
     String[] itemArray, itemDescArray;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_budget_transfer_create);
 
-        PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
 
         item_desc = (TextView) findViewById(R.id.item_desc);
@@ -143,10 +144,9 @@ public class BudgetTransferCreate extends AppCompatActivity {
     }
     public void prepareLineItems()
     {
-
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getItems?projectId='"+currentProjectNo+"'";
+        String url = pm.getString("SERVER_URL") + "/getItems?projectId='"+currentProjectNo+"'";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -154,13 +154,11 @@ public class BudgetTransferCreate extends AppCompatActivity {
                     public void onResponse(JSONObject response) {
 
                         try{
-
                             String type = response.getString("type");
 
                             if(type.equals("ERROR"))
                             {
                                 Toast.makeText(BudgetTransferCreate.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
-
                             }
 
                             if(type.equals("INFO"))
@@ -186,7 +184,8 @@ public class BudgetTransferCreate extends AppCompatActivity {
                             spinner_item.setAdapter(adapter);
 
                             pDialog.dismiss();
-                        }catch(JSONException e){
+                        }
+                        catch(JSONException e){
                             pDialog.dismiss();
                             e.printStackTrace();}
                     }
@@ -196,7 +195,6 @@ public class BudgetTransferCreate extends AppCompatActivity {
                     public void onErrorResponse(VolleyError error) {
                         pDialog.dismiss();
                         Log.e("Volley","Error");
-
                     }
                 }
         );

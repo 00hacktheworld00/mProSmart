@@ -56,9 +56,11 @@ public class QualityPlanActivity extends AppCompatActivity implements View.OnCli
     JSONObject dataObject;
     Boolean isInternetPresent = false;
 
-    String id, processDescription, Activity, procedure, acceptanceCriteria, supplier, subContractor, thirdParty, customerClient;
+    String id, processDescription, Activity, procedure, acceptanceCriteria, supplier, subContractor, thirdParty, customerClient,
+            totalAttachments;
     String createdBy, createdDate;
     ProgressDialog pDialog, pDialog1;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +68,7 @@ public class QualityPlanActivity extends AppCompatActivity implements View.OnCli
         setContentView(R.layout.activity_quality_plan);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
 
         quality_plan_no = (TextView) findViewById(R.id.quality_plan_no);
         project_id = (TextView) findViewById(R.id.project_id);
@@ -178,7 +180,7 @@ public class QualityPlanActivity extends AppCompatActivity implements View.OnCli
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getQualityPlanStatus?qualityPlanId='"+currentQualityPlan+"'";
+        String url = pm.getString("SERVER_URL") + "/getQualityPlanStatus?qualityPlanId='"+currentQualityPlan+"'";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -209,9 +211,10 @@ public class QualityPlanActivity extends AppCompatActivity implements View.OnCli
                                     subContractor = dataObject.getString("subContractor");
                                     thirdParty = dataObject.getString("thirdParty");
                                     customerClient = dataObject.getString("customerClient");
+                                    totalAttachments = dataObject.getString("totalAttachments");
 
                                     qualityItem = new QualityPlanList(String.valueOf(i+1),id, processDescription,Activity, procedure,
-                                            acceptanceCriteria, supplier, subContractor, thirdParty, customerClient);
+                                            acceptanceCriteria, supplier, subContractor, thirdParty, customerClient, totalAttachments);
                                     qualityList.add(qualityItem);
 
 
@@ -241,7 +244,7 @@ public class QualityPlanActivity extends AppCompatActivity implements View.OnCli
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getQualityPlan?projectId='"+currentProjectNo+"'";
+        String url = pm.getString("SERVER_URL") + "/getQualityPlan?projectId='"+currentProjectNo+"'";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {

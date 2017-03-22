@@ -34,14 +34,14 @@ public class QualityChecklistCreate extends AppCompatActivity {
     JSONArray dataArray;
     JSONObject dataObject;
     String currentProjectNo, currentProjectName, currentUserId;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quality_checklist_create);
 
-
-        final PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
         currentProjectName = pm.getString("projectName");
         currentUserId = pm.getString("userId");
@@ -108,7 +108,7 @@ public class QualityChecklistCreate extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(QualityChecklistCreate.this);
 
-        String url = QualityChecklistCreate.this.getResources().getString(R.string.server_url) + "/postQualityCheckList";
+        String url = QualityChecklistCreate.this.pm.getString("SERVER_URL") + "/postQualityCheckList";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {

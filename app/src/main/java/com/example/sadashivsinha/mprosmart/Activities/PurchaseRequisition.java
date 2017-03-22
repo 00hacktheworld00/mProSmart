@@ -54,6 +54,7 @@ public class PurchaseRequisition extends AppCompatActivity implements View.OnCli
     JSONObject dataObject;
     ProgressDialog progressDialog;
     PreferenceManager pm;
+    String[] uomIdArray, uomNameArray;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,7 +100,7 @@ public class PurchaseRequisition extends AppCompatActivity implements View.OnCli
 
             @Override
             protected Void doInBackground(Void... params) {
-                prepareItems();
+                getAllUom();
                 return null;
             }
 
@@ -170,7 +171,7 @@ public class PurchaseRequisition extends AppCompatActivity implements View.OnCli
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getPurchaseRequisitionItem?purchaseRequisitionId=\""+currentPr+"\"";
+        String url = pm.getString("SERVER_URL") + "/getPurchaseRequisitionItem?purchaseRequisitionId=\""+currentPr+"\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -200,6 +201,12 @@ public class PurchaseRequisition extends AppCompatActivity implements View.OnCli
                                     Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(neededBy);
                                     neededBy = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
 
+                                    for(int j=0; j<uomIdArray.length; j++)
+                                    {
+                                        if(uomIdArray[j].equals(uom))
+                                            uom = uomNameArray[j];
+                                    }
+
                                     qualityItem = new PurchaseRequisitionList(id, itemId, itemDescription,quantity, uom, neededBy);
                                     purchaseList.add(qualityItem);
 
@@ -225,6 +232,62 @@ public class PurchaseRequisition extends AppCompatActivity implements View.OnCli
                 }
         );
         requestQueue.add(jor);
+    }
+
+
+    public void getAllUom()
+    {
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+
+        String url = pm.getString("SERVER_URL") + "/getUom";
+
+        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        try{
+                            String type = response.getString("type");
+
+                            if(type.equals("ERROR"))
+                            {
+                                Toast.makeText(PurchaseRequisition.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
+                            }
+
+                            if(type.equals("INFO"))
+                            {
+                                dataArray = response.getJSONArray("data");
+                                uomIdArray = new String[dataArray.length()+1];
+                                uomNameArray = new String[dataArray.length()+1];
+
+                                uomIdArray[0]="UOM";
+                                uomNameArray[0]="UOM";
+
+                                for(int i=0; i<dataArray.length();i++)
+                                {
+                                    dataObject = dataArray.getJSONObject(i);
+                                    uomIdArray[i+1] = dataObject.getString("uomCode");
+                                    uomNameArray[i+1] = dataObject.getString("uomName");
+                                }
+
+                                prepareItems();
+                            }
+
+                        }
+                        catch(JSONException e){
+                            e.printStackTrace();}
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("Volley","Error");
+                    }
+                }
+        );
+
+        requestQueue.add(jor);
+
     }
 
     @Override

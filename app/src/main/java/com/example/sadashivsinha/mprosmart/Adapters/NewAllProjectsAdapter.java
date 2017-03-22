@@ -7,16 +7,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-
-import com.example.sadashivsinha.mprosmart.font.HelveticaBold;
-import com.example.sadashivsinha.mprosmart.font.HelveticaRegular;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.sadashivsinha.mprosmart.Activities.MainCategories;
 import com.example.sadashivsinha.mprosmart.Activities.MapsActivity;
-import com.example.sadashivsinha.mprosmart.Activities.ViewPurchaseOrders;
 import com.example.sadashivsinha.mprosmart.ModelLists.NewAllProjectList;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
+import com.example.sadashivsinha.mprosmart.font.HelveticaBold;
+import com.example.sadashivsinha.mprosmart.font.HelveticaRegular;
 
 import java.net.URL;
 import java.util.List;
@@ -108,9 +108,7 @@ public class NewAllProjectsAdapter extends RecyclerView.Adapter<NewAllProjectsAd
 
         if(!items.getCompanyLogo().isEmpty())
         {
-
             Glide.with(holder.itemView.getContext()).load(items.getCompanyLogo()).crossFade().into(holder.company_logo);
-
 
 //            Picasso.with(holder.itemView.getContext())
 //                    .load(items.getCompanyLogo())
@@ -130,17 +128,30 @@ public class NewAllProjectsAdapter extends RecyclerView.Adapter<NewAllProjectsAd
             @Override
             public void onClick(View v)
             {
-                Intent intent = new Intent(holder.itemView.getContext(), ViewPurchaseOrders.class);
-                String projectNo = holder.project_id.getText().toString();
-                pm.putString("projectId",projectNo);
-                pm.putString("projectName",holder.project_name.getText().toString());
-                pm.putString("projectDesc",holder.project_desc.getText().toString());
-                pm.putString("currency",holder.text_currency.getText().toString());
-                pm.putString("budget",holder.text_budget.getText().toString());
-                pm.putString("createdBy",holder.created_by.getText().toString());
-                pm.putString("createdDate",holder.date.getText().toString());
-                pm.putString("imageUrl",items.getCompanyLogo());
-                holder.itemView.getContext().startActivity(intent);
+                if(holder.text_approved.getVisibility()!=View.GONE)
+                {
+                    if(holder.text_approved.getText().toString().equals("APPROVAL PENDING"))
+                    {
+                        Toast.makeText(holder.itemView.getContext(), "Project has not been APPROVED yet.", Toast.LENGTH_SHORT).show();
+                    }
+                    else if(holder.text_approved.getText().toString().equals("APPROVAL REJECTED"))
+                    {
+                        Toast.makeText(holder.itemView.getContext(), "Project has been REJECTED.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                else {
+                    Intent intent = new Intent(holder.itemView.getContext(), MainCategories.class);
+                    String projectNo = holder.project_id.getText().toString();
+                    pm.putString("projectId",projectNo);
+                    pm.putString("projectName",holder.project_name.getText().toString());
+                    pm.putString("projectDesc",holder.project_desc.getText().toString());
+                    pm.putString("currency",holder.text_currency.getText().toString());
+                    pm.putString("budget",holder.text_budget.getText().toString());
+                    pm.putString("createdBy",holder.created_by.getText().toString());
+                    pm.putString("createdDate",holder.date.getText().toString());
+                    pm.putString("imageUrl",items.getCompanyLogo());
+                    holder.itemView.getContext().startActivity(intent);
+                }
             }
         });
 

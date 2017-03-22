@@ -1,6 +1,5 @@
 package com.example.sadashivsinha.mprosmart.Activities;
 
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -31,7 +30,7 @@ public class NewActivity extends AppCompatActivity {
 
     String NAME = "Joe Smith";
     String EMAIL = "from New York, USA";
-    int PROFILE = R.drawable.abc;
+    int PROFILE = R.drawable.profile_picture;
 
     private Toolbar toolbar;                              // Declaring the Toolbar Object
 
@@ -49,10 +48,10 @@ public class NewActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-        {
-            overridePendingTransition( R.anim.slide_in_right, R.anim.slide_in_left );
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+//        {
+//            overridePendingTransition( R.anim.slide_in_right, R.anim.slide_in_left );
+//        }
 
 
     /* Assinging the tool_bar object ot the view

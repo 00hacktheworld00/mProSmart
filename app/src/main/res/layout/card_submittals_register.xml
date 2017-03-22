@@ -154,6 +154,7 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:orientation="vertical"
+                                    android:visibility="gone"
                                     android:layout_weight="1">
 
 
@@ -185,8 +186,45 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="@dimen/activity_vertical_margin"
-                                android:orientation="horizontal"
+                                android:orientation="vertical"
                                 android:weightSum="2">
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginRight="@dimen/small_margin"
+                                        android:text="Attachments : "
+                                        android:gravity="center" />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="0"
+                                        android:id="@+id/no_of_attachments"
+                                        android:gravity="center" />
+
+                                    <ImageButton
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_gravity="center"
+                                        android:layout_marginLeft="@dimen/small_margin"
+                                        android:background="@drawable/add_new_button"
+                                        android:id="@+id/attachBtn" />
+
+                                    <TextView
+                                        android:layout_width="0dp"
+                                        android:layout_height="0dp"
+                                        android:id="@+id/original_line_no"/>
+                                </LinearLayout>
+
+
+
+                            </LinearLayout>
 
                                 <LinearLayout
                                     android:layout_width="match_parent"
@@ -200,38 +238,6 @@
                                         android:backgroundTint="@color/colorPrimary"
                                         style="@style/Widget.AppCompat.Button.Colored"/>
                                 </LinearLayout>
-
-                                <LinearLayout
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="1"
-                                    android:gravity="end">
-
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="match_parent"
-                                        android:layout_marginRight="@dimen/small_margin"
-                                        android:text="Attachments : "
-                                        android:gravity="center" />
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="match_parent"
-                                        android:text="2"
-                                        android:id="@+id/no_of_attachments"
-                                        android:gravity="center" />
-
-                                    <ImageButton
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_gravity="center"
-                                        android:layout_marginLeft="@dimen/small_margin"
-                                        android:background="@drawable/add_new_button"
-                                        android:id="@+id/attachBtn" />
-                                </LinearLayout>
-
-                            </LinearLayout>
 
                         </LinearLayout>
                     </RelativeLayout>

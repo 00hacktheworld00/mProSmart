@@ -5,15 +5,17 @@ package com.example.sadashivsinha.mprosmart.ModelLists;
  */
 public class BoqList {
 
-    String text_item, text_quantity, text_uom, text_cost, text_currency, text_total_cost;;
+    String text_item, text_quantity, text_uom, itemName;
 
-    public BoqList(String text_item, String text_quantity, String text_uom, String text_cost, String text_currency, String text_total_cost) {
+    public BoqList(String text_item, String text_quantity, String text_uom, String itemName) {
         this.text_item = text_item;
         this.text_quantity = text_quantity;
         this.text_uom = text_uom;
-        this.text_cost = text_cost;
-        this.text_currency = text_currency;
-        this.text_total_cost = text_total_cost;
+        this.itemName = itemName;
+    }
+
+    public String getItemName() {
+        return itemName;
     }
 
     public String getText_item() {
@@ -27,17 +29,5 @@ public class BoqList {
 
     public String getText_uom() {
         return text_uom;
-    }
-
-    public String getText_cost() {
-        return text_cost;
-    }
-
-    public String getText_currency() {
-        return text_currency;
-    }
-
-    public String getText_total_cost() {
-        return text_total_cost;
     }
 }

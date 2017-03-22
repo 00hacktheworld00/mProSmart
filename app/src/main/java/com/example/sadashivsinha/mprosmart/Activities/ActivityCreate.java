@@ -23,6 +23,9 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
+import com.example.sadashivsinha.mprosmart.Utils.Communicator;
+import com.example.sadashivsinha.mprosmart.Utils.ConnectionDetector;
+import com.thomashaertel.widget.MultiSpinner;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import org.json.JSONArray;
@@ -33,13 +36,14 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Locale;
 
 public class ActivityCreate extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
 
     EditText activity_name;
     TextView start_date, end_date;
-    Spinner spinner_resource, spinner_boq;
+    Spinner spinner_boq;
     String whichDate;
     String[] resourceIdArray, resourceNameArray;
     JSONArray dataArray;
@@ -49,16 +53,22 @@ public class ActivityCreate extends AppCompatActivity implements DatePickerDialo
     String currentWbsId, currentProjectNo;
     String itemId, itemNames, currentResourceId, currentBoqId;
     String[] itemsNameArray, itemIdArray;
+    ConnectionDetector cd;
+    Boolean isInternetPresent = false;
+    MultiSpinner multi_spinner_resource;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_activity_create);
 
+        cd = new ConnectionDetector(getApplicationContext());
+        isInternetPresent = cd.isConnectingToInternet();
+
         activity_name = (EditText) findViewById(R.id.activity_name);
         start_date = (TextView) findViewById(R.id.start_date);
         end_date = (TextView) findViewById(R.id.end_date);
-        spinner_resource = (Spinner) findViewById(R.id.spinner_resource);
+        multi_spinner_resource = (MultiSpinner) findViewById(R.id.multi_spinner_resource);
         spinner_boq = (Spinner) findViewById(R.id.spinner_boq);
 
         Button createBtn = (Button) findViewById(R.id.createBtn);
@@ -78,7 +88,9 @@ public class ActivityCreate extends AppCompatActivity implements DatePickerDialo
                         now.get(Calendar.MONTH),
                         now.get(Calendar.DAY_OF_MONTH)
                 );
-//                dpd.setMinDate(now);
+
+                dpd.setMinDate(now);
+
                 dpd.show(getFragmentManager(), "Datepickerdialog");
             }
         });
@@ -103,17 +115,17 @@ public class ActivityCreate extends AppCompatActivity implements DatePickerDialo
 
         new MyTask().execute();
 
-        spinner_resource.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                currentResourceId = resourceIdArray[position];
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
+//        spinner_resource.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//                currentResourceId = resourceIdArray[position];
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> parent) {
+//
+//            }
+//        });
 
         spinner_boq.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -145,7 +157,7 @@ public class ActivityCreate extends AppCompatActivity implements DatePickerDialo
                 {
                     end_date.setError("Field cannot be empty");
                 }
-                else if(spinner_resource.getSelectedItem().toString().equals("Select Resource"))
+                else if(multi_spinner_resource.getText().toString().equals("Select Resources"))
                 {
                     Toast.makeText(ActivityCreate.this, "Select Resource", Toast.LENGTH_SHORT).show();
                 }
@@ -184,13 +196,12 @@ public class ActivityCreate extends AppCompatActivity implements DatePickerDialo
         try {
             object.put("wbsId",currentWbsId);
             object.put("activityName", activity_name.getText().toString());
-            object.put("resourceAllocated", currentResourceId);
+            object.put("resourceAllocated", multi_spinner_resource.getText().toString());
 
             if(!spinner_boq.getSelectedItem().toString().equals("Select BOQ"))
             {
                 object.put("boq", currentBoqId);
             }
-
             Date tradeDate = null;
             String startDate, endDate;
             try
@@ -218,7 +229,7 @@ public class ActivityCreate extends AppCompatActivity implements DatePickerDialo
 
         RequestQueue requestQueue = Volley.newRequestQueue(ActivityCreate.this);
 
-        String url = ActivityCreate.this.getResources().getString(R.string.server_url) + "/postWbsActivity";
+        String url = pm.getString("SERVER_URL") + "/postWbsActivity";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -226,7 +237,17 @@ public class ActivityCreate extends AppCompatActivity implements DatePickerDialo
                     public void onResponse(JSONObject response) {
                         try
                         {
-                            Toast.makeText(ActivityCreate.this, "Activity Created. ID - "+ response.getString("data"), Toast.LENGTH_SHORT).show();
+                            if(response.getString("msg").equals("success"))
+                            {
+                                Toast.makeText(ActivityCreate.this, "Activity Created. ID - "+ response.getString("data"), Toast.LENGTH_SHORT).show();
+
+                                Intent intent = new Intent(ActivityCreate.this, WbsActivity.class);
+                                startActivity(intent);
+                            }
+                            else
+                            {
+                                Toast.makeText(ActivityCreate.this, response.getString("msg"), Toast.LENGTH_SHORT).show();
+                            }
                             pDialog.dismiss();
 
                         }
@@ -245,16 +266,47 @@ public class ActivityCreate extends AppCompatActivity implements DatePickerDialo
                     }
                 }
         );
-        requestQueue.add(jor);
-        Intent intent = new Intent(ActivityCreate.this, WbsActivity.class);
-        startActivity(intent);
+
+        if (!isInternetPresent)
+        {
+            // Internet connection is not present
+
+            Communicator communicator = new Communicator();
+            Log.d("object", object.toString());
+
+            Boolean createWbsActivityPending = pm.getBoolean("createWbsActivityPending");
+
+            if(createWbsActivityPending)
+            {
+                Toast.makeText(ActivityCreate.this, "Already a Wbs Activity creation is in progress. Please try after sometime.", Toast.LENGTH_LONG).show();
+            }
+            else
+            {
+                Toast.makeText(ActivityCreate.this, "Internet not currently available. Wbs Activity will automatically get created on internet connection.", Toast.LENGTH_SHORT).show();
+
+                pm.putString("objectWbsActivity", object.toString());
+                pm.putString("urlWbsActivity", url);
+                pm.putString("toastMessageWbsActivity", "Wbs Activity Created");
+                pm.putBoolean("createWbsActivityPending", true);
+
+                if(pDialog!=null)
+                    pDialog.dismiss();
+
+                Intent intent = new Intent(ActivityCreate.this, WbsActivity.class);
+                startActivity(intent);
+            }
+        }
+        else
+        {
+            requestQueue.add(jor);
+        }
     }
 
     public void prepareItemList()
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getBoqItems?projectId='"+currentProjectNo+"'";
+        String url = pm.getString("SERVER_URL") + "/getBoq?projectId='"+currentProjectNo+"'";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -285,29 +337,34 @@ public class ActivityCreate extends AppCompatActivity implements DatePickerDialo
                                     dataObject = dataArray.getJSONObject(i);
 
                                     itemId = dataObject.getString("id");
-                                    itemNames = dataObject.getString("item");
+                                    itemNames = dataObject.getString("itemName");
 
                                     itemIdArray[i+1]=itemId;
                                     itemsNameArray[i+1]=itemNames;
                                 }
+
+                                if(dataArray==null)
+                                {
+                                    itemsNameArray = new String[1];
+                                    itemsNameArray[0]="No BOQ";
+                                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(ActivityCreate.this,
+                                            android.R.layout.simple_dropdown_item_1line,itemsNameArray);
+
+                                    spinner_boq.setAdapter(adapter);
+                                }
+                                else
+                                {
+                                    itemsNameArray[0]="Select BOQ";
+                                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(ActivityCreate.this,
+                                            android.R.layout.simple_dropdown_item_1line,itemsNameArray);
+
+                                    spinner_boq.setAdapter(adapter);
+                                }
                             }
-
-                            if(msg.equals("No data"))
-                            {
-                                Toast.makeText(ActivityCreate.this, "No BOQ Items available for this project", Toast.LENGTH_SHORT).show();
-//                                Intent intent = new Intent(ActivityCreate.this, BoqActivity.class);
-//                                startActivity(intent);
-                                itemsNameArray = new String[1];
-                                itemsNameArray[0]="No BOQ Item";
-                                ArrayAdapter<String> adapter = new ArrayAdapter<String>(ActivityCreate.this,
-                                        android.R.layout.simple_dropdown_item_1line,itemsNameArray);
-
-                                spinner_boq.setAdapter(adapter);
-                            }
-
                             else
                             {
-                                itemsNameArray[0]="Select BOQ";
+                                itemsNameArray = new String[1];
+                                itemsNameArray[0]="No BOQ";
                                 ArrayAdapter<String> adapter = new ArrayAdapter<String>(ActivityCreate.this,
                                         android.R.layout.simple_dropdown_item_1line,itemsNameArray);
 
@@ -338,7 +395,7 @@ public class ActivityCreate extends AppCompatActivity implements DatePickerDialo
     {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getResource";
+        String url = pm.getString("SERVER_URL") + "/getResource";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -369,11 +426,30 @@ public class ActivityCreate extends AppCompatActivity implements DatePickerDialo
                                     resourceNameArray[i+1]= dataObject.getString("firstName") + " " + dataObject.getString("lastName");
                                 }
 
-                                ArrayAdapter<String> adapter = new ArrayAdapter<String>(ActivityCreate.this,
-                                        android.R.layout.simple_dropdown_item_1line,resourceNameArray);
-                                spinner_resource.setAdapter(adapter);
-                            }
+                                if(dataArray==null)
+                                {
+                                    resourceNameArray = new String[1];
+                                    resourceNameArray[0]="No Resource";
 
+//                                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(ActivityCreate.this,
+//                                      android.R.layout.simple_dropdown_item_1line,resourceNameArray);
+
+                                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(ActivityCreate.this, android.R.layout.simple_spinner_item);
+                                    adapter.addAll(resourceNameArray);
+                                    multi_spinner_resource.setAdapter(adapter, false, onSelectedListener);
+
+                                    multi_spinner_resource.setText("No Resource");
+                                }
+                                else
+                                {
+                                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(ActivityCreate.this, android.R.layout.simple_spinner_item);
+                                    adapter.addAll(resourceNameArray);
+                                    adapter.addAll(resourceNameArray);
+                                    multi_spinner_resource.setAdapter(adapter, false, onSelectedListener);
+
+                                    multi_spinner_resource.setText("Select Resources");
+                                }
+                            }
                         }
                         catch(JSONException e){
                             e.printStackTrace();}
@@ -394,6 +470,11 @@ public class ActivityCreate extends AppCompatActivity implements DatePickerDialo
         requestQueue.add(jor);
 
     }
+    private MultiSpinner.MultiSpinnerListener onSelectedListener = new MultiSpinner.MultiSpinnerListener() {
+        public void onItemsSelected(boolean[] selected) {
+            // Do something here with the selected items
+        }
+    };
 
     @Override
     public void onDateSet(DatePickerDialog view, final int year, final int monthOfYear, final int dayOfMonth) {
@@ -403,6 +484,8 @@ public class ActivityCreate extends AppCompatActivity implements DatePickerDialo
         if(whichDate.equals("start"))
         {
             start_date.setText(date);
+
+            end_date.setText(date);
 
             end_date.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -418,20 +501,20 @@ public class ActivityCreate extends AppCompatActivity implements DatePickerDialo
                             now.get(Calendar.DAY_OF_MONTH)
                     );
 
+                    dpd.setMinDate(new GregorianCalendar(year, monthOfYear, dayOfMonth));
 
-
-
-
-
-//                    dpd.setMinDate(now);
                     dpd.show(getFragmentManager(), "Datepickerdialog");
                 }
             });
-
         }
         else
         {
             end_date.setText(date);
         }
+    }
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(ActivityCreate.this, WbsActivity.class);
+        startActivity(intent);
     }
 }

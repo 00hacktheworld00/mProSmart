@@ -10,6 +10,7 @@ import android.widget.TextView;
 import com.example.sadashivsinha.mprosmart.Activities.QualityStandardActivity;
 import com.example.sadashivsinha.mprosmart.ModelLists.AllQualityStandardList;
 import com.example.sadashivsinha.mprosmart.R;
+import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
 
 import java.util.List;
 
@@ -19,6 +20,7 @@ import java.util.List;
 public class AllQualityStandardAdapter extends RecyclerView.Adapter<AllQualityStandardAdapter.MyViewHolder> {
 
     private List<AllQualityStandardList> qualityList;
+    PreferenceManager pm;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -35,6 +37,8 @@ public class AllQualityStandardAdapter extends RecyclerView.Adapter<AllQualitySt
             created_by = (TextView) view.findViewById(R.id.created_by);
             project_id = (TextView) view.findViewById(R.id.project_id);
 
+            pm = new PreferenceManager(view.getContext());
+
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -49,13 +53,12 @@ public class AllQualityStandardAdapter extends RecyclerView.Adapter<AllQualitySt
 
                     //passing the values for header on next page
 
-                    intent.putExtra("standardNo", standardNo);
-                    intent.putExtra("projectId", projectId);
-                    intent.putExtra("itemId", itemId);
-                    intent.putExtra("itemDesc", itemDesc);
-                    intent.putExtra("dateCreated", dateCreated);
-                    intent.putExtra("createdBy", createdBy);
-
+                    pm.putString("currentStandardNo", standardNo);
+                    pm.putString("currentStandardProjectId", projectId);
+                    pm.putString("currentStandardItemId", itemId);
+                    pm.putString("currentStandardItemDesc", itemDesc);
+                    pm.putString("currentStandardDateCreated", dateCreated);
+                    pm.putString("currentStandardCreatedBy", createdBy);
 
                     view.getContext().startActivity(intent);
                 }

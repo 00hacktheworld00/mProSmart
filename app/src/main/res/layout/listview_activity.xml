@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/android_list_view_tutorial_with_example"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="7dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_toLeftOf="@+id/listview_image"
+        android:layout_marginRight="@dimen/activity_vertical_margin"
+        android:padding="7dp">
+
+        <TextView
+            android:id="@+id/listview_item_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/_15sdp"
+            android:padding="@dimen/very_small_margin"
+            android:text="Sadashiv Sinha"/>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/listview_image"
+        android:layout_width="@dimen/_35sdp"
+        android:layout_height="@dimen/_35sdp"
+        android:background="@drawable/cross"
+        android:contentDescription="@string/app_name"
+        android:padding="10dp"
+        android:layout_centerVertical="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:id="@+id/wbs_res_id"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_1sdp"
+        android:background="@color/bold_grey"
+        android:layout_marginTop="@dimen/very_small_margin"
+        android:layout_below="@+id/listview_image"/>
+</RelativeLayout>

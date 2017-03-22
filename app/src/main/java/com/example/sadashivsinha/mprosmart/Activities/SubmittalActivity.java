@@ -18,6 +18,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -33,6 +34,7 @@ import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.sadashivsinha.mprosmart.Adapters.MyAdapter;
 import com.example.sadashivsinha.mprosmart.Adapters.SubmittalAdapter;
+import com.example.sadashivsinha.mprosmart.ModelLists.AllBoqList;
 import com.example.sadashivsinha.mprosmart.ModelLists.SubmittalList;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
@@ -60,18 +62,18 @@ public class SubmittalActivity extends NewActivity implements View.OnClickListen
     Button view_details_btn;
     JSONArray dataArray;
     JSONObject dataObject;
-    String submittalId, submittalRegisterId, submittalsType, createdDate, dueDate, createdBy, projectName;
-    String lineNo, docType, description, variationFromContract, variationFromContractDocDsc, status,submittalNo;
+    String submittalId, submittalRegisterId, createdDate, dueDate, createdBy, projectName;
+    String lineNo, docType, description, variationFromContract, variationFromContractDocDsc, status,submittalNo, submittalRegisterType;
     ConnectionDetector cd;
     public static final String TAG = NewAllProjects.class.getSimpleName();
     Boolean isInternetPresent = false;
     SubmittalList items;
     private ProgressDialog pDialog, pDialog1;
-    String currentSubmittalNo, currentProjectNo, currentSubmittalId;
+    String currentSubmittalNo, currentProjectNo, currentSubmittalId, noOfAttachments;
     TextView text_submittal_no, text_project_id, text_project_name, text_desc, text_type, text_created_by, text_due_date, text_date_created,
             text_status, text_sub_register;
     PreferenceManager pm;
-    String url;
+    String url, searchText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +81,16 @@ public class SubmittalActivity extends NewActivity implements View.OnClickListen
         setContentView(R.layout.activity_new_submittals);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        if (getIntent().hasExtra("search")) {
+            if (getIntent().getStringExtra("search").equals("yes")) {
+
+                searchText = getIntent().getStringExtra("searchText");
+
+                getSupportActionBar().setTitle("Submittal Item Search Results : " + searchText);
+            }
+        }
+
 
         pm = new PreferenceManager(getApplicationContext());
         currentSubmittalNo = pm.getString("submittalNo");
@@ -101,7 +113,7 @@ public class SubmittalActivity extends NewActivity implements View.OnClickListen
 
         prepareHeader();
 
-        url = getResources().getString(R.string.server_url) + "/submittalLineItems?submittalsId='"+ currentSubmittalId + "'";
+        url = pm.getString("SERVER_URL") + "/submittalLineItems?submittalsId='"+ currentSubmittalId + "'";
 
         submittalAdapter = new SubmittalAdapter(submittalList);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
@@ -140,26 +152,70 @@ public class SubmittalActivity extends NewActivity implements View.OnClickListen
                             variationFromContract = dataObject.getString("variationFromContract");
                             variationFromContractDocDsc = dataObject.getString("variationFromContractDocDsc");
                             status = dataObject.getString("status");
+                            submittalRegisterType = dataObject.getString("submittalRegisterType");
+                            noOfAttachments = dataObject.getString("noOfAttachments");
 
-                            items = new SubmittalList(lineNo, docType, description, variationFromContract, variationFromContractDocDsc,
-                                    status, "");
+                            if (getIntent().hasExtra("search"))
+                            {
+                                if (getIntent().getStringExtra("search").equals("yes")) {
+
+                                    if (lineNo.toLowerCase().contains(searchText.toLowerCase()) || docType.toLowerCase().contains(searchText.toLowerCase())) {
+
+                                        items = new SubmittalList(String.valueOf(i + 1), lineNo, docType, description, variationFromContract, variationFromContractDocDsc,
+                                                status, submittalRegisterType, noOfAttachments);
+                                        submittalList.add(items);
+
+                                        submittalAdapter.notifyDataSetChanged();
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                items = new SubmittalList(String.valueOf(i + 1), lineNo, docType, description, variationFromContract, variationFromContractDocDsc,
+                                        status, submittalRegisterType, noOfAttachments);
+                                submittalList.add(items);
+
+                                submittalAdapter.notifyDataSetChanged();
+                            }
+
+                            pDialog.dismiss();
+                        }
+
+                        Boolean createSubmittalLinePending = pm.getBoolean("createSubmittalLinePending");
+
+                        if (createSubmittalLinePending) {
+
+                            String jsonObjectVal = pm.getString("objectSubmittalLine");
+                            Log.d("JSON SubItem PENDING :", jsonObjectVal);
+
+                            JSONObject jsonObjectPending = new JSONObject(jsonObjectVal);
+                            Log.d("JSONO SubItem PENDING :", jsonObjectPending.toString());
+
+                            docType = dataObject.getString("docType");
+                            description = dataObject.getString("description");
+                            variationFromContract = dataObject.getString("variationFromContract");
+                            variationFromContractDocDsc = dataObject.getString("variationFromContractDocDsc");
+                            status = dataObject.getString("status");
+                            submittalRegisterType = dataObject.getString("submittalRegisterType");
+                            noOfAttachments = dataObject.getString("noOfAttachments");
+
+                            items = new SubmittalList( getResources().getString(R.string.waiting_to_connect), docType, description, variationFromContract, variationFromContractDocDsc,
+                                    status, submittalRegisterType, noOfAttachments);
                             submittalList.add(items);
 
                             submittalAdapter.notifyDataSetChanged();
-                            pDialog.dismiss();
+
                         }
+//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    // TODO Auto-generated catch block
+                    if (pDialog != null)
+                        pDialog.dismiss();
+                }
+                catch ( JSONException | UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
-                if (pDialog != null)
-                    pDialog.dismiss();
             }
 
             else
@@ -175,10 +231,6 @@ public class SubmittalActivity extends NewActivity implements View.OnClickListen
             callJsonArrayRequest();
         }
 
-
-
-
-
         view_details_btn = (Button) findViewById(R.id.view_details_btn);
 
         final LinearLayout hiddenLayout = (LinearLayout) findViewById(R.id.hiddenLayout);
@@ -186,6 +238,7 @@ public class SubmittalActivity extends NewActivity implements View.OnClickListen
         view_details_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                assert hiddenLayout != null;
                 if(hiddenLayout.getVisibility()==View.GONE)
                 {
                     hiddenLayout.setVisibility(View.VISIBLE);
@@ -202,6 +255,7 @@ public class SubmittalActivity extends NewActivity implements View.OnClickListen
 
 
         mRecyclerView = (RecyclerView) findViewById(R.id.RecyclerView); // Assigning the RecyclerView Object to the xml View
+        assert mRecyclerView != null;
         mRecyclerView.setHasFixedSize(true);                            // Letting the system know that the list objects are of fixed size
         mAdapter = new MyAdapter(TITLES,ICONS,NAME,EMAIL,PROFILE);       // Creating the Adapter of MyAdapter class(which we are going to see in a bit)
         // And passing the titles,icons,header view name, header view email,
@@ -256,7 +310,8 @@ public class SubmittalActivity extends NewActivity implements View.OnClickListen
             break;
 
             case R.id.exportBtn:
-            { int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+            {
+                int currentapiVersion = android.os.Build.VERSION.SDK_INT;
                 if (currentapiVersion > android.os.Build.VERSION_CODES.LOLLIPOP)
                 {
                     if (ContextCompat.checkSelfPermission(SubmittalActivity.this,
@@ -318,13 +373,26 @@ public class SubmittalActivity extends NewActivity implements View.OnClickListen
             case R.id.fab_search:
             {
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setTitle("Search Submittals !");
+                alert.setTitle("Search Submittal by Line No or Document Type !");
                 // Set an EditText view to get user input
                 final EditText input = new EditText(this);
+                input.setMaxLines(1);
+                input.setImeOptions(EditorInfo.IME_ACTION_DONE);
                 alert.setView(input);
                 alert.setPositiveButton("Search", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        Toast.makeText(SubmittalActivity.this, "Search for it .", Toast.LENGTH_SHORT).show();
+
+                        if (input.getText().toString().isEmpty()) {
+                            input.setError("Enter Search Field");
+                        } else {
+                            Intent intent = new Intent(SubmittalActivity.this, SubmittalActivity.class);
+                            intent.putExtra("search", "yes");
+                            intent.putExtra("searchText", input.getText().toString());
+
+                            Log.d("SEARCH TEXT", input.getText().toString());
+
+                            startActivity(intent);
+                        }
                     }
                 });
                 alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -363,12 +431,30 @@ public class SubmittalActivity extends NewActivity implements View.OnClickListen
                                 variationFromContract = dataObject.getString("variationFromContract");
                                 variationFromContractDocDsc = dataObject.getString("variationFromContractDocDsc");
                                 status = dataObject.getString("status");
+                                submittalRegisterType = dataObject.getString("submittalRegisterType");
+                                noOfAttachments = dataObject.getString("noOfAttachments");
+                                if (getIntent().hasExtra("search"))
+                                {
+                                    if (getIntent().getStringExtra("search").equals("yes")) {
 
-                                items = new SubmittalList(lineNo, docType, description, variationFromContract, variationFromContractDocDsc,
-                                        status, "");
-                                submittalList.add(items);
+                                        if (lineNo.toLowerCase().contains(searchText.toLowerCase()) || docType.toLowerCase().contains(searchText.toLowerCase())) {
 
-                                submittalAdapter.notifyDataSetChanged();
+                                            items = new SubmittalList(String.valueOf(i + 1), lineNo, docType, description, variationFromContract, variationFromContractDocDsc,
+                                                    status, submittalRegisterType, noOfAttachments);
+                                            submittalList.add(items);
+
+                                            submittalAdapter.notifyDataSetChanged();
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    items = new SubmittalList(String.valueOf(i + 1), lineNo, docType, description, variationFromContract, variationFromContractDocDsc,
+                                            status, submittalRegisterType, noOfAttachments);
+                                    submittalList.add(items);
+
+                                    submittalAdapter.notifyDataSetChanged();
+                                }
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();

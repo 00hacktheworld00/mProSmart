@@ -42,13 +42,14 @@ public class PurchaseOrderCreate extends AppCompatActivity {
     BetterSpinner spinnerVendorId;
     TextView text_created_on, text_created_by, text_project_id;
     String email_send_to, email_send_from, text, email_username, email_password;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_purchase_order_create);
 
-        final PreferenceManager pm = new PreferenceManager(getApplicationContext());
+        pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
         currentUserName = pm.getString("userId");
 
@@ -136,7 +137,7 @@ public class PurchaseOrderCreate extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(PurchaseOrderCreate.this);
 
-        String url = PurchaseOrderCreate.this.getResources().getString(R.string.server_url) + "/postPurchaseOrder";
+        String url = PurchaseOrderCreate.this.pm.getString("SERVER_URL") + "/postPurchaseOrder";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
@@ -246,7 +247,7 @@ public class PurchaseOrderCreate extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getVendors";
+        String url = pm.getString("SERVER_URL") + "/getVendors";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {

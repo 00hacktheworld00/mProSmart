@@ -22,6 +22,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.ModelLists.QualityChecklistList;
 import com.example.sadashivsinha.mprosmart.R;
+import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,6 +35,7 @@ import java.util.List;
 public class QualityChecklistAdapter extends RecyclerView.Adapter<QualityChecklistAdapter.MyViewHolder> {
 
     private List<QualityChecklistList> qualityList;
+    PreferenceManager pm;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -45,6 +47,9 @@ public class QualityChecklistAdapter extends RecyclerView.Adapter<QualityCheckli
 
         public MyViewHolder(final View view) {
             super(view);
+
+            pm = new PreferenceManager(view.getContext());
+
             text_subject = (TextView) view.findViewById(R.id.text_subject);
             text_comments = (TextView) view.findViewById(R.id.text_comments);
             id = (TextView) view.findViewById(R.id.id);
@@ -172,7 +177,7 @@ public class QualityChecklistAdapter extends RecyclerView.Adapter<QualityCheckli
 
         RequestQueue requestQueue = Volley.newRequestQueue(context);
 
-        String url = context.getResources().getString(R.string.server_url) + "/updateQualityChecklistStatus?id='" + currentId + "'";
+        String url = pm.getString("SERVER_URL")  + "/updateQualityChecklistStatus?id='" + currentId + "'";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.PUT, url, object,
                 new Response.Listener<JSONObject>() {

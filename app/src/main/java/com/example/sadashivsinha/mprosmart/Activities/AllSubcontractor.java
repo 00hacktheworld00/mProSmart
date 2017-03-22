@@ -18,6 +18,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -37,6 +38,8 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.Adapters.AllSubcontractorAdapter;
 import com.example.sadashivsinha.mprosmart.Adapters.MyAdapter;
+import com.example.sadashivsinha.mprosmart.ModelLists.AllAddResourcesList;
+import com.example.sadashivsinha.mprosmart.ModelLists.AllBoqList;
 import com.example.sadashivsinha.mprosmart.ModelLists.MomList;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
@@ -83,7 +86,8 @@ public class AllSubcontractor extends NewActivity implements View.OnClickListene
     HelveticaRegular text_subcontractor;
     PreferenceManager pm;
 
-    String url;
+    Spinner spinner_subcontractor;
+    String url, searchText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +95,15 @@ public class AllSubcontractor extends NewActivity implements View.OnClickListene
         setContentView(R.layout.activity_all_inovices);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        if (getIntent().hasExtra("search")) {
+            if (getIntent().getStringExtra("search").equals("yes")) {
+
+                searchText = getIntent().getStringExtra("searchText");
+
+                getSupportActionBar().setTitle("Subcontractor Search Results : " + searchText);
+            }
+        }
 
         pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
@@ -102,7 +115,7 @@ public class AllSubcontractor extends NewActivity implements View.OnClickListene
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         currentDate = sdf.format(c.getTime());
 
-        url = getResources().getString(R.string.server_url) + "/getSubContractors?projectId='"+currentProjectNo+"'";
+        url = pm.getString("SERVER_URL") + "/getSubContractors?projectId='"+currentProjectNo+"'";
 
         allSubcontractorAdapter = new AllSubcontractorAdapter(momList);
         recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
@@ -143,13 +156,51 @@ public class AllSubcontractor extends NewActivity implements View.OnClickListene
                             createdBy = dataObject.getString("createdBy");
                             createdDate = dataObject.getString("createdDate");
 
-                            items = new MomList(String.valueOf(i+1), subContractorId, name, createdDate, createdBy);
+                            if (getIntent().hasExtra("search"))
+                            {
+                                if (getIntent().getStringExtra("search").equals("yes")) {
+
+                                    if (subContractorId.toLowerCase().contains(searchText.toLowerCase()) || name.toLowerCase().contains(searchText.toLowerCase())) {
+
+
+                                        items = new MomList(String.valueOf(i + 1), subContractorId, name, createdDate, createdBy);
+                                        momList.add(items);
+
+                                        allSubcontractorAdapter.notifyDataSetChanged();
+                                    }
+                                }
+                            }
+                            else
+                            {
+
+                                items = new MomList(String.valueOf(i + 1), subContractorId, name, createdDate, createdBy);
+                                momList.add(items);
+
+                                allSubcontractorAdapter.notifyDataSetChanged();
+                            }
+                            pDialog.dismiss();
+                        }
+
+                        Boolean createSubcontractorTimesheet = pm.getBoolean("createSubcontractorTimesheet");
+
+                        if (createSubcontractorTimesheet) {
+
+                            String jsonObjectVal = pm.getString("objectSubcontractorTimesheet");
+                            Log.d("JSON subC PENDING :", jsonObjectVal);
+
+                            JSONObject jsonObjectPending = new JSONObject(jsonObjectVal);
+                            Log.d("JSONObj subC PENDING :", jsonObjectPending.toString());
+
+                            name = jsonObjectPending.getString("name");
+                            createdBy = jsonObjectPending.getString("createdBy");
+                            createdDate = jsonObjectPending.getString("createdDate");
+
+                            items = new MomList(String.valueOf(dataArray.length()), getResources().getString(R.string.waiting_to_connect), name, createdDate, createdBy);
                             momList.add(items);
 
                             allSubcontractorAdapter.notifyDataSetChanged();
-                            pDialog.dismiss();
                         }
-                    } catch (JSONException e) {
+                    }catch (JSONException e) {
                         e.printStackTrace();
                     }
 //                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
@@ -301,13 +352,26 @@ public class AllSubcontractor extends NewActivity implements View.OnClickListene
             case R.id.fab_search:
             {
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setTitle("Search Subcontractor Timesheet !");
+                alert.setTitle("Search Subcontractor Timesheets by Name or ID !");
                 // Set an EditText view to get user input
                 final EditText input = new EditText(this);
+                input.setMaxLines(1);
+                input.setImeOptions(EditorInfo.IME_ACTION_DONE);
                 alert.setView(input);
                 alert.setPositiveButton("Search", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        Toast.makeText(AllSubcontractor.this, "Search for it .", Toast.LENGTH_SHORT).show();
+
+                        if (input.getText().toString().isEmpty()) {
+                            input.setError("Enter Search Field");
+                        } else {
+                            Intent intent = new Intent(AllSubcontractor.this, AllSubcontractor.class);
+                            intent.putExtra("search", "yes");
+                            intent.putExtra("searchText", input.getText().toString());
+
+                            Log.d("SEARCH TEXT", input.getText().toString());
+
+                            startActivity(intent);
+                        }
                     }
                 });
                 alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -342,11 +406,28 @@ public class AllSubcontractor extends NewActivity implements View.OnClickListene
                                 name = dataObject.getString("name");
                                 createdBy = dataObject.getString("createdBy");
                                 createdDate = dataObject.getString("createdDate");
+                                if (getIntent().hasExtra("search"))
+                                {
+                                    if (getIntent().getStringExtra("search").equals("yes")) {
 
-                                items = new MomList(String.valueOf(i+1), subContractorId, name, createdDate, createdBy);
-                                momList.add(items);
+                                        if (subContractorId.toLowerCase().contains(searchText.toLowerCase()) || name.toLowerCase().contains(searchText.toLowerCase())) {
 
-                                allSubcontractorAdapter.notifyDataSetChanged();
+
+                                            items = new MomList(String.valueOf(i + 1), subContractorId, name, createdDate, createdBy);
+                                            momList.add(items);
+
+                                            allSubcontractorAdapter.notifyDataSetChanged();
+                                        }
+                                    }
+                                }
+                                else
+                                {
+
+                                    items = new MomList(String.valueOf(i + 1), subContractorId, name, createdDate, createdBy);
+                                    momList.add(items);
+
+                                    allSubcontractorAdapter.notifyDataSetChanged();
+                                }
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -383,7 +464,7 @@ public class AllSubcontractor extends NewActivity implements View.OnClickListene
 
         RequestQueue requestQueue = Volley.newRequestQueue(AllSubcontractor.this);
 
-        String url = AllSubcontractor.this.getResources().getString(R.string.server_url) + "/postSubContractor";
+        String url = AllSubcontractor.this.pm.getString("SERVER_URL") + "/postSubContractor";
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, object,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -411,8 +492,7 @@ public class AllSubcontractor extends NewActivity implements View.OnClickListene
                     }
                 }
         );
-        cd = new ConnectionDetector(getApplicationContext());
-        isInternetPresent = cd.isConnectingToInternet();
+
 
         if (!isInternetPresent)
         {
@@ -433,17 +513,20 @@ public class AllSubcontractor extends NewActivity implements View.OnClickListene
 
                 pm.putString("objectSubcontractorTimesheet", object.toString());
                 pm.putString("urlSubcontractorTimesheet", url);
-                pm.putString("toastMessageSubcontractorTimesheet", "Subcontractor Created");
+                pm.putString("toastMessageSubcontractorTimesheet", "Subcontractor Timesheet Created");
                 pm.putBoolean("createSubcontractorTimesheet", true);
+
+                Intent intent = new Intent(AllSubcontractor.this, AllSubcontractor.class);
+                startActivity(intent);
             }
         }
         else
         {
             requestQueue.add(jor);
-        }
 
-        Intent intent = new Intent(AllSubcontractor.this, AllSubcontractor.class);
-        startActivity(intent);
+            Intent intent = new Intent(AllSubcontractor.this, AllSubcontractor.class);
+            startActivity(intent);
+        }
 
     }
 
@@ -463,13 +546,106 @@ public class AllSubcontractor extends NewActivity implements View.OnClickListene
 
         text_subcontractor = (HelveticaRegular) dialogView.findViewById(R.id.text_subcontractor);
 
-        final Spinner spinner_subcontractor = (Spinner) dialogView.findViewById(R.id.spinner_subcontractor);
+        spinner_subcontractor = (Spinner) dialogView.findViewById(R.id.spinner_subcontractor);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(dialogView.getContext(),
-                android.R.layout.simple_dropdown_item_1line,
-                new String[] {"Select Subcontractor", "SUB01", "SUB02", "SUB03", "SUB04", "SUB05"});
+        url = pm.getString("SERVER_URL") + "/getResource";
 
-        spinner_subcontractor.setAdapter(adapter);
+        if (!isInternetPresent) {
+            // Internet connection is not present
+            // Ask user to connect to Internet
+            RelativeLayout main_layout = (RelativeLayout) findViewById(R.id.main_layout);
+            Crouton.cancelAllCroutons();
+            Crouton.makeText(AllSubcontractor.this, R.string.no_internet_error, Style.ALERT, main_layout).show();
+
+            pDialog = new ProgressDialog(AllSubcontractor.this);
+            pDialog.setMessage("Getting cache data");
+            pDialog.show();
+
+            Cache cache = AppController.getInstance().getRequestQueue().getCache();
+            Cache.Entry entry = cache.get(url);
+            if (entry != null) {
+                //Cache data available.
+                String[] allContractorRes;
+                String firstName, lastName, resourceTypeId;
+                int count=1;
+
+                try {
+                    String data = new String(entry.data, "UTF-8");
+                    Log.d("CACHE DATA", data);
+                    JSONObject jsonObject = new JSONObject(data);
+                    try {
+                        dataArray = jsonObject.getJSONArray("data");
+
+                        for (int i = 0; i < dataArray.length(); i++) {
+                            dataObject = dataArray.getJSONObject(i);
+
+                            resourceTypeId = dataObject.getString("resourceTypeId");
+
+                            if(resourceTypeId.equals("2"))
+                            {
+                                count++;
+                            }
+                        }
+
+                        if(count!=1)
+                        {
+                            allContractorRes = new String[count];
+                            count = 0;
+                            allContractorRes[count++] = "Select Subcontractor";
+
+                            for (int i = 0; i < dataArray.length(); i++) {
+                                dataObject = dataArray.getJSONObject(i);
+//                            resId = dataObject.getString("id");
+                                firstName = dataObject.getString("firstName");
+                                lastName = dataObject.getString("lastName");
+                                resourceTypeId = dataObject.getString("resourceTypeId");
+
+                                if(resourceTypeId.equals("2"))
+                                {
+                                    allContractorRes[count++] = firstName + " " + lastName;
+                                }
+                            }
+
+                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(dialogView.getContext(),
+                                    android.R.layout.simple_dropdown_item_1line, allContractorRes);
+
+                            spinner_subcontractor.setAdapter(adapter);
+
+                            pDialog.dismiss();
+                        }
+                        else
+                        {
+                            Toast.makeText(this, "No Subcontractors available in this project", Toast.LENGTH_SHORT).show();
+                            pDialog.dismiss();
+                            finish();
+                        }
+                    }
+                    catch (JSONException e)
+                    {
+                        e.printStackTrace();
+                    }
+//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
+                }
+                catch (UnsupportedEncodingException | JSONException e)
+                {
+                    e.printStackTrace();
+                }
+                if (pDialog != null)
+                    pDialog.dismiss();
+            }
+
+            else
+            {
+                Toast.makeText(AllSubcontractor.this, "Offline Data Not available for Subcontractors", Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        }
+
+        else
+        {
+            // Cache data not exist.
+            prepareSubcontractors();
+        }
 
         spinner_subcontractor.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -528,9 +704,85 @@ public class AllSubcontractor extends NewActivity implements View.OnClickListene
         });
     }
 
+    public void prepareSubcontractors() {
+        pDialog = new ProgressDialog(AllSubcontractor.this);
+        pDialog.setMessage("Getting server data");
+        pDialog.show();
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        String resourceTypeId, firstName, lastName;
+                        int count = 1;
+                        String[] allContractorRes;
+                        try {
+//                            dataObject = response.getJSONObject(0);
+                            dataArray = response.getJSONArray("data");
+
+                            for (int i = 0; i < dataArray.length(); i++) {
+                                dataObject = dataArray.getJSONObject(i);
+
+                                resourceTypeId = dataObject.getString("resourceTypeId");
+
+                                if (resourceTypeId.equals("2")) {
+                                    count++;
+                                }
+                            }
+
+                            if (count != 1) {
+                                allContractorRes = new String[count];
+                                count = 0;
+                                allContractorRes[count++] = "Select Subcontractor";
+
+                                for (int i = 0; i < dataArray.length(); i++) {
+                                    dataObject = dataArray.getJSONObject(i);
+//                            resId = dataObject.getString("id");
+                                    firstName = dataObject.getString("firstName");
+                                    lastName = dataObject.getString("lastName");
+                                    resourceTypeId = dataObject.getString("resourceTypeId");
+
+                                    if (resourceTypeId.equals("2")) {
+                                        allContractorRes[count++] = firstName + " " + lastName;
+                                    }
+                                }
+
+                                ArrayAdapter<String> adapter = new ArrayAdapter<String>(dialogView.getContext(),
+                                        android.R.layout.simple_dropdown_item_1line,
+                                        allContractorRes);
+
+                                spinner_subcontractor.setAdapter(adapter);
+
+                                pDialog.dismiss();
+                            } else {
+                                Toast.makeText(AllSubcontractor.this, "No Subcontractors available in this project", Toast.LENGTH_SHORT).show();
+                                pDialog.dismiss();
+                                finish();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+//                        setData(response,false);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        });
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(jsonObjectRequest);
+        if (pDialog != null)
+            pDialog.dismiss();
+
+    }
+
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(AllSubcontractor.this, ViewPurchaseOrders.class);
+        Intent intent = new Intent(AllSubcontractor.this, SiteProjectDelivery.class);
         startActivity(intent);
     }
 

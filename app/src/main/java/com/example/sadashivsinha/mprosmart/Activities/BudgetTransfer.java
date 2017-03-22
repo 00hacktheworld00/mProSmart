@@ -51,7 +51,8 @@ public class BudgetTransfer extends AppCompatActivity {
     ConnectionDetector cd;
     public static final String TAG = BudgetTransfer.class.getSimpleName();
     Boolean isInternetPresent = false;
-    String lineId, currencyCode, itemId, quantity, uomId, ammount, createdBy, dateCreated;
+    String lineId, currencyCode, itemId, quantity, uomId, ammount, createdBy, dateCreated, currentTransferNo;
+    PreferenceManager pm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +61,8 @@ public class BudgetTransfer extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        pm = new PreferenceManager(getApplicationContext());
+        currentTransferNo = pm.getString("currentTransfer");
 
         FloatingActionButton fab_add = (FloatingActionButton) findViewById(R.id.fab_add);
         fab_add.setOnClickListener(new View.OnClickListener() {
@@ -84,7 +87,7 @@ public class BudgetTransfer extends AppCompatActivity {
         if (!isInternetPresent) {
             // Internet connection is not present
             // Ask user to connect to Internet
-            RelativeLayout main_content = (RelativeLayout) findViewById(R.id.main_content);
+            RelativeLayout main_content = (RelativeLayout) findViewById(R.id.main_layout);
             Snackbar snackbar = Snackbar.make(main_content,getResources().getString(R.string.no_internet_error), Snackbar.LENGTH_LONG);
             snackbar.show();
         }
@@ -178,7 +181,6 @@ public class BudgetTransfer extends AppCompatActivity {
 //    {
 //        RequestQueue requestQueue = Volley.newRequestQueue(this);
 //
-//        String url = getResources().getString(R.string.server_url) + "/getBudgetTransfer?projectId=\""+currentProjectNo+"\"";
 //
 //        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
 //                new Response.Listener<JSONObject>() {
@@ -237,13 +239,11 @@ public class BudgetTransfer extends AppCompatActivity {
 //        requestQueue.add(jor);
 //    }
 
-
     public void prepareItems()
     {
-
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        String url = getResources().getString(R.string.server_url) + "/getBudgetTransferLine?budgetTransferId=\""+1+"\"";
+        String url = pm.getString("SERVER_URL") + "/getBudgetTransferLine?budgetTransferId=\""+currentTransferNo+"\"";
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -252,7 +252,6 @@ public class BudgetTransfer extends AppCompatActivity {
 
                         Log.d("TAG",response.toString());
                         try{
-
                             String type = response.getString("type");
 
                             if(type.equals("ERROR"))
@@ -283,7 +282,6 @@ public class BudgetTransfer extends AppCompatActivity {
                                     budgetList.add(items);
 
                                     budgetAdapter.notifyDataSetChanged();
-
                                 }
                             }
                             pDialog.dismiss();
