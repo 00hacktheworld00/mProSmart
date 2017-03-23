@@ -48,6 +48,7 @@
             android:layout_alignParentStart="true"
             fab:menu_colorNormal="@color/colorAccent"
             fab:menu_colorPressed="@color/colorAccentDark"
+            android:visibility="gone"
             fab:menu_backgroundColor="@android:color/transparent"
             fab:menu_colorRipple="#99FFFFFF">
 

@@ -788,6 +788,9 @@ public class AllMaterialIssue extends AppCompatActivity implements View.OnClickL
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
+
+                        if(pDialog!=null)
+                            pDialog.dismiss();
 //                        setData(response,false);
                     }
                 }, new Response.ErrorListener() {

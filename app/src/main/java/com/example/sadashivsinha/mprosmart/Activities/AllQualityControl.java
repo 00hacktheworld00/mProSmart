@@ -18,6 +18,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -35,6 +36,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.Adapters.AllQualityAdapter;
 import com.example.sadashivsinha.mprosmart.Adapters.MyAdapter;
+import com.example.sadashivsinha.mprosmart.ModelLists.AllSiteDiaryList;
 import com.example.sadashivsinha.mprosmart.ModelLists.MomList;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
@@ -74,7 +76,7 @@ public class AllQualityControl extends NewActivity implements View.OnClickListen
     String[] purchaseOrdersArray, vendorIdArray, receiptArray;
     String currentVendor;
     String matchPurchaseOrderId;
-    String url, po_url;
+    String url, po_url, searchText;
     PreferenceManager pm;
 
     @Override
@@ -103,6 +105,15 @@ public class AllQualityControl extends NewActivity implements View.OnClickListen
 
         cd = new ConnectionDetector(getApplicationContext());
         isInternetPresent = cd.isConnectingToInternet();
+
+        if (getIntent().hasExtra("search")) {
+            if (getIntent().getStringExtra("search").equals("yes")) {
+
+                searchText = getIntent().getStringExtra("searchText");
+
+                getSupportActionBar().setTitle("Quality Control Search Results : " + searchText);
+            }
+        }
 
         // check for Internet status
         if (!isInternetPresent) {
@@ -136,10 +147,26 @@ public class AllQualityControl extends NewActivity implements View.OnClickListen
                             createdBy = dataObject.getString("createdBy");
                             purchaseOrderNo = dataObject.getString("purchaseOrderId");
 
-                            items = new MomList(String.valueOf(i+1), qirNo, vendorId, receiptNo, projectId, createdBy, purchaseOrderNo, 0);
-                            momList.add(items);
+                            if (getIntent().hasExtra("search"))
+                            {
+                                if (getIntent().getStringExtra("search").equals("yes")) {
 
-                            allQualityAdapter.notifyDataSetChanged();
+                                    if (qirNo.toLowerCase().contains(searchText.toLowerCase()) || vendorId.toLowerCase().contains(searchText.toLowerCase())) {
+
+                                        items = new MomList(String.valueOf(i+1), qirNo, vendorId, receiptNo, projectId, createdBy, purchaseOrderNo, 0);
+                                        momList.add(items);
+
+                                        allQualityAdapter.notifyDataSetChanged();
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                items = new MomList(String.valueOf(i+1), qirNo, vendorId, receiptNo, projectId, createdBy, purchaseOrderNo, 0);
+                                momList.add(items);
+
+                                allQualityAdapter.notifyDataSetChanged();
+                            }
                             pDialog.dismiss();
                         }
 
@@ -539,13 +566,26 @@ public class AllQualityControl extends NewActivity implements View.OnClickListen
             case R.id.fab_search:
             {
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setTitle("Search Quality control !");
+                alert.setTitle("Search Quality Control by QIR No or Vendor ID!");
                 // Set an EditText view to get user input
                 final EditText input = new EditText(this);
+                input.setMaxLines(1);
+                input.setImeOptions(EditorInfo.IME_ACTION_DONE);
                 alert.setView(input);
                 alert.setPositiveButton("Search", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        Toast.makeText(AllQualityControl.this, "Search for it .", Toast.LENGTH_SHORT).show();
+
+                        if (input.getText().toString().isEmpty()) {
+                            input.setError("Enter Search Field");
+                        } else {
+                            Intent intent = new Intent(AllQualityControl.this, AllSiteDiary.class);
+                            intent.putExtra("search", "yes");
+                            intent.putExtra("searchText", input.getText().toString());
+
+                            Log.d("SEARCH TEXT", input.getText().toString());
+
+                            startActivity(intent);
+                        }
                     }
                 });
                 alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -712,8 +752,24 @@ public class AllQualityControl extends NewActivity implements View.OnClickListen
                                 createdBy = dataObject.getString("createdBy");
                                 purchaseOrderNo = dataObject.getString("purchaseOrderId");
 
-                                items = new MomList(String.valueOf(i+1), qirNo, vendorId, receiptNo, projectId, createdBy, purchaseOrderNo, 0);
-                                momList.add(items);
+                                if (getIntent().hasExtra("search"))
+                                {
+                                    if (getIntent().getStringExtra("search").equals("yes")) {
+
+                                        if (qirNo.toLowerCase().contains(searchText.toLowerCase()) || vendorId.toLowerCase().contains(searchText.toLowerCase())) {
+
+                                            items = new MomList(String.valueOf(i+1), qirNo, vendorId, receiptNo, projectId, createdBy, purchaseOrderNo, 0);
+                                            momList.add(items);
+
+                                            allQualityAdapter.notifyDataSetChanged();
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    items = new MomList(String.valueOf(i+1), qirNo, vendorId, receiptNo, projectId, createdBy, purchaseOrderNo, 0);
+                                    momList.add(items);
+                                }
 
                                 allQualityAdapter.notifyDataSetChanged();
                             }

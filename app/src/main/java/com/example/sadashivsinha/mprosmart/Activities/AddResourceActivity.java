@@ -16,6 +16,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -70,10 +71,13 @@ public class AddResourceActivity extends AppCompatActivity {
     String firstName, lastName, resourceTypeId, designationId, ratePerHour, currencyId, emailId, phone, houseNo ,streetName,
             locality, state, country, zipCode;
     HelveticaRegular title;
-    String[] currencyArray, resTypeArray, designationArray, vendorNameArray, vendorIdArray;
+    String[] resTypeArray, designationArray, vendorNameArray, vendorIdArray;
     String vendorTypeId, vendorName, vendorId;
     String currentSubcontractor, subContractor;
     PreferenceManager pm;
+    String currencyCode;
+    String[] allCurrencies;
+    String currencyUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +90,8 @@ public class AddResourceActivity extends AppCompatActivity {
         cd = new ConnectionDetector(getApplicationContext());
         isInternetPresent = cd.isConnectingToInternet();
         pm = new PreferenceManager(getApplicationContext());
+
+        currencyUrl = pm.getString("SERVER_URL") + "/getCurrencies";
 
         //Load animation
         final Animation slide_down = AnimationUtils.loadAnimation(getApplicationContext(),
@@ -120,11 +126,6 @@ public class AddResourceActivity extends AppCompatActivity {
         spinner_res_type = (BetterSpinner) findViewById(R.id.spinner_res_type);
         spinner_designation = (BetterSpinner) findViewById(R.id.spinner_designation);
 
-        currencyArray = new String[3];
-        currencyArray[0] = "INR";
-        currencyArray[1] = "$";
-        currencyArray[2] = "EURO";
-
         resTypeArray = new String[2];
         resTypeArray[0] = "EMPLOYEE";
         resTypeArray[1] = "CONTRACT";
@@ -133,10 +134,6 @@ public class AddResourceActivity extends AppCompatActivity {
         designationArray[0] = "Design Consultant";
         designationArray[1] = "Engineer";
         designationArray[2] = "Architect";
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(AddResourceActivity.this,
-                android.R.layout.simple_dropdown_item_1line, currencyArray);
-        spinner_currency.setAdapter(adapter);
 
         ArrayAdapter<String> adapterResType = new ArrayAdapter<String>(AddResourceActivity.this,
                 android.R.layout.simple_dropdown_item_1line, resTypeArray);
@@ -157,6 +154,72 @@ public class AddResourceActivity extends AppCompatActivity {
         layout_subcontractor = (LinearLayout) findViewById(R.id.layout_subcontractor);
 
         layout_subcontractor.setVisibility(View.GONE);
+
+        if (!isInternetPresent) {
+            // Internet connection is not present
+            // Ask user to connect to Internet
+            RelativeLayout main_layout = (RelativeLayout) findViewById(R.id.main_layout);
+            Crouton.cancelAllCroutons();
+            Crouton.makeText(AddResourceActivity.this, R.string.no_internet_error, Style.ALERT, main_layout).show();
+
+            pDialog = new ProgressDialog(AddResourceActivity.this);
+            pDialog.setMessage("Getting cache data");
+            pDialog.show();
+
+            Cache cache = AppController.getInstance().getRequestQueue().getCache();
+            Cache.Entry entry = cache.get(currencyUrl);
+            if (entry != null) {
+                //Cache data available.
+                try {
+                    String data = new String(entry.data, "UTF-8");
+                    Log.d("CACHE DATA", data);
+                    JSONObject jsonObject = new JSONObject(data);
+                    try {
+                        dataArray = jsonObject.getJSONArray("data");
+
+                        allCurrencies = new String[dataArray.length()];
+
+                        for (int i = 0; i < dataArray.length(); i++) {
+                            dataObject = dataArray.getJSONObject(i);
+                            currencyCode = dataObject.getString("currencyCode");
+                            allCurrencies[i] = currencyCode;
+
+                        }
+
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(AddResourceActivity.this,
+                                android.R.layout.simple_dropdown_item_1line, allCurrencies);
+                        spinner_currency.setAdapter(adapter);
+
+                        pDialog.dismiss();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+//                    Toast.makeText(getApplicationContext(), "Loading from cache.", Toast.LENGTH_SHORT).show();
+                } catch (UnsupportedEncodingException | JSONException e) {
+                    e.printStackTrace();
+                }
+
+                if (pDialog != null)
+                    pDialog.dismiss();
+            }
+
+            else
+            {
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(AddResourceActivity.this,
+                        android.R.layout.simple_dropdown_item_1line, new String[] {"N.A"});
+                spinner_currency.setAdapter(adapter);
+
+                Toast.makeText(AddResourceActivity.this, "Offline Data Not available for currencies", Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        }
+
+        else
+        {
+            // Cache data not exist.
+            getCurrencies();
+        }
+
 
         spinner_subcontractor.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -535,11 +598,6 @@ public class AddResourceActivity extends AppCompatActivity {
                                 text_country.setText(country);
 //                                        text_zipcode.setText(issuedBy);
 
-                                for (int j = 0; j < currencyArray.length; j++) {
-                                    //matching server currency and spinner currency and setting into spinner
-                                    if (currencyArray[j].equals(currencyId))
-                                        spinner_currency.setText(currencyArray[j]);
-                                }
                                 if (resourceTypeId != null) {
                                     spinner_res_type.setText(resTypeArray[Integer.parseInt(resourceTypeId) - 1]);
                                 }
@@ -643,12 +701,6 @@ public class AddResourceActivity extends AppCompatActivity {
                                         text_country.setText(country);
 //                                        text_zipcode.setText(issuedBy);
 
-                                        for(int j=0; j<currencyArray.length ;j++)
-                                        {
-                                            //matching server currency and spinner currency and setting into spinner
-                                            if(currencyArray[j].equals(currencyId))
-                                                spinner_currency.setText(currencyArray[j]);
-                                        }
                                         if(resourceTypeId!=null)
                                         {
                                             spinner_res_type.setText(resTypeArray[Integer.parseInt(resourceTypeId)-1]);
@@ -1083,5 +1135,54 @@ public class AddResourceActivity extends AppCompatActivity {
         {
             requestQueue.add(jor);
         }
+    }
+
+    private void getCurrencies() {
+        // TODO Auto-generated method stub
+
+        pDialog = new ProgressDialog(AddResourceActivity.this);
+        pDialog.setMessage("Getting server data");
+        pDialog.show();
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, currencyUrl, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try
+                        {
+//                            dataObject = response.getJSONObject(0);
+                            dataArray = response.getJSONArray("data");
+                            allCurrencies = new String[dataArray.length()];
+
+                            for (int i = 0; i < dataArray.length(); i++) {
+                                dataObject = dataArray.getJSONObject(i);
+                                currencyCode = dataObject.getString("currencyCode");
+                                allCurrencies[i] = currencyCode;
+
+                            }
+
+
+                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(AddResourceActivity.this,
+                                    android.R.layout.simple_dropdown_item_1line, allCurrencies);
+                            spinner_currency.setAdapter(adapter);
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+//                        setData(response,false);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+            }
+        });
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(jsonObjectRequest);
+        if(pDialog!=null)
+            pDialog.dismiss();
     }
 }

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -37,7 +38,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
@@ -56,15 +60,20 @@ public class ResourceItemCreate extends AppCompatActivity implements DatePickerD
     public static final String TAG = ResourceItemCreate.class.getSimpleName();
     Boolean isInternetPresent = false;
 
+    String currentStartDate, currentEndDate, startDate, endDate;
+
     PreferenceManager pm;
 
-    String[] wbsNameArray, activitiesNameArray, activityIdArray, wbsIdArray;
+    String[] wbsNameArray, activitiesNameArray, activityIdArray, wbsIdArray, startDateArray, endDateArray;
     String wbsName, activityName, activityId, wbsId, wbs_url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_resource_item_create);
+
+        currentStartDate = "";
+        currentEndDate = "";
 
         pm = new PreferenceManager(getApplicationContext());
         currentProjectNo = pm.getString("projectId");
@@ -87,7 +96,6 @@ public class ResourceItemCreate extends AppCompatActivity implements DatePickerD
         text_total_hours = (EditText) findViewById(R.id.text_total_hours);
 
         TextWatcher watch = new TextWatcher(){
-
             @Override
             public void afterTextChanged(Editable arg0) {
                 // TODO Auto-generated method stub
@@ -132,14 +140,36 @@ public class ResourceItemCreate extends AppCompatActivity implements DatePickerD
                         now.get(Calendar.MONTH),
                         now.get(Calendar.DAY_OF_MONTH)
                 );
-                dpd.setMaxDate(now);
+
+                if(currentStartDate.equals("") && currentEndDate.equals(""))
+                {
+                    SimpleDateFormat dateFormatter = new SimpleDateFormat("EEEE, yyyy-MM-dd");
+
+                    try {
+                        Date parsedStartDate = dateFormatter.parse(currentStartDate);
+                        Date parsedEndDate = dateFormatter.parse(currentEndDate);
+
+                        Calendar calendar = Calendar.getInstance();
+
+                        calendar.setTime(parsedStartDate);
+                        dpd.setMinDate(calendar);
+
+                        Log.d("START DATE", calendar.toString());
+
+                        calendar.setTime(parsedEndDate);
+                        dpd.setMaxDate(calendar);
+
+                        Log.d("END DATE", calendar.toString());
+
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                }
                 dpd.show(getFragmentManager(), "Datepickerdialog");
             }
         });
 
         if (!isInternetPresent) {
-            // Internet connection is not present
-            // Ask user to connect to Internet
             LinearLayout main_layout = (LinearLayout) findViewById(R.id.main_layout);
             Crouton.cancelAllCroutons();
             Crouton.makeText(ResourceItemCreate.this, R.string.no_internet_error, Style.ALERT, main_layout).show();
@@ -160,6 +190,7 @@ public class ResourceItemCreate extends AppCompatActivity implements DatePickerD
                         dataArray = jsonObject.getJSONArray("data");
                         wbsNameArray = new String[dataArray.length() + 1];
                         wbsIdArray = new String[dataArray.length() + 1];
+
                         wbsNameArray[0] = "Select WBS";
                         wbsIdArray[0] = "";
 
@@ -209,8 +240,6 @@ public class ResourceItemCreate extends AppCompatActivity implements DatePickerD
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if(position==0)
                 {
-                    //hide layout below
-
                     spinner_activity.setVisibility(View.GONE);
                 }
 
@@ -222,6 +251,31 @@ public class ResourceItemCreate extends AppCompatActivity implements DatePickerD
 
                     prepareActivities(currentSelectedWbs);
                 }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        spinner_activity.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if(position==0)
+                {
+                    currentStartDate = "";
+                    currentEndDate = "";
+                }
+
+                else
+                {
+                    currentStartDate = startDateArray[position];
+                    currentEndDate = endDateArray[position];
+                }
+
+                Log.d("currentStartDate ", currentStartDate);
+                Log.d("currentEndDate ", currentEndDate);
             }
 
             @Override
@@ -428,9 +482,7 @@ public class ResourceItemCreate extends AppCompatActivity implements DatePickerD
 
         final ProgressDialog pDialog = new ProgressDialog(ResourceItemCreate.this);
 
-
         String activity_url = pm.getString("SERVER_URL") + "/getWbsActivity?wbsId=\"" + currentWbsId + "\"";
-
 
         if (!isInternetPresent) {
             // Internet connection is not present
@@ -455,7 +507,13 @@ public class ResourceItemCreate extends AppCompatActivity implements DatePickerD
                         dataArray = jsonObject.getJSONArray("data");
                         activityIdArray = new String[dataArray.length() + 1];
                         activitiesNameArray = new String[dataArray.length() + 1];
-                        activityIdArray[0] = "Select Activity";
+                        startDateArray = new String[dataArray.length() + 1];
+                        endDateArray = new String[dataArray.length() + 1];
+
+                        startDateArray[0] = "";
+                        endDateArray[0] = "";
+
+                        activitiesNameArray[0] = "Select Activity";
                         activitiesNameArray[0] = "Select Activity";
 
                         for (int i = 0; i < dataArray.length(); i++) {
@@ -464,8 +522,14 @@ public class ResourceItemCreate extends AppCompatActivity implements DatePickerD
                             activityId = dataObject.getString("id");
                             activityName = dataObject.getString("activityName");
 
+                            startDate = dataObject.getString("startDate");
+                            endDate = dataObject.getString("endDate");
+
                             activityIdArray[i + 1] = activityId;
                             activitiesNameArray[i + 1] = activityName;
+
+                            startDateArray[i + 1] = startDate;
+                            endDateArray[i + 1] = endDate;
                         }
 
                         ArrayAdapter<String> adapter;
@@ -515,6 +579,14 @@ public class ResourceItemCreate extends AppCompatActivity implements DatePickerD
                                     activitiesNameArray = new String[dataArray.length() + 1];
                                     activityIdArray[0] = "Select Activity";
                                     activitiesNameArray[0] = "Select Activity";
+                                    startDateArray = new String[dataArray.length() + 1];
+                                    endDateArray = new String[dataArray.length() + 1];
+
+                                    startDateArray[0] = "";
+                                    endDateArray[0] = "";
+
+                                    activitiesNameArray[0] = "Select Activity";
+                                    activitiesNameArray[0] = "Select Activity";
 
                                     for (int i = 0; i < dataArray.length(); i++) {
                                         dataObject = dataArray.getJSONObject(i);
@@ -522,8 +594,14 @@ public class ResourceItemCreate extends AppCompatActivity implements DatePickerD
                                         activityId = dataObject.getString("id");
                                         activityName = dataObject.getString("activityName");
 
+                                        startDate = dataObject.getString("startDate");
+                                        endDate = dataObject.getString("endDate");
+
                                         activityIdArray[i + 1] = activityId;
                                         activitiesNameArray[i + 1] = activityName;
+
+                                        startDateArray[i + 1] = startDate;
+                                        endDateArray[i + 1] = endDate;
                                     }
 
                                     ArrayAdapter<String> adapter = new ArrayAdapter<String>(ResourceItemCreate.this,

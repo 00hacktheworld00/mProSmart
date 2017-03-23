@@ -73,7 +73,7 @@
                         android:padding="10dp"
                         android:hint="House No."
                         android:background="@drawable/edittext_states_red"
-                        android:inputType="number"
+                        android:inputType="textCapSentences"
                         android:maxLines="1"
                         android:imeOptions="actionNext"
                         android:textColorHint="#000000"
@@ -288,6 +288,7 @@
                     android:background="@drawable/ic_plus_green"
                     android:layout_gravity="center_horizontal"
                     android:id="@+id/btn_add_address_two"
+                    android:visibility="gone"
                     android:layout_centerVertical="true"
                     android:layout_alignParentEnd="true" />
             </RelativeLayout>

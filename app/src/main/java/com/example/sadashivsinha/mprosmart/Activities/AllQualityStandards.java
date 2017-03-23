@@ -17,6 +17,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -37,6 +38,7 @@ import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.Adapters.AllQualityStandardAdapter;
 import com.example.sadashivsinha.mprosmart.ModelLists.AllQualityStandardList;
 import com.example.sadashivsinha.mprosmart.ModelLists.AllSiteDiaryList;
+import com.example.sadashivsinha.mprosmart.ModelLists.MomList;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
 import com.example.sadashivsinha.mprosmart.Utils.AppController;
@@ -82,7 +84,7 @@ public class AllQualityStandards extends AppCompatActivity implements View.OnCli
     String[] itemsArray, itemDescArray, itemIdArray;
     String item, itemDesc, currentItemId;
     Spinner spinner_item;
-    String url;
+    String url, searchText;
     public static final String TAG = AllQualityStandards.class.getSimpleName();
 
         @Override
@@ -113,6 +115,15 @@ public class AllQualityStandards extends AppCompatActivity implements View.OnCli
                 recyclerView.setLayoutManager(new LinearLayoutManager(AllQualityStandards.this));
                 recyclerView.setHasFixedSize(true);
                 recyclerView.setAdapter(qualityAdapter);
+
+            if (getIntent().hasExtra("search")) {
+                if (getIntent().getStringExtra("search").equals("yes")) {
+
+                    searchText = getIntent().getStringExtra("searchText");
+
+                    getSupportActionBar().setTitle("Quality Standard Search Results : " + searchText);
+                }
+            }
 
             if (!isInternetPresent) {
                 // Internet connection is not present
@@ -147,12 +158,29 @@ public class AllQualityStandards extends AppCompatActivity implements View.OnCli
                                 Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(createdDate);
                                 createdDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
 
+                                if (getIntent().hasExtra("search"))
+                                {
+                                    if (getIntent().getStringExtra("search").equals("yes")) {
 
-                                qualityItem = new AllQualityStandardList(String.valueOf(i+1), id,itemId, itemDescription,
-                                        createdDate, createdBy, currentProjectNo);
-                                qualityList.add(qualityItem);
+                                        if (itemId.toLowerCase().contains(searchText.toLowerCase()) || itemDescription.toLowerCase().contains(searchText.toLowerCase())) {
+                                            qualityItem = new AllQualityStandardList(String.valueOf(i+1), id,itemId, itemDescription,
+                                                    createdDate, createdBy, currentProjectNo);
+                                            qualityList.add(qualityItem);
 
-                                qualityAdapter.notifyDataSetChanged();
+                                            qualityAdapter.notifyDataSetChanged();
+
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    qualityItem = new AllQualityStandardList(String.valueOf(i+1), id,itemId, itemDescription,
+                                            createdDate, createdBy, currentProjectNo);
+                                    qualityList.add(qualityItem);
+
+                                    qualityAdapter.notifyDataSetChanged();
+
+                                }
                             }
 
                             pDialog.dismiss();
@@ -233,13 +261,26 @@ public class AllQualityStandards extends AppCompatActivity implements View.OnCli
                 case R.id.fab_search:
                 {
                     AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                    alert.setTitle("Search Quality Standards !");
+                    alert.setTitle("Search Quality Standards by Item ID or Description!");
                     // Set an EditText view to get user input
                     final EditText input = new EditText(this);
+                    input.setMaxLines(1);
+                    input.setImeOptions(EditorInfo.IME_ACTION_DONE);
                     alert.setView(input);
                     alert.setPositiveButton("Search", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
-                            Toast.makeText(AllQualityStandards.this, "Search for it .", Toast.LENGTH_SHORT).show();
+
+                            if (input.getText().toString().isEmpty()) {
+                                input.setError("Enter Search Field");
+                            } else {
+                            Intent intent = new Intent(AllQualityStandards.this, AllQualityStandards.class);
+                                intent.putExtra("search", "yes");
+                                intent.putExtra("searchText", input.getText().toString());
+
+                                Log.d("SEARCH TEXT", input.getText().toString());
+
+                                startActivity(intent);
+                            }
                         }
                     });
                     alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -342,12 +383,29 @@ public class AllQualityStandards extends AppCompatActivity implements View.OnCli
                                 Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(createdDate);
                                 createdDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
 
+                                if (getIntent().hasExtra("search"))
+                                {
+                                    if (getIntent().getStringExtra("search").equals("yes")) {
 
-                                qualityItem = new AllQualityStandardList(String.valueOf(i+1), id,itemId, itemDescription,
-                                        createdDate, createdBy, currentProjectNo);
-                                qualityList.add(qualityItem);
+                                        if (itemId.toLowerCase().contains(searchText.toLowerCase()) || itemDescription.toLowerCase().contains(searchText.toLowerCase())) {
+                                            qualityItem = new AllQualityStandardList(String.valueOf(i+1), id,itemId, itemDescription,
+                                                    createdDate, createdBy, currentProjectNo);
+                                            qualityList.add(qualityItem);
 
-                                qualityAdapter.notifyDataSetChanged();
+                                            qualityAdapter.notifyDataSetChanged();
+
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    qualityItem = new AllQualityStandardList(String.valueOf(i+1), id,itemId, itemDescription,
+                                            createdDate, createdBy, currentProjectNo);
+                                    qualityList.add(qualityItem);
+
+                                    qualityAdapter.notifyDataSetChanged();
+
+                                }
                             }
                             pDialog.dismiss();
 

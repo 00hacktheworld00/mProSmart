@@ -80,7 +80,7 @@
                 app:fab_colorNormal="@color/colorAccent"
                 app:fab_colorPressed="@color/colorAccentDark"
                 fab:fab_size="mini"
-                fab:fab_label="Search Quality Plan" />
+                fab:fab_label="Search Quality Standard" />
 
         </com.github.clans.fab.FloatingActionMenu>
 

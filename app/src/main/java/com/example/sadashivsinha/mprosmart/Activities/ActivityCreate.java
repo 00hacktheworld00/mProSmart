@@ -202,18 +202,23 @@ public class ActivityCreate extends AppCompatActivity implements DatePickerDialo
             {
                 object.put("boq", currentBoqId);
             }
-            Date tradeDate = null;
+            Date tradeDate1 = null, tradeDate2 = null;
             String startDate, endDate;
             try
             {
-                tradeDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).parse(start_date.getText().toString());
-                startDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).format(tradeDate);
+                tradeDate1 = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).parse(start_date.getText().toString());
+                startDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).format(tradeDate1);
 
-                tradeDate = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).parse(end_date.getText().toString());
-                endDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).format(tradeDate);
+                tradeDate2 = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).parse(end_date.getText().toString());
+                endDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).format(tradeDate2);
 
                 object.put("startDate", startDate);
                 object.put("endDate", endDate);
+
+                long diff = tradeDate2.getTime() - tradeDate1.getTime();
+                int diffInDays = (int) diff / (1000 * 60 * 60 * 24);
+
+                object.put("duration", diffInDays + 1);
 
             } catch (ParseException e)
 

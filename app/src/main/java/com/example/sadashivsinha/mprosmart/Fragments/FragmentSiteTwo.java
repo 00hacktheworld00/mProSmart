@@ -85,7 +85,7 @@ public class FragmentSiteTwo extends Fragment {
             protected Void doInBackground(Void... params)
             {
                 setRetainInstance(true);
-                getAllResources();
+                getAllSubcontractors();
                 return null;
             }
 
@@ -145,6 +145,74 @@ public class FragmentSiteTwo extends Fragment {
                             }
 
                         }catch(JSONException e){e.printStackTrace();}
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("Volley","Error");
+
+                    }
+                }
+        );
+        requestQueue.add(jor);
+    }
+
+    private void getAllSubcontractors()
+    {
+        RequestQueue requestQueue = Volley.newRequestQueue(context);
+
+        String url = pm.getString("SERVER_URL") + "/getAllSubContractorlineItems?projectId='"+currentProjectNo+"'";
+
+        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        try{
+
+                            Log.d("Site Hours Sub", response.toString());
+
+                            String type = response.getString("type");
+
+                            if(type.equals("ERROR"))
+                            {
+                                Toast.makeText(context, response.getString("msg"), Toast.LENGTH_SHORT).show();
+                            }
+
+                            if(type.equals("INFO"))
+                            {
+                                dataArray = response.getJSONArray("data");
+
+                                for(int i=0; i<dataArray.length();i++)
+                                {
+                                    dataObject = dataArray.getJSONObject(i);
+                                    date = dataObject.getString("date");
+
+                                    Date tradeDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(date);
+                                    date = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).format(tradeDate);
+
+                                    if(date.equals(currentSelectedDate))
+                                    {
+                                        Log.d("SUB", "YES");
+
+                                        lineId = dataObject.getString("subContractor");
+                                        wbs = dataObject.getString("wbs");
+                                        activities = dataObject.getString("activities");
+                                        resourceName = dataObject.getString("resourceName");
+                                        totalHours = dataObject.getString("totalHours");
+
+                                        items = new SiteTwoList(lineId,wbs, activities, resourceName, Float.parseFloat(totalHours));
+                                        itemList.add(items);
+
+                                        mainAdapter.notifyDataSetChanged();
+                                    }
+                                }
+                            }
+
+                            getAllResources();
+
+                        }catch(JSONException | ParseException e){e.printStackTrace();}
                     }
                 },
                 new Response.ErrorListener() {

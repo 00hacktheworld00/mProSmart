@@ -64,13 +64,13 @@ public class CreateNewAllProject extends AppCompatActivity {
     public static final String TAG = CreateNewAllProject.class.getSimpleName();
     Boolean isInternetPresent = false;
     PreferenceManager pm;
-    String currencyUrl;
 
 
     JSONArray dataArray;
     JSONObject dataObject;
     String currencyCode;
     String[] allCurrencies;
+    String currencyUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

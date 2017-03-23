@@ -140,6 +140,8 @@ public class ChangeOrdersNew extends NewActivity {
         pDialog.setMessage("Getting server data");
         pDialog.show();
 
+        pm.putBoolean("changeOrderIsNull" + pm.getString("projectId"), true);
+
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -153,8 +155,6 @@ public class ChangeOrdersNew extends NewActivity {
                                 pm.putBoolean("changeOrderIsNull", false);
                                 for(int i=0; i<dataArray.length();i++)
                                 {
-
-
                                     dataObject = dataArray.getJSONObject(i);
 
                                     id = dataObject.getString("id");
@@ -176,9 +176,8 @@ public class ChangeOrdersNew extends NewActivity {
 
                                     pDialog.dismiss();
                                 }
+                                pm.putBoolean("changeOrderIsNull" + pm.getString("projectId"), false);
                             }
-                            else
-                                pm.putBoolean("changeOrderIsNull", true);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -441,7 +440,7 @@ public class ChangeOrdersNew extends NewActivity {
                     int requestMethod;
                     String url;
 
-                    if(pm.getBoolean("changeOrderIsNull"))
+                    if(pm.getBoolean("changeOrderIsNull" + pm.getString("projectId")))
                     {
                         requestMethod = Request.Method.POST;
                         Log.d("METHOD", "POST");
@@ -498,5 +497,10 @@ public class ChangeOrdersNew extends NewActivity {
                 }
             }
         });
+    }
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(ChangeOrdersNew.this, AllChangeOrders.class);
+        startActivity(intent);
     }
 }

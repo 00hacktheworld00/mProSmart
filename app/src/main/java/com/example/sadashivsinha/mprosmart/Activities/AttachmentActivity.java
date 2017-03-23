@@ -172,6 +172,8 @@ public class AttachmentActivity extends AppCompatActivity {
 
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");
+        intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+
 //        intent.addCategory(Intent.CATEGORY_OPENABLE);
 
         try

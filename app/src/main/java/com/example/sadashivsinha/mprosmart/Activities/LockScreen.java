@@ -144,37 +144,44 @@ public class LockScreen extends AppCompatActivity implements View.OnClickListene
             break;
             case R.id.btn_next:
             {
-                if(!pm.getBoolean("lockScreenEnable"))
+                if(enteredPinCount<4)
                 {
-                    pm.putString("lockScreenPin", enteredPin );
-                    pm.putBoolean("lockScreenEnable", true );
-
-                    Intent intent = new Intent(LockScreen.this, WelcomeActivity.class);
-                    Log.d("PIN CODE : ", enteredPin);
-                    startActivity(intent);
+                    Toast.makeText(this, "Enter PIN", Toast.LENGTH_SHORT).show();
                 }
-                else if(lockScreenPin.equals(enteredPin))
+                else
                 {
-                    if(getIntent().hasExtra("notification"))
+                    if(!pm.getBoolean("lockScreenEnable"))
                     {
-                        if(getIntent().getStringExtra("notification").equals("true"))
+                        pm.putString("lockScreenPin", enteredPin );
+                        pm.putBoolean("lockScreenEnable", true );
+
+                        Intent intent = new Intent(LockScreen.this, WelcomeActivity.class);
+                        Log.d("PIN CODE : ", enteredPin);
+                        startActivity(intent);
+                    }
+                    else if(lockScreenPin.equals(enteredPin))
+                    {
+                        if(getIntent().hasExtra("notification"))
                         {
-                            Intent intent = new Intent(LockScreen.this, ApproveRejectActivity.class);
+                            if(getIntent().getStringExtra("notification").equals("true"))
+                            {
+                                Intent intent = new Intent(LockScreen.this, ApproveRejectActivity.class);
+                                startActivity(intent);
+                            }
+                        }
+                        else
+                        {
+                            Intent intent = new Intent(LockScreen.this, WelcomeActivity.class);
                             startActivity(intent);
                         }
                     }
+
                     else
                     {
-                        Intent intent = new Intent(LockScreen.this, WelcomeActivity.class);
-                        startActivity(intent);
+                        Log.d("PIN ENTERED : ", enteredPin);
+                        Log.d("PIN ACTUAL : ", lockScreenPin);
+                        Toast.makeText(LockScreen.this, "Wrong Pin Entered. Please try again .", Toast.LENGTH_LONG).show();
                     }
-                }
-
-                else
-                {
-                    Log.d("PIN ENTERED : ", enteredPin);
-                    Log.d("PIN ACTUAL : ", lockScreenPin);
-                    Toast.makeText(LockScreen.this, "Wrong Pin Entered. Please try again .", Toast.LENGTH_LONG).show();
                 }
             }
             break;

@@ -233,32 +233,9 @@ public class AllQualityChecklist extends NewActivity implements View.OnClickList
         switch (v.getId()) {
             case R.id.fab_add:
             {
-//                Intent intent = new Intent(AllQualityChecklist.this, QualityChecklistCreate.class);
-//                startActivity(intent);
-
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-                alertDialogBuilder
-                        .setMessage("Do you want to create new Quality Checklist ?")
-                        .setCancelable(false)
-                        .setPositiveButton("Yes",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-
-                                        final String projectId = currentProjectNo;
-                                        final Context mContext = getApplicationContext();
-                                        saveNewQualityChecklist(projectId,currentUserId,mContext);
-
-                                    }
-                                })
-
-                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
-
-                AlertDialog alertDialog = alertDialogBuilder.create();
-                alertDialog.show();
+                final String projectId = currentProjectNo;
+                final Context mContext = getApplicationContext();
+                saveNewQualityChecklist(projectId,currentUserId,mContext);
             }
             break;
             case R.id.fab_search:

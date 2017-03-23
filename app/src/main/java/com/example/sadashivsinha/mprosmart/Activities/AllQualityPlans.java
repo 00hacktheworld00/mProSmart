@@ -17,6 +17,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -31,6 +32,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.sadashivsinha.mprosmart.Adapters.AllQualityPlansAdapter;
 import com.example.sadashivsinha.mprosmart.ModelLists.AllQualityPlansList;
+import com.example.sadashivsinha.mprosmart.ModelLists.AllQualityStandardList;
 import com.example.sadashivsinha.mprosmart.ModelLists.AllSiteDiaryList;
 import com.example.sadashivsinha.mprosmart.R;
 import com.example.sadashivsinha.mprosmart.SharedPreference.PreferenceManager;
@@ -70,7 +72,7 @@ public class AllQualityPlans extends AppCompatActivity implements View.OnClickLi
     ConnectionDetector cd;
     public static final String TAG = AllQualityPlans.class.getSimpleName();
     Boolean isInternetPresent = false;
-    String url;
+    String url, searchText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,6 +96,14 @@ public class AllQualityPlans extends AppCompatActivity implements View.OnClickLi
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(qualityAdapter);
 
+        if (getIntent().hasExtra("search")) {
+            if (getIntent().getStringExtra("search").equals("yes")) {
+
+                searchText = getIntent().getStringExtra("searchText");
+
+                getSupportActionBar().setTitle("Quality Plan Search Results : " + searchText);
+            }
+        }
 
         // check for Internet status
         if (!isInternetPresent) {
@@ -123,11 +133,31 @@ public class AllQualityPlans extends AppCompatActivity implements View.OnClickLi
                             createdBy = dataObject.getString("createdBy");
                             createdDate = dataObject.getString("createdDate");
 
-                            qualityItem = new AllQualityPlansList(String.valueOf(i+1), id, currentProjectNo, currentProjectName,
-                                    createdDate, createdBy);
-                            qualityList.add(qualityItem);
+                            if (getIntent().hasExtra("search"))
+                            {
+                                if (getIntent().getStringExtra("search").equals("yes")) {
 
-                            qualityAdapter.notifyDataSetChanged();
+                                    if (id.toLowerCase().contains(searchText.toLowerCase()))
+                                        qualityItem = new AllQualityPlansList(String.valueOf(i+1), id, currentProjectNo, currentProjectName,
+                                                createdDate, createdBy);
+                                        qualityList.add(qualityItem);
+
+                                        qualityAdapter.notifyDataSetChanged();
+
+
+                                    }
+                                }
+                            else
+                            {
+                                qualityItem = new AllQualityPlansList(String.valueOf(i+1), id, currentProjectNo, currentProjectName,
+                                        createdDate, createdBy);
+                                qualityList.add(qualityItem);
+
+                                qualityAdapter.notifyDataSetChanged();
+
+
+                            }
+
                             pDialog.dismiss();
                         }
 
@@ -209,13 +239,26 @@ public class AllQualityPlans extends AppCompatActivity implements View.OnClickLi
             case R.id.fab_search:
             {
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setTitle("Search Quality Plans !");
+                alert.setTitle("Search Quality Plan!");
                 // Set an EditText view to get user input
                 final EditText input = new EditText(this);
+                input.setMaxLines(1);
+                input.setImeOptions(EditorInfo.IME_ACTION_DONE);
                 alert.setView(input);
                 alert.setPositiveButton("Search", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        Toast.makeText(AllQualityPlans.this, "Search for it .", Toast.LENGTH_SHORT).show();
+
+                        if (input.getText().toString().isEmpty()) {
+                            input.setError("Enter Search Field");
+                        } else {
+                            Intent intent = new Intent(AllQualityPlans.this, AllQualityPlans.class);
+                            intent.putExtra("search", "yes");
+                            intent.putExtra("searchText", input.getText().toString());
+
+                            Log.d("SEARCH TEXT", input.getText().toString());
+
+                            startActivity(intent);
+                        }
                     }
                 });
                 alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -310,11 +353,30 @@ public class AllQualityPlans extends AppCompatActivity implements View.OnClickLi
                                 createdBy = dataObject.getString("createdBy");
                                 createdDate = dataObject.getString("createdDate");
 
-                                qualityItem = new AllQualityPlansList(String.valueOf(i+1), id, currentProjectNo, currentProjectName,
-                                        createdDate, createdBy);
-                                qualityList.add(qualityItem);
+                                if (getIntent().hasExtra("search"))
+                                {
+                                    if (getIntent().getStringExtra("search").equals("yes")) {
 
-                                qualityAdapter.notifyDataSetChanged();
+                                        if (id.toLowerCase().contains(searchText.toLowerCase()))
+                                            qualityItem = new AllQualityPlansList(String.valueOf(i+1), id, currentProjectNo, currentProjectName,
+                                                    createdDate, createdBy);
+                                        qualityList.add(qualityItem);
+
+                                        qualityAdapter.notifyDataSetChanged();
+
+
+                                    }
+                                }
+                                else
+                                {
+                                    qualityItem = new AllQualityPlansList(String.valueOf(i+1), id, currentProjectNo, currentProjectName,
+                                            createdDate, createdBy);
+                                    qualityList.add(qualityItem);
+
+                                    qualityAdapter.notifyDataSetChanged();
+
+
+                                }
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
